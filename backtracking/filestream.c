@@ -44,11 +44,8 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
     for(size_t i = 0; i < dimension; ++i)
     {
         for(size_t j = 0; j<dimension; ++j)
-            printf("%i ",grid[i*dimension +j]);
-        printf("\n");
+            FinalGrid[i][j] = grid[i * dimension +j];
     }
     fclose(file);
-    return;
-    FinalGrid[1][2] = 0;
 }
 
