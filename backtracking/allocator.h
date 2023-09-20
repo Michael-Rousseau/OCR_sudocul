@@ -1,3 +1,3 @@
 #pragma once
-int **allocGrid(unsigned int dimension);
-void freeGrid(int **grid);
+unsigned int **allocGrid(unsigned int dimension);
+void freeGrid(unsigned int **grid);

@@ -16,7 +16,7 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
         return;
     }
     char car;
-    int grid[dimension * dimension];
+    unsigned int grid[dimension * dimension];
     size_t index = 0;
     while((car = fgetc(file)) != EOF)
     {
