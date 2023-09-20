@@ -5,7 +5,7 @@
 #include "filestream.h"
 #include "allocator.h"
 
-#define dim 11
+#define dim 9
 
 int main(int argc, char **argv)
 {

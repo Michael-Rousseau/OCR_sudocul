@@ -37,7 +37,7 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
         {
             errx(1, "FILE DOESN'T RESPECT THE FORMAT");
         }
-        if(car != '\n' && car != '\0')
+        if(car != '\n' && car != '\0' && car != ' ')
            index++;
     }
 
