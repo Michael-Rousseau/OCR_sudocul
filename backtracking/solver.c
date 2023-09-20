@@ -8,8 +8,11 @@ unsigned int ValidRow(unsigned int **grid, unsigned int x,
     for(size_t i = 0; i< dim; ++i)
     {
         if(grid[x][i] == val)
+        {
             return 0;
+        }
     }
+    printf("%s\n", "okrow");
     return 1;
 }
 
@@ -19,15 +22,18 @@ unsigned int ValidColumn(unsigned int **grid, unsigned int y,
     for(size_t i = 0; i<dim; ++i)
     {
         if(grid[i][y] == val)
+        {
             return 0;
+        }
     }
+    printf("%s\n", "okcol");
     return 1;
 }
 
 unsigned int ValidSquare(unsigned int **grid, unsigned int x, unsigned int y,
         unsigned int val, unsigned int dim)
 {
-    int where = (int)sqrt(dim);
+    int where = 3;
     y-= y%where;
     x-= x%where;
 
@@ -36,10 +42,15 @@ unsigned int ValidSquare(unsigned int **grid, unsigned int x, unsigned int y,
         for(int j = 0; j<where; ++j)
         {
             if(grid[x+i][y+j] == val)
+            {
                 return 0;
+            }
         }
     }
+
+    printf("%s\n", "oksqr");
     return 1;
+    dim++;
 }
 
 unsigned int BePlaced(unsigned int **grid, unsigned int x, unsigned int y,
@@ -55,9 +66,10 @@ unsigned int BePlaced(unsigned int **grid, unsigned int x, unsigned int y,
 unsigned int solve(unsigned int **grid, unsigned int x, unsigned int y,
         unsigned int dim)
 {
-    if (y>= (dim -2) && x > (dim -2))
+    if (y> (dim -1) && x >= (dim -1))
         return 1;
-    if(y >= (dim-2))
+
+    if(y > (dim-1))
     {
         y = 0;
         ++x;
@@ -67,7 +79,7 @@ unsigned int solve(unsigned int **grid, unsigned int x, unsigned int y,
         return solve(grid, x, y+1, dim);
     for(size_t val = 1 ;val<= dim; ++val)
     {
-        if(BePlaced(grid, x,y,val,dim))
+        if(BePlaced(grid, x,y, val, dim))
         {
             grid[x][y] = val;
         }
@@ -77,3 +89,4 @@ unsigned int solve(unsigned int **grid, unsigned int x, unsigned int y,
     }
     return 0;
 }
+
