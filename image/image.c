@@ -70,3 +70,57 @@ void surface_to_grayscale(SDL_Surface* surface)
     SDL_UnlockSurface(surface);
 }
 
+
+
+// Converts a colored pixel into black and white.
+//
+// pixel_color: Color of the pixel to convert in the RGB format.
+// format: Format of the pixel used by the surface.
+Uint32 pixel_to_blackwhite(Uint32 pixel_color, SDL_PixelFormat* format)
+{
+        Uint8 r, g, b;
+        SDL_GetRGB(pixel_color, format, &r, &g, &b);
+
+        int threshold = 164;
+
+        Uint8 average = 0.3*r + 0.59*g + 0.11*b;
+        if (average > threshold)
+        {
+                r = 255;
+                g = 255;
+                b = 255;
+        } else
+        {
+                r = 0;
+                g = 0;
+                b = 0;
+
+        }
+
+        Uint32 color = SDL_MapRGB(format, r, g, b);
+        return color;
+}
+
+void surface_to_blackwhite(SDL_Surface* surface)
+{
+        Uint32* pixels = surface->pixels;
+        if (pixels == NULL)
+                errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+        int len = surface->w * surface->h;
+
+        SDL_PixelFormat* format = surface->format;
+        if (format == NULL)
+                errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+        int i=0;
+        SDL_LockSurface(surface);
+
+        while (i < len){
+                pixels[i] = pixel_to_blackwhite(pixels[i], format);
+                i++;
+        }
+
+        SDL_UnlockSurface(surface);
+
+}
