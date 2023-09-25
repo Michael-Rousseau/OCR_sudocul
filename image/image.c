@@ -124,3 +124,57 @@ void surface_to_blackwhite(SDL_Surface* surface)
         SDL_UnlockSurface(surface);
 
 }
+
+
+
+// Adjusts the contrast of a single pixel.
+//
+// pixel_color: Color of the pixel to adjust in the RGB format.
+// format: Format of the pixel used by the surface.
+// contrast: Contrast adjustment factor (e.g., 1.5 for increasing contrast).
+Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format, float contrast)
+{
+    Uint8 r, g, b;
+    SDL_GetRGB(pixel_color, format, &r, &g, &b);
+
+    // Adjust the contrast of each channel individually
+    r = (Uint8)(r * contrast);
+    g = (Uint8)(g * contrast);
+    b = (Uint8)(b * contrast);
+
+    // Ensure values stay within the valid range (0-255)
+    r = (r > 255) ? 255 : r;
+    g = (g > 255) ? 255 : g;
+    b = (b > 255) ? 255 : b;
+
+    Uint32 color = SDL_MapRGB(format, r, g, b);
+    return color;
+}
+
+
+// Adjusts the contrast of an SDL surface.
+//
+// surface: The SDL surface to adjust.
+// contrast: Contrast adjustment factor (e.g., 1.5 for increasing contrast).
+void surface_to_contrast(SDL_Surface* surface, float contrast)
+{
+    Uint32* pixels = surface->pixels;
+    if (pixels == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    int len = surface->w * surface->h;
+    SDL_PixelFormat* format = surface->format;
+    if (format == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    int i = 0;
+    SDL_LockSurface(surface);
+
+    while (i < len) {
+        pixels[i] = pixel_to_contrast(pixels[i], format, contrast);
+        i++;
+    }
+
+    SDL_UnlockSurface(surface);
+}
+

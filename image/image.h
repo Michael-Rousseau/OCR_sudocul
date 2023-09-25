@@ -24,5 +24,8 @@ Uint32 pixel_to_grayscale(Uint32 pixel_color, SDL_PixelFormat* format);
 SDL_Surface* load_image(const char* path);
 void surface_to_blackwhite(SDL_Surface* surface);
 Uint32 pixel_to_blackwhite(Uint32 pixel_color, SDL_PixelFormat* format);
+void surface_to_contrast(SDL_Surface* surface, float contrast);
+Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format, float contrast);
+
 
 #endif

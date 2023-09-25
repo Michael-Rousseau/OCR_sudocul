@@ -89,6 +89,35 @@ void event_loop_blackwhite(SDL_Renderer* renderer, SDL_Texture* blackwhite)
     }
 }
 
+
+
+
+ 
+void event_loop_contrast(SDL_Renderer* renderer, SDL_Texture* contrast)
+{
+    SDL_Event event;
+
+    draw(renderer, contrast);
+    while (1)
+    {
+        SDL_WaitEvent(&event);
+
+        switch (event.type)
+        {
+                case SDL_QUIT:
+                        return;
+                case SDL_WINDOWEVENT:
+                        if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+                        {
+                                draw(renderer, contrast);
+                                break;
+                        }
+        }
+    }
+}
+
+
+
 /* 
 void event_loop_"FILTER NAME"(SDL_Renderer* renderer, SDL_Texture* "FILTER NAME")
 {
@@ -112,11 +141,6 @@ void event_loop_"FILTER NAME"(SDL_Renderer* renderer, SDL_Texture* "FILTER NAME"
         }
     }
 }
-
-
-
-
-
 
 */
 
@@ -170,8 +194,22 @@ int main(int argc, char** argv)
             event_loop_blackwhite(renderer, blackwhite_texture);
             SDL_DestroyTexture(blackwhite_texture);
 
+    } else if (strcmp(argv[1], "contrast") == 0){
+	    surface_to_contrast(surface, 0.5);
+	    // In the surface_to_contrast function, I have a surface and a contrast param.
+	    // If the contrast is > 0, we have an increasing contrast
+	    // If the contrast is < 0, we have a decreasing contrast
+
+	    SDL_Texture* contrast_texture = SDL_CreateTextureFromSurface(renderer, surface);
+	    if (contrast_texture == NULL)
+		    errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+	    SDL_FreeSurface(surface);
+	    event_loop_blackwhite(renderer, contrast_texture);
+	    SDL_DestroyTexture(contrast_texture);
+
     } /* PLEASE LEAVE THE EXAMPLE !
-	 if (strcmp(rgc[1], "FILTER NAME") == 0){
+	 if (strcmp(argv[1], "FILTER NAME") == 0){
 		surface_to_"FILTER NAME"(surface);
 		SDL_Texture* "FILTER NAME"_texture = SDL_CreateTextureFromSurface(renderer, surface);
 		if ("FILTER NAME"_texture == NULL)
