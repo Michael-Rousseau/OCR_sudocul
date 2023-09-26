@@ -47,7 +47,6 @@ unsigned int ValidSquare(unsigned int **grid, unsigned int x, unsigned int y,
             }
         }
     }
-
     printf("%s\n", "oksqr");
     return 1;
     dim++;
@@ -66,27 +65,26 @@ unsigned int BePlaced(unsigned int **grid, unsigned int x, unsigned int y,
 unsigned int solve(unsigned int **grid, unsigned int x, unsigned int y,
         unsigned int dim)
 {
-    if (y> (dim -1) && x >= (dim -1))
+    if (x >= (dim-1) && y > (dim-1))
         return 1;
 
-    if(y > (dim-1))
+    if (y > (dim-1))
     {
         y = 0;
         ++x;
     }
+    if (grid[x][y] != 0)
+        return solve(grid, x, y + 1, dim);
 
-    if(grid[x][y] != 0)
-        return solve(grid, x, y+1, dim);
-    for(size_t val = 1 ;val<= dim; ++val)
+    for (size_t val = 1; val <= dim; ++val)
     {
-        if(BePlaced(grid, x,y, val, dim))
+        if (BePlaced(grid, x, y, val, dim))
         {
             grid[x][y] = val;
+            if (solve(grid, x, y + 1, dim))
+                return 1;
+            grid[x][y] = 0;
         }
-        if(solve(grid, x,y+1, dim))
-            return 1;
-        grid[x][y] = 0;
     }
     return 0;
 }
-
