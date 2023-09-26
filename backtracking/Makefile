@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -Werror
 LDFLAGS =
 LDLIBS =
 
-SRC = allocator.c filestream.c main.c
+SRC = allocator.c filestream.c main.c solver.c
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=.d}
 
