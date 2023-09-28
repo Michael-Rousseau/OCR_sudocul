@@ -23,9 +23,11 @@ unsigned int **allocGrid(unsigned int dimension)
     return grid;
 }
 
-void freeGrid(int **grid)
+void freeGrid(int **grid, int dim)
 {
     //this function will be used everywhere to free an array
+    for(int i = 0; i<dim; ++i)
+        free(grid[i]);
 
     free(grid);
 }

@@ -12,7 +12,6 @@ unsigned int ValidRow(unsigned int **grid, unsigned int x,
             return 0;
         }
     }
-    printf("%s\n", "okrow");
     return 1;
 }
 
@@ -26,7 +25,6 @@ unsigned int ValidColumn(unsigned int **grid, unsigned int y,
             return 0;
         }
     }
-    printf("%s\n", "okcol");
     return 1;
 }
 
@@ -47,7 +45,6 @@ unsigned int ValidSquare(unsigned int **grid, unsigned int x, unsigned int y,
             }
         }
     }
-    printf("%s\n", "oksqr");
     return 1;
     dim++;
 }
@@ -65,10 +62,10 @@ unsigned int BePlaced(unsigned int **grid, unsigned int x, unsigned int y,
 unsigned int solve(unsigned int **grid, unsigned int x, unsigned int y,
         unsigned int dim)
 {
-    if (x >= (dim-1) && y > (dim-1))
+    if (x >= (dim-1) && y == dim)
         return 1;
 
-    if (y > (dim-1))
+    if (y == dim)
     {
         y = 0;
         ++x;

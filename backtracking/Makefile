@@ -2,8 +2,8 @@
 
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -Werror 
-LDFLAGS =
+CFLAGS = -Wall -Wextra -fsanitize=address -g
+LDFLAGS =-fsanitize=address
 LDLIBS =
 
 SRC = allocator.c filestream.c main.c solver.c
@@ -11,7 +11,7 @@ OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=.d}
 
 main: ${OBJ}
-
+-include ${DEP}
 .PHONY: clean
 
 clean:

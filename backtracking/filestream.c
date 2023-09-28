@@ -3,6 +3,28 @@
 #include <stdlib.h>
 #include <err.h>
 
+unsigned int cast(char t)
+{
+    switch(t)
+    {
+        case 'A':
+            return 10;
+        case 'B':
+            return 11;
+        case 'C':
+            return 12;
+        case 'D':
+            return 13;
+        case 'E':
+            return 14;
+        case 'F':
+            return 15;
+        default:
+            return t-'0';
+    }
+
+
+}
 void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
 {
     //the first part of the algorithm will read the grid FILE
@@ -20,15 +42,17 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
     size_t index = 0;
     while((car = fgetc(file)) != EOF)
     {
-        
        if(car == '.')
         {
             grid[index] = 0;
         }
-        else if(car > '0'  && car <='9')
+        else if((car > '0'  && car <='9') )
         {
             grid[index] = car -'0';
         }
+        else if((car >= 'A' && car <= 'F'))
+            grid[index] = cast(car);
+
         else if(car == '\0' || car == ' ')
         {
             grid[index] = -1;
@@ -48,4 +72,6 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
     }
     fclose(file);
 }
+
+
 
