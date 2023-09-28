@@ -6,7 +6,7 @@ unsigned int **allocGrid(unsigned int dimension)
 {
     unsigned int **grid = NULL;
     grid = calloc(dimension, sizeof(unsigned int *));
-    //the calloc function will create a new dynamic tab in memory -> next courses
+    //the calloc function will create a new dynamic tab in memory 
 
     if (grid == NULL)
     {

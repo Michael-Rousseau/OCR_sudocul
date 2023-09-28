@@ -59,8 +59,8 @@ unsigned int isColumnSolved(unsigned int **grid, unsigned int x,
     return true;
 }
 
-unsigned int isSquareSolved(unsigned int **grid, unsigned int x, unsigned int y,
-                            unsigned int dimension)
+unsigned int isSquareSolved(unsigned int **grid, unsigned int x, unsigned int y 
+        ,unsigned int dimension)
 {
     int increment = (int)sqrt(dimension);
     x -= x % increment;
