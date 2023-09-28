@@ -2,15 +2,15 @@
 
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address
-LDFLAGS = -fsanitize=address
+CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address -lm
+LDFLAGS = -fsanitize=address -lm
 LDLIBS =
 
-SRC = main.c matrix.c
+SRC = main.c sigmoid.c matrix.c
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=.d}
 
-main: matrix.o main.o
+main: matrix.o sigmoid.o main.o
 
 .PHONY: clean
 
