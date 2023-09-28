@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <math.h>
 
-double calcSigmoid(int x)
+double sigmoid(int x)
 {
     return 1/(1+exp(-x));
 }
 
-double* sigmoid(double* vector, size_t len)
+double* vecd_sigmoid(double* vector, size_t len)
 {
     for(size_t i = 0; i < len; ++i)
     {
@@ -16,14 +16,14 @@ double* sigmoid(double* vector, size_t len)
     return vector;
 }
 
-double calcDerivateSigmoid(int x)
+double prime_sigmoid(int x)
 {
     double sigx = calcSigmoid(x);
     return sigx * (1- sigx);
 }
 
 
-double* DerSigmoid(double* vector, size_t len)
+double* vecd_prime_sigmoid(double* vector, size_t len)
 {
     for(size_t i = 0; i < len; ++i)
     {
