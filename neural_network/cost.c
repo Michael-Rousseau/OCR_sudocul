@@ -17,5 +17,5 @@ double descent_gradient(double **network, size_t layers, double *labels, size_t 
         sum += squared_distance_cost(expected, actual);
     }
 
-    return sum / len;
+    return sum;
 }
