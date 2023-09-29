@@ -64,3 +64,4 @@ void free_network(double **network, size_t layers) {
 
     free(network);
 }
+
