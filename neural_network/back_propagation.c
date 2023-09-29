@@ -3,23 +3,21 @@
 #include "network.h"
 #include "sigmoid.h"
 
-double d_backpropagation(double** network,size_t *sizes, size_t layers, 
-        double **weight, double **biases, double learning_rate)
+double d_backpropagation(double **network,size_t *sizes, size_t layers, double **weight, double **biases, double learning_rate)
 {
-    double errRate = 0;
-
+    double error_rate = 0;
     size_t output_layer = layers - 1;
 
-    double **delta = malloc(layers * sizeof(double *));
+    double **delta = malloc(layers * sizeof(double*));
     for (size_t i = 0; i < layers; i++) {
         delta[i] = malloc(sizes[i] * sizeof(double));
     }
 
     for (size_t i = 0; i < sizes[output_layer]; ++i) {
-        double target =1;
+        double target = 1;
         double output = network[output_layer][i];
         delta[output_layer][i] = (output - target) * sigmoid(output);
-        errRate += 0.5 * ((output - target)* (output-target));
+        error_rate += 0.5 * ((output - target)* (output-target));
     }
 
     for (size_t l = output_layer; l > 0; --l) {
@@ -27,8 +25,7 @@ double d_backpropagation(double** network,size_t *sizes, size_t layers,
             delta[l][i] = sigmoid(network[l][i]) * delta[l][i];
 
             for (size_t j = 0; j < sizes[l - 1]; ++j) {
-                double delta_weight = learning_rate 
-                    * delta[l][i] * network[l - 1][j];
+                double delta_weight = learning_rate * delta[l][i] * network[l - 1][j];
                 weight[l - 1][i * sizes[l - 1] + j] -= delta_weight;
             }
 
@@ -52,5 +49,5 @@ double d_backpropagation(double** network,size_t *sizes, size_t layers,
     }
     free(delta);
 
-    return errRate;
+    return error_rate;
 }
