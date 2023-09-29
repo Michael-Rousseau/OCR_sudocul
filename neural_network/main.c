@@ -35,6 +35,36 @@ void test(double **network, size_t *sizes, double **weights, double **biases) {
     printf("\tExpected: %.1f\n", expected);
     printf("\tActual  : %.1f\n", result);
 
+    input[0] = 1;
+    input[1] = 1;
+
+    expected = input[0] + input[1];
+    if (expected > 1) expected = 0;
+
+    set_input_layer(network, input, 2);
+    feed_forward(network, sizes, 1, weights, biases);
+    feed_forward(network, sizes, 2, weights, biases);
+
+    result = read_output(network, sizes, 3);
+    printf("\nTEST x1=%.1f x2=%.1f\n", input[0], input[1]);
+    printf("\tExpected: %.1f\n", expected);
+    printf("\tActual  : %.1f\n", result);
+
+    input[0] = 0;
+    input[1] = 1;
+
+    expected = input[0] + input[1];
+    if (expected > 1) expected = 0;
+
+    set_input_layer(network, input, 2);
+    feed_forward(network, sizes, 1, weights, biases);
+    feed_forward(network, sizes, 2, weights, biases);
+
+    result = read_output(network, sizes, 3);
+    printf("\nTEST x1=%.1f x2=%.1f\n", input[0], input[1]);
+    printf("\tExpected: %.1f\n", expected);
+    printf("\tActual  : %.1f\n", result);
+
     free(input);
 }
 

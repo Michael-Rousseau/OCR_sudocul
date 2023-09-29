@@ -36,7 +36,7 @@ void feed_forward(double **network, size_t *sizes, size_t layer,
             sum += network[layer - 1][j] * weight[layer - 1][len_i * i + j];
         }
 
-        sum -= biases[layer - 1][i];
+        sum += biases[layer - 1][i];
         network[layer][i] = sigmoid(sum);
     }
 }
