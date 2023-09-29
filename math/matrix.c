@@ -85,6 +85,30 @@ double *matd_add(double *m1, double *m2, size_t rows, size_t cols)
     return r;
 }
 
+double *matd_sub(double *m1, double *m2, size_t rows, size_t cols)
+{
+    if (m1 == NULL || m2 == NULL) {
+        errx(EXIT_FAILURE, "%s", NULL_POINTER_FAILURE);
+        return NULL;
+    }
+
+    double *r = malloc(rows * cols * sizeof(double));
+
+    if (r == NULL) {
+        errx(EXIT_FAILURE, "%s", MALLOC_FAILURE);
+        return NULL;
+    }
+
+
+    for (size_t x = 0; x < cols; x++) {
+        for (size_t y = 0; y < rows; y++) {
+            r[y * cols + x] = m1[y * cols + x] - m2[y * cols + x];
+        }
+    }
+
+    return r;
+}
+
 double *matd_mul(double *m1, double *m2, size_t r1, size_t c1, size_t c2)
 {
     if (m1 == NULL || m2 == NULL) {
