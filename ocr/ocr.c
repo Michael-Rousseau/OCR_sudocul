@@ -15,12 +15,15 @@ double prime_sigmoid(double x) {
 }
 
 void feed_forward(network *n, double *inputs) {
+    for (size_t i = 0; i < n->layers[0]; i++)
+        n->values[0][i] = inputs[i];
+
     for (size_t layer = 1; layer < n->len; layer++) {
         for (size_t i = 0; i < n->layers[layer]; i++) {
             double sum = 0;
 
             for (size_t j = 0; j < n->layers[layer - 1]; j++)
-                sum += n->values[i - 1][j];
+                sum += n->values[layer - 1][j];
 
             n->values[layer][i] = sigmoid(sum + n->biases[layer - 1][i]);
         }
