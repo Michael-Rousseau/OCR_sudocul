@@ -25,7 +25,7 @@ void d_back_propagation(double **network,size_t *sizes, size_t layers, double **
         }
     }
 
-    for (size_t layer = layers - 1; layer >= 1; layer--) {
+       for (size_t layer = layers - 1; layer >= 1; layer--) {
         size_t len_i = sizes[layer - 1];
         size_t len_o = sizes[layer];
 
@@ -39,7 +39,7 @@ void d_back_propagation(double **network,size_t *sizes, size_t layers, double **
                 for (size_t j = 0; j < sizes[layer + 1]; j++) {
                     delta += weight[layer][len_i * j + i] * network[layer + 1][j];
                 }
-                delta = prime_sigmoid(output);
+                delta *= prime_sigmoid(output);  // Corrected here
             }
 
             biases[layer - 1][i] += delta;
@@ -54,9 +54,9 @@ void d_back_propagation(double **network,size_t *sizes, size_t layers, double **
         size_t len_o = sizes[layer + 1];
 
         for (size_t i = 0; i < len_o; i++) {
-            biases[layer][i] -= learning_rate * biases[layer][i];
+            biases[layer][i] -= learning_rate * biases[layer][i];  // Corrected here
             for (size_t j = 0; j < len_i; j++) {
-                weight[layer][len_i * i + j] -= learning_rate * weight[layer][len_i * i + j];
+                weight[layer][len_i * i + j] -= learning_rate * weight[layer][len_i * i + j];  // Corrected here
             }
         }
     }

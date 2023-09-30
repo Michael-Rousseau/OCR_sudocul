@@ -129,9 +129,11 @@ int main() {
     test(network, sizes, weights, biases);
     free(weights[0]);
     free(weights[1]);
+    free(weights[2]);
     free(weights);
     free(biases[0]);
     free(biases[1]);
+    free(biases[2]);
     free(biases);
     free_network(network, 3);
 
