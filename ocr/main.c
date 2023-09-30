@@ -21,11 +21,11 @@ int main() {
     free_network(n);
     printf("Freed network.\n");
 
-    for (size_t i = 0; i < 100; i++) {
-        double lb = -1;
-        double ub = 1;
-        printf("[%2.2f, %2.2f[ -> %f\n", lb, ub, drand(lb, ub));
+    double *i1 = get_random_bits(20);
+    for (size_t i = 0; i < 20; i++) {
+        printf("%1.0f ", i1[i]);
     }
+    printf("\n");
 
     return 0;
 }

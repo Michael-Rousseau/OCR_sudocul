@@ -18,7 +18,7 @@ network *init_network(size_t *layers, size_t len);
 network *rand_init_network(size_t *layers, size_t len,
         double wmin, double wmax, double bmin, double bmax);
 
-void import_network(network *n, double ***w, double **b);
-void export_network(network *n);
+network *import_network(char *path);
+void export_network(network *n, char *path);
 
-network *free_network(network *network);
+void free_network(network *network);

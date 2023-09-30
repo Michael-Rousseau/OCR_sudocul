@@ -60,15 +60,15 @@ network *rand_init_network(size_t *layers, size_t len,
     return n;
 }
 
-void import_network(network *n, double ***w, double **b) {
+network *import_network(char *path) {
+    return NULL;
+}
+
+void export_network(network *n, char *path) {
 
 }
 
-void export_network(network *n) {
-
-}
-
-network *free_network(network *n) {
+void free_network(network *n) {
     for (size_t i = 0; i < n->len; i++)
         free((n->values)[i]);
     free(n->values);
