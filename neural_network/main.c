@@ -84,6 +84,7 @@ int main() {
     // Initialize random seed for weight and bias initialization
     srand(time(NULL));
 
+    size_t layers = 3;
     size_t sizes[] = { 2, 2, 1 };
     double w0[4];  // Array to store random weights for layer 0
     double w1[2];  // Array to store random weights for layer 1
@@ -118,8 +119,9 @@ int main() {
             if (expected > 1) expected = 0;
 
             set_input_layer(network, input, 2);
-            feed_forward(network, sizes, 1, weights, biases);
-            feed_forward(network, sizes, 2, weights, biases);
+
+            for (size_t j = 1; j < layers; j++)
+                feed_forward(network, sizes, j, weights, biases);
 
             // Backpropagate and update weights and biases
             d_back_propagation(network, sizes, 3, weights, biases, learning_rate, &expected);
@@ -127,15 +129,15 @@ int main() {
     }
 
     test(network, sizes, weights, biases);
-    free(weights[0]);
-    free(weights[1]);
-    free(weights[2]);
+
+    for (size_t i = 0; i < layers - 1; i++) {
+        free(weights[i]);
+        free(weights[i]);
+    }
+
     free(weights);
-    free(biases[0]);
-    free(biases[1]);
-    free(biases[2]);
     free(biases);
-    free_network(network, 3);
+    free_network(network, layers);
 
     return 0;
 }
