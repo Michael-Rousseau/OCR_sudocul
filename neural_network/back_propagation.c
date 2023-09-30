@@ -3,51 +3,61 @@
 #include "network.h"
 #include "sigmoid.h"
 
-double d_backpropagation(double **network,size_t *sizes, size_t layers, double **weight, double **biases, double learning_rate)
+
+void d_back_propagation(double **network,size_t *sizes, size_t layers, double **weight, double **biases, double learning_rate, double* target)
 {
-    double error_rate = 0;
-    size_t output_layer = layers - 1;
+    *weight = malloc((layers - 1) * sizeof(double *));
+    *biases = malloc((layers - 1) * sizeof(double *));
 
-    double **delta = malloc(layers * sizeof(double*));
-    for (size_t i = 0; i < layers; i++) {
-        delta[i] = malloc(sizes[i] * sizeof(double));
-    }
+    for (size_t i = 0; i < layers - 1; i++) {
+        size_t len_i = sizes[i];
+        size_t len_o = sizes[i + 1];
 
-    for (size_t i = 0; i < sizes[output_layer]; ++i) {
-        double target = 1;
-        double output = network[output_layer][i];
-        delta[output_layer][i] = (output - target) * sigmoid(output);
-        error_rate += 0.5 * ((output - target)* (output-target));
-    }
+        (weight)[i] = malloc(len_i * len_o * sizeof(double));
+        (biases)[i] = malloc(len_o * sizeof(double));
 
-    for (size_t l = output_layer; l > 0; --l) {
-        for (size_t i = 0; i < sizes[l]; ++i) {
-            delta[l][i] = sigmoid(network[l][i]) * delta[l][i];
-
-            for (size_t j = 0; j < sizes[l - 1]; ++j) {
-                double delta_weight = learning_rate * delta[l][i] * network[l - 1][j];
-                weight[l - 1][i * sizes[l - 1] + j] -= delta_weight;
-            }
-
-            double delta_bias = learning_rate * delta[l][i];
-            biases[l - 1][i] -= delta_bias;
+        for (size_t j = 0; j < len_i * len_o; j++) {
+            (weight)[i][j] = 0.0;
         }
 
-        if (l > 1) {
-            for (size_t j = 0; j < sizes[l - 1]; ++j) {
-                double sum = 0;
-                for (size_t k = 0; k < sizes[l]; ++k) {
-                    sum += weight[l - 1][k * sizes[l - 1] + j] * delta[l][k];
+        for (size_t j = 0; j < len_o; j++) {
+            (biases)[i][j] = 0.0;
+        }
+    }
+
+    for (size_t layer = layers - 1; layer >= 1; layer--) {
+        size_t len_i = sizes[layer - 1];
+        size_t len_o = sizes[layer];
+
+        for (size_t i = 0; i < len_o; i++) {
+            double output = network[layer][i];
+            double delta = 0.0;
+
+            if (layer == layers - 1) {
+                delta = (output - target[i]) * (output);
+            } else {
+                for (size_t j = 0; j < sizes[layer + 1]; j++) {
+                    delta += weight[layer][len_i * j + i] * network[layer + 1][j];
                 }
-                delta[l - 1][j] = sum;
+                delta = prime_sigmoid(output);
+            }
+
+            biases[layer - 1][i] += delta;
+            for (size_t j = 0; j < len_i; j++) {
+                weight[layer - 1][len_i * i + j] += delta * network[layer - 1][j];
             }
         }
     }
 
-    for (size_t i = 0; i < layers; i++) {
-        free(delta[i]);
-    }
-    free(delta);
+    for (size_t layer = 0; layer < layers - 1; layer++) {
+        size_t len_i = sizes[layer];
+        size_t len_o = sizes[layer + 1];
 
-    return error_rate;
+        for (size_t i = 0; i < len_o; i++) {
+            biases[layer][i] -= learning_rate * biases[layer][i];
+            for (size_t j = 0; j < len_i; j++) {
+                weight[layer][len_i * i + j] -= learning_rate * weight[layer][len_i * i + j];
+            }
+        }
+    }
 }

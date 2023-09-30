@@ -2,7 +2,7 @@
 
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address -lm
+CFLAGS = -Wall -Wextra -g -fsanitize=address -lm
 LDFLAGS = -fsanitize=address -lm
 LDLIBS =
 

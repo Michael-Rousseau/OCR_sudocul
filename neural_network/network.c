@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "sigmoid.h"
+#include "cost.h"
 
 double **init_network(size_t *sizes, size_t layers) {
     double **network = malloc(layers * sizeof(double*));
