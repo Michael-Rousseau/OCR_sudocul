@@ -15,7 +15,7 @@ void test_network(network *n, size_t nb_tests) {
 
     char booleans[][6] = {
         "FALSE",
-        "TRUE"
+        "TRUE "
     };
 
     double valid = 0;
@@ -25,21 +25,24 @@ void test_network(network *n, size_t nb_tests) {
         int expected = (((int) input1[i]) + ((int) input2[i])) % 2;
 
         feed_forward(n, input);
-        int result = (int) n->values[n->len - 1][0];
+        int result;
+        if (n->values[n->len - 1][0] < 0.5)
+            result = 0;
+        else
+            result = 1;
+
+        int bool_to_print = 0;
+        if (result == expected) {
+            bool_to_print = 1;
+            valid++;
+        }
 
         double *target = malloc(sizeof(double));
         *target = (double) expected;
-        back_propagation(n, 0.1, target);
+        back_prop(n, target);
         free(target);
 
-        if (result == expected) {
-            result = 1;
-            valid++;
-        }
-        else
-            result = 0;
-
-        printf("TEST n%5zu: %s\n", i + 1, booleans[result]);
+        printf("TEST n%5zu: %s (%1.0f XOR %1.0F = %hhi EXPECTED %hhi)\n", i + 1, booleans[bool_to_print], input1[i], input2[i], result, expected);
     }
 
     printf("\nRATE: %3.2f%%\n", 100 * valid / ((double) nb_tests));
