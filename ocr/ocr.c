@@ -46,16 +46,15 @@ void back_prop(network *n, double *expected) {
     size_t last = n->len - 1;
 
     for (size_t i = 0; i < n->layers[last]; i++) {
-        n->costs[last - 1][i] = prime_sigmoid(n->values[last][i]) *
-            (n->values[last][i] - expected[i]);
+        n->costs[last - 1][i] = expected[i] - n->values[last][i];
     }
 
     for (size_t i = last - 1; i > 0; i--) {
         for (size_t j = 0; j < n->layers[i]; j++) {
-            n->costs[i - 1][j] = 0;
+            n->costs[i][j] = 0;
 
             for (size_t k = 0; k < n->layers[i + 1]; k++) {
-                n->costs[i - 1][j] += n->weights[i][j][k] * n->costs[i][j];
+                n->costs[i][j] += n->weights[i][j][k] * n->costs[i][j];
             }
 
             n->costs[i - 1][j] *= prime_sigmoid(n->values[i][j]);
@@ -68,6 +67,7 @@ void learn(network *n, double speed) {
         for (size_t j = 0; j < n->layers[i]; j++) {
             for(size_t k = 0; k < n->layers[i - 1]; j++)
                 return;
+
         }
     }
 }
