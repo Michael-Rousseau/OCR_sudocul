@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
+//use these functions to generate random bits, for XOR tests
 double drand(double min, double max) {
     return ((float) rand() / (float) RAND_MAX) * (max - min) + min;
 }

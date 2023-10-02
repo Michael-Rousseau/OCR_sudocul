@@ -39,7 +39,7 @@ void test_network(network *n, size_t nb_tests) {
 
         double *target = malloc(sizeof(double));
         *target = (double) expected;
-        back_prop(n, target);
+        back_propagation(n, 1, target);
         free(target);
 
         printf("TEST n%5zu: %s (%1.0f XOR %1.0F = %hhi EXPECTED %hhi)\n", i + 1, booleans[bool_to_print], input1[i], input2[i], result, expected);

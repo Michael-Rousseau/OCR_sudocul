@@ -4,6 +4,8 @@
 #include "network.h"
 #include "helper.h"
 
+//init the eural_network, defined by a struct containing
+//a vector for values
 network *init_network(size_t *layers, size_t len) {
     network *n = malloc(sizeof(network));
 
@@ -29,7 +31,7 @@ network *init_network(size_t *layers, size_t len) {
         for (size_t j = 0; j < layers[i + 1]; j++) {
             costs[i][j] = 0;
             biases[i][j] = 0;
-            weights[i][j] = malloc(layers[i] * sizeof(j));
+            weights[i][j] = malloc(layers[i] * sizeof(double));
 
             for (size_t k = 0; k < layers[i]; k++) {
                 weights[i][j][k] = 0;
