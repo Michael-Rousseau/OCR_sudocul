@@ -27,6 +27,11 @@ void test_network(network *n, size_t nb_tests) {
         feed_forward(n, input);
         int result = (int) n->values[n->len - 1][0];
 
+        double *target = malloc(sizeof(double));
+        *target = (double) expected;
+        back_propagation(n, 0.1, target);
+        free(target);
+
         if (result == expected) {
             result = 1;
             valid++;
