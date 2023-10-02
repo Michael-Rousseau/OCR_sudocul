@@ -65,7 +65,7 @@ void back_propagation(network *net, double learning_rate, double* target)
     for (size_t layer = output_layer - 1; layer > 0; layer--) {
         for (size_t i = 0; i < sizes[layer]; i++) {
             double output = network_values[layer][i];
-            double delta = 0.0;
+            double delta = 0;
 
             for (size_t j = 0; j < sizes[layer + 1]; j++) {
                 delta += weights[layer][j][i] * prime_sigmoid(output) * biases[layer][j];

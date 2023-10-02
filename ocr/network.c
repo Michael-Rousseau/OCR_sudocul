@@ -18,13 +18,16 @@ network *init_network(size_t *layers, size_t len) {
     }
 
     double **biases = malloc((len - 1) * sizeof(double*));
+    double **costs = malloc((len - 1) * sizeof(double*));
     double ***weights = malloc((len - 1) * sizeof(double*));
 
     for (size_t i = 0; i < len - 1; i++) {
         biases[i] = malloc(layers[i + 1] * sizeof(double));
+        costs[i] = malloc(layers[i + 1] * sizeof(double));
         weights[i] = malloc(layers[i + 1] * sizeof(double));
 
         for (size_t j = 0; j < layers[i + 1]; j++) {
+            costs[i][j] = 0;
             biases[i][j] = 0;
             weights[i][j] = malloc(layers[i] * sizeof(j));
 
@@ -37,6 +40,8 @@ network *init_network(size_t *layers, size_t len) {
     n->values = values;
     n->len = len;
     n->layers = layers;
+
+    n->costs = costs;
     n->biases = biases;
     n->weights = weights;
 
@@ -77,9 +82,11 @@ void free_network(network *n) {
         for (size_t j = 0; j < n->layers[i + 1]; j++)
             free(n->weights[i][j]);
 
+        free(n->costs[i]);
         free(n->biases[i]);
         free(n->weights[i]);
     }
+    free(n->costs);
     free(n->biases);
     free(n->weights);
 

@@ -9,6 +9,7 @@ struct struct_network {
     size_t *layers;
 
     double **biases;
+    double **costs;
     double ***weights;
 };
 
