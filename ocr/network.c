@@ -118,11 +118,15 @@ void network_to_graph(network *n, char *path) {
 
     double **biases = n->biases;
     double ***weights = n->weights;
-    asprintf(&output, text, n->values[0][0], n->values[0][1],
-            biases[0][0], biases[0][1], biases[1][0],
+    asprintf(&output, text,
+            n->values[0][0], n->values[0][1],
+            biases[0][0], n->values[1][0],
+            biases[0][1], n->values[1][1],
+            biases[1][0], n->values[2][0],
             weights[0][0][0], weights[0][0][1],
             weights[0][1][0], weights[0][1][1],
             weights[1][0][0], weights[1][0][1]);
+
     free(text);
 
     FILE *file_out;

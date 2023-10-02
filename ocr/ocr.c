@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -10,7 +11,7 @@ double sigmoid(double x) {
 }
 
 double prime_sigmoid(double x) {
-    double sigx = sigmoid(x);
+    double sigx = (x);
     return sigx * (1 - sigx);
 }
 
@@ -19,13 +20,22 @@ void feed_forward(network *n, double *inputs) {
         n->values[0][i] = inputs[i];
 
     for (size_t layer = 1; layer < n->len; layer++) {
+        printf("LAYER %zu\n", layer);
         for (size_t i = 0; i < n->layers[layer]; i++) {
+            printf("NODE %zu\n", i + 1);
+
             double sum = 0;
 
-            for (size_t j = 0; j < n->layers[layer - 1]; j++)
+            for (size_t j = 0; j < n->layers[layer - 1]; j++) {
                 sum += n->values[layer - 1][j] * n->weights[layer - 1][i][j];
+                printf("sum += %2.2f * %2.2f (=%2.2f)\n",
+                        n->values[layer - 1][j],
+                        n->weights[layer - 1][i][j],
+                        sum);
+            }
 
             n->values[layer][i] = sigmoid(sum + n->biases[layer - 1][i]);
+            printf("New node value: %2.2f\n", n->values[layer][i]);
         }
     }
 }
@@ -67,7 +77,6 @@ void learn(network *n, double speed) {
         for (size_t j = 0; j < n->layers[i]; j++) {
             for(size_t k = 0; k < n->layers[i - 1]; j++)
                 return;
-
         }
     }
 }
@@ -98,7 +107,7 @@ void back_propagation(network *net, double learning_rate, double* target)
             double delta = 0;
 
             for (size_t j = 0; j < sizes[layer + 1]; j++) {
-                delta += weights[layer][j][i] * prime_sigmoid(output) + biases[layer][j];
+                delta += weights[layer][j][i] * prime_sigmoid(output);
             }
 
             biases[layer - 1][i] += delta * learning_rate;
