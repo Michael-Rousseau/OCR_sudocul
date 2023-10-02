@@ -21,7 +21,7 @@ void test_network(network *n, size_t nb_tests) {
     n->values[0][0] = input1[0];
     n->values[0][1] = input2[0];
     network_to_graph(n, "results/test_before");
-    for (size_t i = 0; i < 2; i++) {
+    for (size_t i = 0; i < nb_tests; i++) {
         double input[] = {input1[i], input2[i]};
         int expected = (((int)input1[i]) + ((int)input2[i])) % 2;
 
@@ -40,9 +40,11 @@ void test_network(network *n, size_t nb_tests) {
 
         double *target = malloc(sizeof(double));
         *target = (double)expected;
-        back_propagation(n, 0.1, target);
+        back_prop(n, target);
+        learn(n, 0.1);
 
-        if (1) {
+        if (i % (nb_tests / 10) == 0) {
+
             char *graph_path;
             asprintf(&graph_path, "results/learning_results%zu", i);
             network_to_graph(n, graph_path);
@@ -51,7 +53,7 @@ void test_network(network *n, size_t nb_tests) {
         free(target);
 
         printf("TEST n%5zu: %s (%1.0f XOR %1.0F = %hhi EXPECTED %hhi)\n", i + 1,
-               booleans[bool_to_print], input1[i], input2[i], result, expected);
+              booleans[bool_to_print], input1[i], input2[i], result, expected);
     }
 
     network_to_graph(n, "results/test_after");
@@ -71,7 +73,7 @@ int main() {
 
     network *n = rand_init_network(layers, LAYER_COUNT, -1, 1, -1, 1);
 
-    test_network(n, 100000);
+    test_network(n, 10000000);
 
     free_network(n);
     return 0;

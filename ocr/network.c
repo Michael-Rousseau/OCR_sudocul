@@ -113,8 +113,6 @@ void network_to_graph(network *n, char *path) {
     fclose(file_in);
 
     char *output;
-    double inputs[] = {
-    };
 
     double **biases = n->biases;
     double ***weights = n->weights;

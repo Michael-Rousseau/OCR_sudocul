@@ -20,6 +20,24 @@ void feed_forward(network *n, double *inputs) {
         n->values[0][i] = inputs[i];
 
     for (size_t layer = 1; layer < n->len; layer++) {
+        for (size_t i = 0; i < n->layers[layer]; i++) {
+
+            double sum = 0;
+
+            for (size_t j = 0; j < n->layers[layer - 1]; j++) {
+                sum += n->values[layer - 1][j] * n->weights[layer - 1][i][j];
+            }
+
+            n->values[layer][i] = sigmoid(sum + n->biases[layer - 1][i]);
+        }
+    }
+}
+
+void v_feed_forward(network *n, double *inputs) {
+    for (size_t i = 0; i < n->layers[0]; i++)
+        n->values[0][i] = inputs[i];
+
+    for (size_t layer = 1; layer < n->len; layer++) {
         printf("LAYER %zu\n", layer);
         for (size_t i = 0; i < n->layers[layer]; i++) {
             printf("NODE %zu\n", i + 1);
@@ -56,15 +74,16 @@ void back_prop(network *n, double *expected) {
     size_t last = n->len - 1;
 
     for (size_t i = 0; i < n->layers[last]; i++) {
-        n->costs[last - 1][i] = expected[i] - n->values[last][i];
+        double v = n->values[last][i];
+        n->costs[last - 1][i] = v * (1 - v) * (v - expected[i]);
     }
 
     for (size_t i = last - 1; i > 0; i--) {
-        for (size_t j = 0; j < n->layers[i]; j++) {
-            n->costs[i][j] = 0;
+        for (size_t j = 0; j < n->layers[i + 1]; j++) {
+            n->costs[i - 1][j] = 0;
 
-            for (size_t k = 0; k < n->layers[i + 1]; k++) {
-                n->costs[i][j] += n->weights[i][j][k] * n->costs[i][j];
+            for (size_t k = 0; k < n->layers[i]; k++) {
+                n->costs[i - 1][j] += n->weights[i][j][k] * n->costs[i][j];
             }
 
             n->costs[i - 1][j] *= prime_sigmoid(n->values[i][j]);
@@ -73,10 +92,19 @@ void back_prop(network *n, double *expected) {
 }
 
 void learn(network *n, double speed) {
-    for (size_t i = 1; i < n->len; i++) {
-        for (size_t j = 0; j < n->layers[i]; j++) {
-            for(size_t k = 0; k < n->layers[i - 1]; j++)
-                return;
+    for (size_t i = 0; i < n->len - 1; i++) {
+        for (size_t j = 0; j < n->layers[i]; j++)
+        {
+            for(size_t k = 0; k < n->layers[i + 1]; k++)
+            {
+                n->weights[i][k][j] -= speed *
+                    n->values[i][j] *
+                    n->costs[i][k];
+            }
+        }
+
+        for (size_t j = 0; j < n->layers[i + 1]; j++) {
+            n->biases[i][j] -= speed * n->costs[i][j];
         }
     }
 }
