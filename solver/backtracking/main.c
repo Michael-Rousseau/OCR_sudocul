@@ -23,7 +23,7 @@ int main(int argc, char **argv)
             printf("%2d ", FinalGrid[i][j]);
         printf("\n");
     }
-
+    gridWriter(dim, FinalGrid);
     freeGrid(FinalGrid, dim);
     return 0;
 }

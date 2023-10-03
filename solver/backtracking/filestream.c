@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <err.h>
+#include <math.h>
 
 unsigned int cast(char t)
 {
@@ -74,4 +76,36 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
 }
 
 
+char* gridWriter(unsigned int dim, unsigned int** FinalGrid)
+{
+    FILE* file_in;
+    file_in = fopen("solve", "w");
+    if(file_in == NULL)
+        errx(1, "FILE DOESN'T OPEN");
 
+    double sqDim = sqrt((double)dim);
+    char* final = malloc(1);
+    char *tmp = malloc((dim +1 + sqDim) *sizeof(char));
+    size_t k = 0;
+
+    for(size_t i = 0; i < dim; ++i)
+    {
+        for(size_t j = 0; j < dim; ++j)
+        {
+            if((j % dim) == 0 & j != 0)
+                tmp[k++] = ' ';
+            else
+                tmp[k++] = FinalGrid[i][j];
+        }
+        int i = asprintf(&final, "%hhu\n", tmp);
+        if(i == -1)
+            return NULL;
+        k = 0;
+    }
+    free(tmp);
+    final[strlen(final) -1] = '\0';
+    fprintf(file_in, "%s\n", final);
+    fclose(file_in);
+    free(final);
+
+}
