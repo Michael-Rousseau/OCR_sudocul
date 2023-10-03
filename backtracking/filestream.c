@@ -80,30 +80,25 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
 
 void gridWriter(unsigned int dim, unsigned int** FinalGrid, char* _path)
 {
-
-    double sqDim = sqrt((double)dim);
-    char* final = malloc(1);
-    char *tmp = malloc((dim +1 + sqDim) *sizeof(char));
-    size_t k = 0;
-
-    for(size_t i = 0; i < dim; ++i)
-    {
-        for(size_t j = 0; j < dim; ++j)
-        {
-            if((j % dim) == 0 && j != 0)
-                tmp[k++] = ' ';
-            else
-                tmp[k++] = FinalGrid[i][j];
-        }
-        int i = asprintf(&final, "%s\n", tmp);
-        if(i == -1)
-            return;
-        k = 0;
+    double SqDim = sqrt(dim);
+    FILE *file = fopen(_path, "w");
+    if (file == NULL) {
+        errx(1, "FILE OPEN FAILED");
     }
-
-    final[strlen(final) -1] = '\0';
-    file_write(_path, final);
-    free(tmp);
-    free(final);
-
+    for (size_t i = 0; i < dim; ++i)
+    {
+        if(i % 3 == 0 && i != 0)
+            fprintf(file, "\n");
+        for (size_t j = 0; j < dim; ++j)
+        {
+            if(j % (int)SqDim == 0 && j !=0)
+                fprintf(file," %u", FinalGrid[i][j]);
+            else
+                fprintf(file, "%u", FinalGrid[i][j]);
+            if (j == dim - 1) {
+                fprintf(file, "\n");
+            }
+        }
+    }
+    fclose(file);
 }
