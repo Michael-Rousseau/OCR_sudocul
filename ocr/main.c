@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "files.h"
 #include "helper.h"
 #include "network.h"
 #include "ocr.h"
@@ -42,18 +43,6 @@ void test_network(network *n, size_t nb_tests) {
         back_prop(n, target);
         learn(n, 0.1);
 
-        /*
-        if (i % (nb_tests / 10) == 0) {
-
-            char *graph_path;
-            asprintf(&graph_path, "results/learning_results%zu", i);
-            network_to_graph(n, graph_path);
-            free(graph_path);
-        }
-
-        printf("TEST n%5zu: %s (%1.0f XOR %1.0F = %hhi EXPECTED %hhi)\n", i + 1,
-            booleans[bool_to_print], input1[i], input2[i], result, expected);
-        */
         free(target);
     }
 

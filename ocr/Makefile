@@ -6,7 +6,7 @@ CFLAGS = -Wall -Wextra -ggdb3 -std=c11 -fsanitize=address -lm
 LDFLAGS = -fsanitize=address -lm
 LDLIBS =
 
-SRC = main.c helper.c network.c ocr.c
+SRC = main.c helper.c network.c ocr.c files.c
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=.d}
 
