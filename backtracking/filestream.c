@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <err.h>
 #include <math.h>
+#include "../fileStream/files.h"
+
 
 unsigned int cast(char t)
 {
@@ -76,12 +78,8 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
 }
 
 
-char* gridWriter(unsigned int dim, unsigned int** FinalGrid)
+void gridWriter(unsigned int dim, unsigned int** FinalGrid, char* _path)
 {
-    FILE* file_in;
-    file_in = fopen("solve", "w");
-    if(file_in == NULL)
-        errx(1, "FILE DOESN'T OPEN");
 
     double sqDim = sqrt((double)dim);
     char* final = malloc(1);
@@ -92,20 +90,20 @@ char* gridWriter(unsigned int dim, unsigned int** FinalGrid)
     {
         for(size_t j = 0; j < dim; ++j)
         {
-            if((j % dim) == 0 & j != 0)
+            if((j % dim) == 0 && j != 0)
                 tmp[k++] = ' ';
             else
                 tmp[k++] = FinalGrid[i][j];
         }
-        int i = asprintf(&final, "%hhu\n", tmp);
+        int i = asprintf(&final, "%s\n", tmp);
         if(i == -1)
-            return NULL;
+            return;
         k = 0;
     }
-    free(tmp);
+
     final[strlen(final) -1] = '\0';
-    fprintf(file_in, "%s\n", final);
-    fclose(file_in);
+    file_write(_path, final);
+    free(tmp);
     free(final);
 
 }
