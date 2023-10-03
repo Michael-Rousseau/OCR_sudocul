@@ -73,7 +73,7 @@ int main() {
 
     network *n = rand_init_network(layers, LAYER_COUNT, -1, 1, -1, 1);
 
-    test_network(n, 10000000);
+    test_network(n, 1000000);
 
     free_network(n);
     return 0;
