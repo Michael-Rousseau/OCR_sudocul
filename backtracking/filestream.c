@@ -1,7 +1,11 @@
 #include <stdio.h>
+#include <string.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <err.h>
+#include <math.h>
+#include "../fileStream/files.h"
+
 
 unsigned int cast(char t)
 {
@@ -74,4 +78,27 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
 }
 
 
-
+void gridWriter(unsigned int dim, unsigned int** FinalGrid, char* _path)
+{
+    double SqDim = sqrt(dim);
+    FILE *file = fopen(_path, "w");
+    if (file == NULL) {
+        errx(1, "FILE OPEN FAILED");
+    }
+    for (size_t i = 0; i < dim; ++i)
+    {
+        if(i % 3 == 0 && i != 0)
+            fprintf(file, "\n");
+        for (size_t j = 0; j < dim; ++j)
+        {
+            if(j % (int)SqDim == 0 && j !=0)
+                fprintf(file," %u", FinalGrid[i][j]);
+            else
+                fprintf(file, "%u", FinalGrid[i][j]);
+            if (j == dim - 1) {
+                fprintf(file, "\n");
+            }
+        }
+    }
+    fclose(file);
+}

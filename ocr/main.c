@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "../fileStream/files.h"
 #include "helper.h"
 #include "network.h"
 #include "ocr.h"
@@ -72,7 +72,7 @@ int main() {
 
     network *n = rand_init_network(layers, LAYER_COUNT, -1, 1, -1, 1);
 
-    test_network(n, 100000);
+    test_network(n, 5000000);
 
     free_network(n);
     return 0;

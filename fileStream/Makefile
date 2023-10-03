@@ -2,16 +2,16 @@
 
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address -lm
-LDFLAGS = -fsanitize=address -lm
+CFLAGS = -Wall -Wextra -fsanitize=address -g
+LDFLAGS =-fsanitize=address -lm
 LDLIBS =
 
-SRC = main.c sigmoid.c matrix.c
+SRC = filestram.c
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=.d}
 
-main: matrix.o sigmoid.o main.o
-
+main: ${OBJ}
+-include ${DEP}
 .PHONY: clean
 
 clean:
