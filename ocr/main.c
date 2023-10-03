@@ -14,15 +14,19 @@ void test_network(network *n, size_t nb_tests) {
     double *input1 = get_random_bits(nb_tests);
     double *input2 = get_random_bits(nb_tests);
 
-    char booleans[][6] = {"FALSE", "TRUE "};
-
     double valid = 0;
 
-    n->values[0][0] = input1[0];
-    n->values[0][1] = input2[0];
+    double *input = malloc(2 * sizeof(double));
+    double *target = malloc(sizeof(double));
+
+    double j = 0;
     for (size_t i = 0; i < nb_tests; i++) {
-        double input[] = {input1[i], input2[i]};
-        int expected = (((int)input1[i]) + ((int)input2[i])) % 2;
+        double i1 = input1[i];
+        double i2 = input2[i];
+        input[0] = i1;
+        input[1] = i2;
+
+        int expected = ((int)i1 + (int)i2) % 2;
 
         feed_forward(n, input);
         int result;
@@ -31,22 +35,29 @@ void test_network(network *n, size_t nb_tests) {
         else
             result = 1;
 
-        int bool_to_print = 0;
-        if (result == expected) {
-            bool_to_print = 1;
+        if (result == expected)
             valid++;
-        }
 
-        double *target = malloc(sizeof(double));
         *target = (double)expected;
         back_prop(n, target);
-        learn(n, 1);
+        learn(n, 0.1);
 
-        free(target);
+        if (j == 1000) {
+            if (100 * valid / j >= 100) {
+                printf("Finished learning in %zu tries\n", i);
+                break;
+            }
+            printf("RATE: %3.2f%% (%zu)\n", 100 * valid / j, i);
+
+            j = 1;
+            valid = 0;
+        }
+        else
+            j++;
     }
 
-    printf("\nRATE: %3.2f%%\n", 100 * valid / ((double)nb_tests));
-
+    free(input);
+    free(target);
     free(input1);
     free(input2);
 }

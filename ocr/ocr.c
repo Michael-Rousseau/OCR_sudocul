@@ -11,8 +11,7 @@ double sigmoid(double x) {
 }
 
 double prime_sigmoid(double x) {
-    double sigx = (x);
-    return sigx * (1 - sigx);
+    return x * (1 - x);
 }
 
 void feed_forward(network *n, double *inputs) {
