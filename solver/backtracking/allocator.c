@@ -6,7 +6,7 @@ unsigned int **allocGrid(unsigned int dimension)
 {
     unsigned int **grid = NULL;
     grid = calloc(dimension, sizeof(unsigned int *));
-    //the calloc function will create a new dynamic tab in memory -> next courses
+    //the calloc function will create a new dynamic tab in memory 
 
     if (grid == NULL)
     {
@@ -23,9 +23,11 @@ unsigned int **allocGrid(unsigned int dimension)
     return grid;
 }
 
-void freeGrid(int **grid)
+void freeGrid(int **grid, int dim)
 {
     //this function will be used everywhere to free an array
+    for(int i = 0; i<dim; ++i)
+        free(grid[i]);
 
     free(grid);
 }

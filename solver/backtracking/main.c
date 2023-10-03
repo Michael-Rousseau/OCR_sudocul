@@ -16,15 +16,14 @@ int main(int argc, char **argv)
 
     gridReader(dim, FinalGrid, argv[1]);
 
-    solve(FinalGrid, 0,0,dim);
-    
+    solve(FinalGrid,0,0,dim);
     for(size_t i = 0; i<dim; ++i)
     {
-	for(size_t j = 0; j < dim; ++j)
-	    printf("%i", FinalGrid[i][j]);
-	printf("\n");
+        for(size_t j = 0; j < dim; ++j)
+            printf("%2d ", FinalGrid[i][j]);
+        printf("\n");
     }
-
-    freeGrid(FinalGrid);
+    gridWriter(dim, FinalGrid);
+    freeGrid(FinalGrid, dim);
     return 0;
 }
