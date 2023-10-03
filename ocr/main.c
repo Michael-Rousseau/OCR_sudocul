@@ -68,12 +68,12 @@ int main() {
 
     size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
     layers[0] = 2;
-    layers[1] = 2;
+    layers[1] = 10;
     layers[2] = 1;
 
     network *n = rand_init_network(layers, LAYER_COUNT, -1, 1, -1, 1);
 
-    test_network(n, 1000000);
+    test_network(n, 100000);
 
     free_network(n);
     return 0;

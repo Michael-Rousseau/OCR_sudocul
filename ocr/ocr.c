@@ -31,19 +31,6 @@ void feed_forward(network *n, double *inputs) {
             n->values[layer][i] = sigmoid(sum + n->biases[layer - 1][i]);
         }
     }
-
-    size_t max = 0;
-    size_t last = n->len - 1;
-    size_t len = n->layers[last];
-    for (size_t i = 1; i < len; i++) {
-        if (n->values[last][max] < n->values[last][i])
-            max = i;
-    }
-
-    for (size_t i = 0; i < len; i++) {
-        n->values[last][i] = 0;
-    }
-    n->values[last][max] = 1;
 }
 
 void v_feed_forward(network *n, double *inputs) {
