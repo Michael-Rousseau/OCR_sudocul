@@ -26,6 +26,8 @@ void surface_to_blackwhite(SDL_Surface* surface);
 Uint32 pixel_to_blackwhite(Uint32 pixel_color, SDL_PixelFormat* format);
 void surface_to_contrast(SDL_Surface* surface, float contrast);
 Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format, float contrast);
-
+float** generate_Kernel(int ksize, float sigma);
+void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface* filteredimage);
+void surface_to_reducenoise(SDL_Surface* surface);
 
 #endif
