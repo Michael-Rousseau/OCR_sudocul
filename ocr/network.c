@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include <err.h>
 
 #include "network.h"
 #include "helper.h"
@@ -70,11 +71,69 @@ network *rand_init_network(size_t *layers, size_t len,
 }
 
 network *import_network(char *path) {
-    return NULL;
+    FILE *in;
+    in = fopen(path, "rb");
+
+    network *n = malloc(sizeof(network));
+
+    fread(&(n->len), sizeof(double), 1, in);
+    n->layers = malloc(n->len * sizeof(size_t));
+
+    n->values = malloc(n->len * sizeof(double*));
+    n->costs = malloc((n->len - 1) * sizeof(double*));
+    n->biases = malloc((n->len - 1) * sizeof(double*));
+    n->weights = malloc((n->len - 1) * sizeof(double*));
+
+    for (size_t i = 0; i < n->len; i++) {
+        fread(&(n->layers[i]), sizeof(size_t), 1, in);
+        n->values[i] = malloc(n->layers[i] * sizeof(double));
+    }
+
+    for (size_t i = 0; i < n->len - 1; i++) {
+        n->costs[i] = malloc(n->layers[i + 1] * sizeof(double));
+        n->biases[i] = malloc(n->layers[i + 1] * sizeof(double));
+        n->weights[i] = malloc(n->layers[i + 1] * sizeof(double*));
+
+        for (size_t j = 0; j < n->layers[i + 1]; j++) {
+            fread(&(n->costs[i][j]), sizeof(double), 1, in);
+            fread(&(n->biases[i][j]), sizeof(double), 1, in);
+            n->weights[i][j] = malloc(n->layers[i] * sizeof(double));
+
+            for (size_t k = 0; k < n->layers[i]; k++) {
+                fread(&(n->weights[i][j][k]), sizeof(double), 1, in);
+            }
+        }
+    }
+
+    fclose(in);
+    return n;
 }
 
 void export_network(network *n, char *path) {
+    FILE *out;
+    out = fopen(path, "wb");
 
+    if (out == NULL) {
+        errx(EXIT_FAILURE, "Could not open file %s.", path);
+        return;
+    }
+
+    fwrite(&(n->len), sizeof(size_t), 1, out);
+    for (size_t i = 0; i < n->len; i++)
+        fwrite(&(n->layers[i]), sizeof(size_t), 1, out);
+
+    for (size_t i = 0; i < n->len - 1; i++) {
+        for (size_t j = 0; j < n->layers[i + 1]; j++) {
+            fwrite(&(n->costs[i][j]), sizeof(double), 1, out);
+            fwrite(&(n->biases[i][j]), sizeof(double), 1, out);
+
+            for (size_t k = 0; k < n->layers[i]; k++) {
+                fwrite(&(n->weights[i][j][k]), sizeof(double), 1, out);
+            }
+        }
+    }
+
+    fclose(out);
 }
 
 void free_network(network *n) {

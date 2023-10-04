@@ -40,7 +40,7 @@ void test_network(network *n, size_t nb_tests) {
 
         *target = (double)expected;
         back_prop(n, target);
-        learn(n, 0.1);
+        learn(n, 0.9);
 
         if (j == 1000) {
             if (100 * valid / j >= 100) {
@@ -65,14 +65,19 @@ void test_network(network *n, size_t nb_tests) {
 int main() {
     srand(RANDOM_SEED);
 
+    /*
     size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
     layers[0] = 2;
-    layers[1] = 10;
+    layers[1] = 12;
     layers[2] = 1;
 
     network *n = rand_init_network(layers, LAYER_COUNT, -1, 1, -1, 1);
+    */
+
+    network *n = import_network("xor.trained");
 
     test_network(n, 5000000);
+    //export_network(n, "xor.trained");
 
     free_network(n);
     return 0;
