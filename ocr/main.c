@@ -65,19 +65,17 @@ void test_network(network *n, size_t nb_tests) {
 int main() {
     srand(RANDOM_SEED);
 
-    /*
     size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
     layers[0] = 2;
-    layers[1] = 12;
+    layers[1] = 4;
     layers[2] = 1;
 
     network *n = rand_init_network(layers, LAYER_COUNT, -1, 1, -1, 1);
-    */
 
-    network *n = import_network("xor.trained");
+    //network *n = import_network("xor.trained");
 
     test_network(n, 5000000);
-    //export_network(n, "xor.trained");
+    export_network(n, "xor.trained");
 
     free_network(n);
     return 0;

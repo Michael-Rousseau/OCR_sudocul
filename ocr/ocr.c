@@ -78,11 +78,11 @@ void back_prop(network *n, double *expected) {
     }
 
     for (size_t i = last - 1; i > 0; i--) {
-        for (size_t j = 0; j < n->layers[i + 1]; j++) {
+        for (size_t j = 0; j < n->layers[i]; j++) {
             n->costs[i - 1][j] = 0;
 
-            for (size_t k = 0; k < n->layers[i]; k++) {
-                n->costs[i - 1][j] += n->weights[i][j][k] * n->costs[i][j];
+            for (size_t k = 0; k < n->layers[i + 1]; k++) {
+                n->costs[i - 1][j] += n->weights[i][k][j] * n->costs[i][k];
             }
 
             n->costs[i - 1][j] *= prime_sigmoid(n->values[i][j]);
