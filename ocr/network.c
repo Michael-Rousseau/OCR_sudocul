@@ -190,7 +190,7 @@ void network_to_graph(network *n, char *path) {
     char *dest;
     asprintf(&dest, "%s.dot", path);
     file_out = fopen(dest, "w");
-    fprintf(file_out, output);
+    fprintf(file_out, "%s", output);
     fclose(file_out);
 
     char *new_dest;
