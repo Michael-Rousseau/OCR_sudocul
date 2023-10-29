@@ -153,6 +153,8 @@ int main(int argc, char** argv)
         IMG_SaveJPG(surface, "reducenoise.jpg", 100);
         surface_to_blackwhite(surface);
         IMG_SaveJPG(surface, "t.jpg", 100);
+        surface_to_inverse(surface);
+        IMG_SaveJPG(surface, "inverse.jpg", 100);
 
         SDL_Texture* process_texture = SDL_CreateTextureFromSurface(renderer, surface);
         if (process_texture == NULL)

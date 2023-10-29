@@ -42,6 +42,8 @@ SDL_Surface* load_image(const char* path)
     return fs;
 }
 
+
+
 // pixel_color: Color of the pixel to convert in the RGB format.
 // format: Format of the pixel used by the surface.
 Uint32 pixel_to_grayscale(Uint32 pixel_color, SDL_PixelFormat* format)
@@ -72,6 +74,47 @@ void surface_to_grayscale(SDL_Surface* surface)
 
     SDL_UnlockSurface(surface);
 }
+
+
+void surface_to_inverse(SDL_Surface* surface)
+{
+    Uint32* pixels = surface->pixels;
+    if (pixels == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    int len = surface->w * surface->h;
+    SDL_PixelFormat* format = surface->format;
+
+    if (format == NULL || pixels == NULL || SDL_LockSurface(surface) != 0)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    for (int i = 0; i < len; i++)
+    {
+        Uint8 r, g, b;
+        SDL_GetRGB(pixels[i], format, &r, &g, &b);
+        if (r == 255)
+            r =0;
+        else{
+            r = 255;
+        }
+        if (g == 255)
+            g =0;
+        else{
+            g = 255;
+        }
+        if (b == 255)
+            b = 0;
+        else{
+            b = 255;
+        }
+
+        pixels[i] = SDL_MapRGB(format, r, g, b);
+
+    }
+
+    SDL_UnlockSurface(surface);
+}
+
 
 
 
@@ -348,7 +391,7 @@ void surface_to_reducenoise(SDL_Surface* surface)
 {
     // Define the kernel size and sigma for Gaussian blur
     int kernelSize = 9;
-    float sigma = 15.0;
+    float sigma = 10.0;
 
     // Generate the Gaussian kernel
     float** kernel = generate_Kernel(kernelSize, sigma);
