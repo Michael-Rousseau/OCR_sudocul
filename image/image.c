@@ -75,57 +75,119 @@ void surface_to_grayscale(SDL_Surface* surface)
 
 
 
-// Converts a colored pixel into black and white.
-//
-// pixel_color: Color of the pixel to convert in the RGB format.
-// format: Format of the pixel used by the surface.
-Uint32 pixel_to_blackwhite(Uint32 pixel_color, SDL_PixelFormat* format)
-{
-    Uint8 r, g, b;
-    SDL_GetRGB(pixel_color, format, &r, &g, &b);
 
-    int threshold = 164;
-
-    Uint8 average = 0.3*r + 0.59*g + 0.11*b;
-    if (average > threshold)
-    {
-        r = 255;
-        g = 255;
-        b = 255;
-    } else
-    {
-        r = 0;
-        g = 0;
-        b = 0;
-
+Uint32* integral_image(SDL_Surface* surface) {
+    Uint32* integral = malloc(surface->w * surface->h * sizeof(Uint32));
+    if (!integral) {
+        errx(EXIT_FAILURE, "Memory allocation for integral image failed");
     }
 
-    Uint32 color = SDL_MapRGB(format, r, g, b);
-    return color;
-}
-
-void surface_to_blackwhite(SDL_Surface* surface)
-{
-    Uint32* pixels = surface->pixels;
-    if (pixels == NULL)
-        errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-    int len = surface->w * surface->h;
-
-    SDL_PixelFormat* format = surface->format;
-    if (format == NULL)
-        errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-    int i=0;
     SDL_LockSurface(surface);
 
-    while (i < len){
-        pixels[i] = pixel_to_blackwhite(pixels[i], format);
-        i++;
+    for (int y = 0; y < surface->h; y++) {
+        Uint32 sum = 0;
+        for (int x = 0; x < surface->w; x++) {
+            Uint32 pixel = ((Uint32*)surface->pixels)[y * surface->w + x];
+            Uint8 r, g, b;
+            SDL_GetRGB(pixel, surface->format, &r, &g, &b);
+            Uint8 average = (r + g + b) / 3;
+
+            sum += average;
+            if (y == 0) {
+                integral[y * surface->w + x] = sum;
+            } else {
+                integral[y * surface->w + x] = integral[(y - 1) * surface->w + x] + sum;
+            }
+        }
+    }
+
+    SDL_UnlockSurface(surface);
+    return integral;
+}
+
+Uint8 fast_local_threshold(Uint32* integral, int x, int y, int neighborhood_size, int width, int height) {
+    int side = neighborhood_size / 2;
+    int x1 = x - side - 1;
+    int y1 = y - side - 1;
+    int x2 = x + side;
+    int y2 = y + side;
+
+    x1 = (x1 < 0) ? 0 : x1;
+    y1 = (y1 < 0) ? 0 : y1;
+    x2 = (x2 >= width) ? width - 1 : x2;
+    y2 = (y2 >= height) ? height - 1 : y2;
+
+    int count = (x2 - x1) * (y2 - y1);
+
+    Uint32 sum = integral[y2 * width + x2] - integral[y1 * width + x2] - integral[y2 * width + x1] + integral[y1 * width + x1];
+    return (Uint8)(sum / count);
+}
+
+
+
+
+/*Uint8 calculate_local_threshold(SDL_Surface* surface, int x, int y, int neighborhood_size) {
+    int sum = 0;
+    int count = 0;
+    int side = neighborhood_size / 2; // calculate half the size of the neighborhood
+    SDL_LockSurface(surface); // make sure to lock the surface before directly accessing pixels
+
+    for (int i = -side; i <= side; i++) {
+        for (int j = -side; j <= side; j++) {
+            int newX = x + i;
+            int newY = y + j;
+            // Check if we are still within the image boundaries
+            if (newX >= 0 && newX < surface->w && newY >= 0 && newY < surface->h) {
+                Uint32 pixel = ((Uint32*)surface->pixels)[newY * surface->w + newX];
+                Uint8 r, g, b;
+                SDL_GetRGB(pixel, surface->format, &r, &g, &b);
+                Uint8 average = (r + g + b) / 3; // or another method to convert to grayscale if needed
+                sum += average;
+                count++;
+            }
+        }
+    }
+
+    SDL_UnlockSurface(surface); // unlock the surface
+
+    if (count == 0) return 0; // avoid division by zero
+    return (Uint8)(sum / count); // return the mean value
+}
+*/
+
+void surface_to_blackwhite(SDL_Surface* surface) {
+    int neighborhood_size = 15;
+    if (neighborhood_size % 2 == 0) neighborhood_size++;
+
+    SDL_Surface* copy = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGB888, 0);
+    if (!copy) {
+        errx(EXIT_FAILURE, "Unable to create surface copy: %s", SDL_GetError());
+    }
+
+    Uint32* integral = integral_image(copy);
+
+    SDL_LockSurface(surface);
+    for (int y = 0; y < surface->h; y++) {
+        for (int x = 0; x < surface->w; x++) {
+            Uint8 local_threshold = fast_local_threshold(integral, x, y, neighborhood_size, copy->w, copy->h);
+
+            Uint32 pixel = ((Uint32*)surface->pixels)[y * surface->w + x];
+            Uint8 r, g, b;
+            SDL_GetRGB(pixel, surface->format, &r, &g, &b);
+            Uint8 average = (r + g + b) / 3;
+
+            if (average < local_threshold) {
+                ((Uint32*)surface->pixels)[y * surface->w + x] = SDL_MapRGB(surface->format, 0, 0, 0);
+            } else {
+                ((Uint32*)surface->pixels)[y * surface->w + x] = SDL_MapRGB(surface->format, 255, 255, 255);
+            }
+        }
     }
 
     SDL_UnlockSurface(surface);
 
+    SDL_FreeSurface(copy);
+    free(integral);
 }
 
 
@@ -140,18 +202,22 @@ Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format, float cont
     Uint8 r, g, b;
     SDL_GetRGB(pixel_color, format, &r, &g, &b);
 
-    // Adjust the contrast of each channel individually
-    r = (Uint8)(r * contrast);
-    g = (Uint8)(g * contrast);
-    b = (Uint8)(b * contrast);
+    // Here, we shift the range from [0, 255] to [-128, 127] before adjusting contrast
+    float shifted_contrast_scale = (contrast - 1.0) * 128.0;
 
-    // Ensure values stay within the valid range (0-255)
-    r = (r >= 255) ? 255 : r;
-    g = (g >= 255) ? 255 : g;
-    b = (b >= 255) ? 255 : b;
+    // Adjust contrast
+    int new_r = r + (int)((r - 128) * shifted_contrast_scale / 128.0);
+    int new_g = g + (int)((g - 128) * shifted_contrast_scale / 128.0);
+    int new_b = b + (int)((b - 128) * shifted_contrast_scale / 128.0);
 
-    Uint32 color = SDL_MapRGB(format, r, g, b);
-    return color;
+    // Clamp the values to the [0, 255] range
+    new_r = new_r > 255 ? 255 : new_r < 0 ? 0 : new_r;
+    new_g = new_g > 255 ? 255 : new_g < 0 ? 0 : new_g;
+    new_b = new_b > 255 ? 255 : new_b < 0 ? 0 : new_b;
+
+    // Return the new color
+    return SDL_MapRGB(format, new_r, new_g, new_b);
+
 }
 
 
@@ -203,8 +269,9 @@ float** generate_Kernel(int ksize, float sigma)
             //x and y must be coordinates such that 0 is in the center of the kernel
             int mx = x - center;
             int my = y - center;
+            double tmp = -(mx * mx + my * my) / (2 * sigma * sigma);
 
-            kernel[y][x] =  1. / (2 * M_PI * sigma * sigma) * exp(-(mx * mx + my * my) / (2 * sigma * sigma));
+            kernel[y][x] =  1. / (2 * M_PI * sigma * sigma) * exp(tmp);
             sum += kernel[y][x];
         }
     }
@@ -280,8 +347,8 @@ void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface
 void surface_to_reducenoise(SDL_Surface* surface)
 {
     // Define the kernel size and sigma for Gaussian blur
-    int kernelSize = 5;
-    float sigma = 4.0;
+    int kernelSize = 9;
+    float sigma = 15.0;
 
     // Generate the Gaussian kernel
     float** kernel = generate_Kernel(kernelSize, sigma);
@@ -306,3 +373,4 @@ void surface_to_reducenoise(SDL_Surface* surface)
     }
     free(kernel);
 }
+

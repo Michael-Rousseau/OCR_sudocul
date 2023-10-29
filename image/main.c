@@ -34,43 +34,12 @@ void draw(SDL_Renderer* renderer, SDL_Texture* texture)
     SDL_RenderPresent(renderer);
 }
 
-// Event loop that calls the relevant event handler.
-//
-// renderer: Renderer to draw on.
-// colored: Texture that contains the colored image.
-// grayscale: Texture that contains the grayscale image.
-void event_loop_grayscale(SDL_Renderer* renderer, SDL_Texture* grayscale)
+
+void event_loop_image(SDL_Renderer* renderer, SDL_Texture* t_image)
 {
     SDL_Event event;
 
-    draw(renderer, grayscale);
-    while (1)
-    {
-        SDL_WaitEvent(&event);
-
-        switch (event.type)
-        {
-            case SDL_QUIT:
-                return;
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED){
-                    draw(renderer, grayscale);
-                    break;
-                }
-        }
-    }
-}
-
-// Event loop that calls the relevant event handler.
-//
-// renderer: Renderer to draw on.
-// colored: Texture that contains the colored image.
-// blackwhite: Texture that contains the black and white image.
-void event_loop_blackwhite(SDL_Renderer* renderer, SDL_Texture* blackwhite)
-{
-    SDL_Event event;
-
-    draw(renderer, blackwhite);
+    draw(renderer, t_image);
     while (1)
     {
         SDL_WaitEvent(&event);
@@ -82,94 +51,12 @@ void event_loop_blackwhite(SDL_Renderer* renderer, SDL_Texture* blackwhite)
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED)
                 {
-                    draw(renderer, blackwhite);
+                    draw(renderer, t_image);
                     break;
                 }
         }
     }
 }
-
-
-
-
-
-void event_loop_contrast(SDL_Renderer* renderer, SDL_Texture* contrast)
-{
-    SDL_Event event;
-
-    draw(renderer, contrast);
-    while (1)
-    {
-        SDL_WaitEvent(&event);
-
-        switch (event.type)
-        {
-            case SDL_QUIT:
-                return;
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED)
-                {
-                    draw(renderer, contrast);
-                    break;
-                }
-        }
-    }
-}
-
-// Event loop that calls the relevant event handler.
-//
-// renderer: Renderer to draw on.
-// colored: Texture that contains the colored image.
-// blackwhite: Texture that contains blurred image.
-void event_loop_reducenoise(SDL_Renderer* renderer, SDL_Texture* blur)
-{
-    SDL_Event event;
-
-    draw(renderer, blur);
-    while (1)
-    {
-        SDL_WaitEvent(&event);
-
-        switch (event.type)
-        {
-                case SDL_QUIT:
-                        return;
-                case SDL_WINDOWEVENT:
-                        if (event.window.event == SDL_WINDOWEVENT_RESIZED)
-                        {
-                                draw(renderer, blur);
-                                break;
-                        }
-        }
-    }
-}
-
-
-/* 
-   void event_loop_"FILTER NAME"(SDL_Renderer* renderer, SDL_Texture* "FILTER NAME")
-   {
-   SDL_Event event;
-
-   draw(renderer, "FILTER NAME");
-   while (1)
-   {
-   SDL_WaitEvent(&event);
-
-   switch (event.type)
-   {
-   case SDL_QUIT:
-   return;
-   case SDL_WINDOWEVENT:
-   if (event.window.event == SDL_WINDOWEVENT_RESIZED)
-   {
-   draw(renderer, "FILTER NAME");
-   break;
-   }
-   }
-   }
-   }
-
-*/
 
 
 int main(int argc, char** argv)
@@ -207,7 +94,7 @@ int main(int argc, char** argv)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
         SDL_FreeSurface(surface);
-        event_loop_grayscale(renderer, grayscale_texture);
+        event_loop_image(renderer, grayscale_texture);
         SDL_DestroyTexture(grayscale_texture);
 
     } else if (strcmp(argv[1], "blackwhite") == 0){
@@ -218,7 +105,7 @@ int main(int argc, char** argv)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
         SDL_FreeSurface(surface);
-        event_loop_blackwhite(renderer, blackwhite_texture);
+        event_loop_image(renderer, blackwhite_texture);
         SDL_DestroyTexture(blackwhite_texture);
 
     } else if (strcmp(argv[1], "bright") == 0)
@@ -233,7 +120,7 @@ int main(int argc, char** argv)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
         SDL_FreeSurface(surface);
-        event_loop_blackwhite(renderer, contrast_texture);
+        event_loop_image(renderer, contrast_texture);
         SDL_DestroyTexture(contrast_texture);
 
     } else if (strcmp(argv[1], "dark") == 0){
@@ -244,7 +131,7 @@ int main(int argc, char** argv)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
         SDL_FreeSurface(surface);
-        event_loop_blackwhite(renderer, contrast_texture);
+        event_loop_image(renderer, contrast_texture);
         SDL_DestroyTexture(contrast_texture);
 
     } else if (strcmp(argv[1], "reducenoise") ==0){
@@ -254,10 +141,28 @@ int main(int argc, char** argv)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
         SDL_FreeSurface(surface);
-        event_loop_reducenoise(renderer, blur_texture);
+        event_loop_image(renderer, blur_texture);
         SDL_DestroyTexture(blur_texture);
-    }
 
+    } else if (strcmp(argv[1],"process") == 0){
+        surface_to_grayscale(surface);
+        IMG_SaveJPG(surface, "grayscale.jpg", 100);
+        surface_to_contrast(surface, 0.1);
+        IMG_SaveJPG(surface, "contrast.jpg", 100);
+        surface_to_reducenoise(surface);
+        IMG_SaveJPG(surface, "reducenoise.jpg", 100);
+        surface_to_blackwhite(surface);
+        IMG_SaveJPG(surface, "t.jpg", 100);
+
+        SDL_Texture* process_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        if (process_texture == NULL)
+            errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+        SDL_FreeSurface(surface);
+        event_loop_image(renderer, process_texture);
+        SDL_DestroyTexture(process_texture);
+
+    }
     /* PLEASE LEAVE THE EXAMPLE !
        if (strcmp(argv[1], "FILTER NAME") == 0){
        surface_to_"FILTER NAME"(surface);
@@ -266,13 +171,13 @@ int main(int argc, char** argv)
        errx(EXIT_FAILURE, "%s", SDL_GetError());
 
        SDL_FreeSurface(surface);
-       event_loop_blackwhite(renderer, "FILTER NAME"_texture);
+       event_loop_image(renderer, "FILTER NAME"_texture);
        SDL_DestroyTexture("FILTER NAME"_texture);
 
        }
        */
        else {
-           //ERROR
+           errx(EXIT_FAILURE, "Unsupported filter: %s", argv[1]);
        }
 
        SDL_DestroyRenderer(renderer);
