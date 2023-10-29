@@ -417,3 +417,115 @@ void surface_to_reducenoise(SDL_Surface* surface)
     free(kernel);
 }
 
+//dilation and erosion to enhance the features
+
+
+//Dilation = adds pixels to the boundaries of objects in an image.
+//we will be using it to Strengthen the grid lines and 
+//fill in any breaks or gaps in the grid lines.
+
+int White (Uint32 pixel, SDL_PixelFormat* format)
+{
+    Uint8 r, g, b;
+    SDL_GetRGB(pixel, format, &r, &g, &b);
+    if (r == 255 && g == 255 && b == 255)
+	    return 1;
+    return 0;
+}
+
+void dilation(SDL_Surface* image) 
+{
+	SDL_Surface* outputimage = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
+
+	int centerkernel = 3;
+	int wimage = image->w;
+    	int himage = image->h;
+	//Dilate should turn on any pixel that is touching a pixel in the north, east, south, or west direction (no diagonals) that is already turned on in the input.
+	
+	SDL_LockSurface(image);
+	SDL_LockSurface(outputimage);
+
+	for (int y = centerkernel; y < himage - centerkernel; y++)
+	{
+		for(int x = centerkernel; x < wimage - centerkernel; x++)
+		{
+			//the presence of a single foreground pixel anywhere in the neighborhood will result in a foreground output
+			//
+                        Uint32 pixeli = ((Uint32*)image->pixels)[y * wimage +x];
+			if (White(pixeli, image->format) == 1)
+			{
+				//the surroundings should be set to white;
+				//ys = y surroundings
+
+				for (int ys = -centerkernel; ys < centerkernel+1; ys++)
+				{
+					for (int xs  = -centerkernel; xs< centerkernel+1;xs++)
+					{
+						((Uint32*)outputimage->pixels)[(y + ys) * outputimage->w + (x + xs)] = SDL_MapRGB(image->format, 255, 255, 255);
+					}
+				}
+			}
+		}
+	}
+	//SDL_BlitSurface(outputimage, NULL, image, NULL);
+	
+	memcpy(image->pixels, outputimage->pixels, image->w * image->h * sizeof(Uint32));
+	SDL_UnlockSurface(image);
+    	SDL_UnlockSurface(outputimage);
+    	SDL_FreeSurface(outputimage);
+}
+
+
+
+
+//Erosion removes pixels on object boundaries.
+//we will  be using it to removing any small noise or speckles present in the image.
+// and ensure that numbers in the cells are not connected to the grid lines.
+ 
+
+void erosion(SDL_Surface* image)
+{
+	int centerkernel = 3;
+	int wimage = image->w;
+    	int himage = image->h;
+
+	SDL_Surface* outputimage = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
+
+	for (int y = centerkernel; y < himage - centerkernel; y++)
+	{
+		for(int x = centerkernel; x < wimage - centerkernel; x++)
+		{
+			
+			//a pixel will be set to the background value if any other pixels in the neighborhood are background.
+			int black =  0;
+			
+			for (int ys = -centerkernel; ys < centerkernel+1; ys++)
+				{
+					if (black == 0){
+					for (int xs  = -centerkernel; xs< centerkernel+1;xs++)
+					{
+						if (black ==0)
+						{
+							Uint32 pixeli = ((Uint32*)image->pixels)[(y+ys) * wimage +(xs+x)];
+
+							 Uint8 r, g, b;
+							 SDL_GetRGB(pixeli, image->format, &r, &g, &b);
+							 if (r==0&& g == 0&&b ==0)
+								 black =1;
+					
+
+						}
+					}
+					}
+				}
+			if (black == 0)
+				((Uint32*)outputimage->pixels)[ y * outputimage->w +x] = SDL_MapRGB(image->format, 255, 255, 255);
+
+		}
+	}
+	memcpy(image->pixels, outputimage->pixels, image->w * image->h * sizeof(Uint32));
+	SDL_UnlockSurface(image);
+    	SDL_UnlockSurface(outputimage);
+    	SDL_FreeSurface(outputimage);
+}
+
