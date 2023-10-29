@@ -20,3 +20,31 @@ double *get_random_bits(size_t n) {
 
     return r;
 }
+
+int is_decimal(const char *str) {
+    if (NULL == str || 0 == str[0])
+        return 0;
+
+    int found = 0;
+    for (size_t i = 0; str[i]; i++) {
+        if ('.' == str[i] || ',' == str[i]) {
+            if (found)
+                return 0;
+            found = 1;
+        }
+        else if (str[i] < '0' || str[i] > '9')
+            return 0;
+    }
+
+    return 1;
+}
+
+int is_int(const char *str) {
+    if (NULL == str || 0 == str[0])
+        return 0;
+
+    for (size_t i = 0; str[i]; i++)
+        if (str[i] < '0' || str[i] > '9')
+            return 0;
+    return 1;
+}
