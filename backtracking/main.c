@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <err.h>
-
+#include <string.h>
 #include "solver.h"
 #include "filestream.h"
 #include "allocator.h"
@@ -22,7 +22,9 @@ int main(int argc, char **argv)
             printf("%2d ", FinalGrid[i][j]);
         printf("\n");
     }
-    gridWriter(dim, FinalGrid, "solve");
+    char* name = argv[1];
+    strcat(name, ".result");
+    gridWriter(dim, FinalGrid, name);
     freeGrid(FinalGrid, dim);
     return 0;
 }
