@@ -15,7 +15,6 @@ int main(int argc, char **argv)
     unsigned int **FinalGrid = allocGrid(dim);
 
     gridReader(dim, FinalGrid, argv[1]);
-
     solve(FinalGrid,0,0,dim);
     for(size_t i = 0; i<dim; ++i)
     {

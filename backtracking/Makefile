@@ -10,13 +10,13 @@ SRC = allocator.c main.c solver.c filestream.c files.c
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=.d}
 
-main: ${OBJ}
+solver: ${OBJ}
 -include ${DEP}
 .PHONY: clean
 
 clean:
 	${RM} ${OBJ}
 	${RM} ${EXE}
-	${RM} main
+	${RM} solver
 
 # END
