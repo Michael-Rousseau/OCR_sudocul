@@ -1,8 +1,14 @@
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "hough1.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #define DEGREE 0.017453293 // Conversion factor from degrees to radians
+#define MAX_THETA 180
+#define PI_2 (3.14159265358979323846 / 2) // π/2 if not defined in math.h
+
+
 
 int** create_accumulator(int accumulator_height, int accumulator_width) {
     // Allocate memory for accumulator
@@ -28,7 +34,7 @@ void free_accumulator(int** accumulator, int accumulator_height) {
     }
     free(accumulator);
 }
-
+/*
 int** hough_transform(int** edge_image, int image_height, int image_width, int *accumulator_height, int *accumulator_width) {
     int max_dist = (int)sqrt(image_width * image_width + image_height * image_height);
     *accumulator_height = 2 * max_dist;
@@ -52,25 +58,46 @@ int** hough_transform(int** edge_image, int image_height, int image_width, int *
 
     return accumulator;
 }
+*/
 
-void find_peaks(int** accumulator, int accumulator_height, int accumulator_width, struct point* peaks, int* num_peaks, int threshold) {
-    *num_peaks = 0;
 
-    for (int y = 1; y < accumulator_height - 1; y++) {
-        for (int x = 1; x < accumulator_width - 1; x++) {
-            int current = accumulator[y][x];
-            if (current >= threshold &&
-                current > accumulator[y - 1][x] &&
-                current > accumulator[y + 1][x] &&
-                current > accumulator[y][x - 1] &&
-                current > accumulator[y][x + 1]) {
-                // This is a local maximum
-                peaks[*num_peaks].x = x;
-                peaks[*num_peaks].y = y;
-                (*num_peaks)++;
+
+int** hough_transform(int** edge_image, int image_height, int image_width, int *accumulator_height, int *accumulator_width) {
+    int max_dist = (int)sqrt(image_width * image_width + image_height * image_height);
+    *accumulator_height = 2 * max_dist; // accommodate negative and positive r values
+    *accumulator_width = MAX_THETA; // 180 degrees
+
+    // Check if the allocations were successful before proceeding
+    int **accumulator = create_accumulator(*accumulator_height, *accumulator_width);
+    if (!accumulator) {
+        // handle the error, for instance, print a message and terminate the program
+        fprintf(stderr, "Failed to allocate memory for accumulator.\n");
+        exit(EXIT_FAILURE); // or any appropriate error handling
+    }
+
+    // Initialize all points in accumulator to 0
+    for (int i = 0; i < *accumulator_height; i++) {
+        for (int j = 0; j < *accumulator_width; j++) {
+            accumulator[i][j] = 0;
+        }
+    }
+
+    // Perform the Hough Transform
+    for (int y = 0; y < image_height; y++) {
+        for (int x = 0; x < image_width; x++) {
+            if (edge_image[y][x] != 0) { // if it's an edge
+                for (int theta = 0; theta < MAX_THETA; theta++) {
+                    double rad = DEGREE * theta;
+                    int r = (int)(x * cos(rad) + y * sin(rad)) + max_dist; // shifted to ensure it's non-negative
+                    if (r >= 0 && r < *accumulator_height) {
+                        accumulator[r][theta]++; // vote
+                    }
+                }
             }
         }
     }
+
+    return accumulator;
 }
 
 
