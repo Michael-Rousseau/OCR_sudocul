@@ -199,7 +199,7 @@ Uint8 fast_local_threshold(Uint32* integral, int x, int y, int neighborhood_size
 */
 
 void surface_to_blackwhite(SDL_Surface* surface) {
-    int neighborhood_size = 15;
+    int neighborhood_size = 20;
     if (neighborhood_size % 2 == 0) neighborhood_size++;
 
     SDL_Surface* copy = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGB888, 0);
@@ -246,7 +246,7 @@ Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format, float cont
     SDL_GetRGB(pixel_color, format, &r, &g, &b);
 
     // Here, we shift the range from [0, 255] to [-128, 127] before adjusting contrast
-    float shifted_contrast_scale = (contrast - 1.0) * 128.0;
+    float shifted_contrast_scale = (contrast - 1.0) * 128.0; //1
 
     // Adjust contrast
     int new_r = r + (int)((r - 128) * shifted_contrast_scale / 128.0);
@@ -390,7 +390,7 @@ void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface
 void surface_to_reducenoise(SDL_Surface* surface)
 {
     // Define the kernel size and sigma for Gaussian blur
-    int kernelSize = 9;
+    int kernelSize = 5;
     float sigma = 10.0;
 
     // Generate the Gaussian kernel
@@ -437,7 +437,7 @@ void dilation(SDL_Surface* image)
 {
 	SDL_Surface* outputimage = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
 
-	int centerkernel = 3;
+	int centerkernel = 1;
 	int wimage = image->w;
     	int himage = image->h;
 	//Dilate should turn on any pixel that is touching a pixel in the north, east, south, or west direction (no diagonals) that is already turned on in the input.
@@ -485,7 +485,7 @@ void dilation(SDL_Surface* image)
 
 void erosion(SDL_Surface* image)
 {
-	int centerkernel = 3;
+	int centerkernel = 1;
 	int wimage = image->w;
     	int himage = image->h;
 
@@ -528,4 +528,320 @@ void erosion(SDL_Surface* image)
     	SDL_UnlockSurface(outputimage);
     	SDL_FreeSurface(outputimage);
 }
+
+//canny edge detection
+
+
+double* sobelFilter(SDL_Surface *image, double Gx[3][3], double Gy[3][3], double* ang) 
+{
+	int imagew = image->w;
+	int imageh = image->h;
+
+	SDL_LockSurface(image);
+
+	Uint32* pixels = (Uint32*) image->pixels;
+	double *gradient = malloc(imagew * imageh * sizeof(double));
+
+	for(int y = 1; y < imageh-1; y++)
+	{
+		for(int x =1; x < imagew -1; x++)
+		{
+			double gx = 0.0, gy = 0.0;
+			for(int ky = -1; ky <= 1; ky++)
+			{
+				for(int kx = -1; kx <= 1; kx++)
+				{
+					Uint32 neighborPixel = pixels[(y + ky) * imagew + x + kx];
+					Uint8 intensity;
+					SDL_GetRGB(neighborPixel, image->format, &intensity, &intensity, &intensity);  
+					// Get the intensity (0 for black, 255 for white)
+
+					gx += Gx[ky + 1][kx + 1] * intensity;
+					gy += Gy[ky + 1][kx + 1] * intensity;
+				}
+			} 
+			int outputindex = y * imagew + x;
+
+			double angle = atan2f(gy, gx);
+			ang[outputindex] = angle;
+
+			float magnitude = sqrt(gx*gx + gy*gy);
+
+			gradient[outputindex] = magnitude;  // Store the magnitude
+		}
+	}
+
+	SDL_UnlockSurface(image);
+	return gradient;
+	
+}
+
+//Non-Maximal Suppression -> "thin" the edges. 
+//For each pixel in the gradient image, we compare its magnitude to the magnitude of its neighbors along the gradient direction. 
+//If the pixel's magnitude  > its neighbors', it remains unchanged; otherwise, it's set to zero.
+double* nonMaximalSuppressionAndHysteresis(double* gradient, double* ang, int width, int height, double lowThreshold, double highThreshold) 
+{
+    double* edge = (double*)calloc(width * height, sizeof(double));
+    if (!edge) 
+        return NULL;
+
+    for (int y = 1; y < height - 1; y++) 
+    {
+        for (int x = 1; x < width - 1; x++) 
+	{
+            int index = y * width + x;
+            double angle = ang[index];
+
+
+	    // 1st -> find neighboring pixels based on the gradient direction
+            int dx1, dy1, dx2, dy2;
+	    //MI_PI_4 is 45
+            if ((angle >= -M_PI_4 && angle < M_PI_4) || (angle <= -3 * M_PI_4 || angle >= 3 * M_PI_4)) {
+                dx1 = 1; dy1 = 0; dx2 = -1; dy2 = 0; 
+            } else if ((angle >= M_PI_4 && angle < 3 * M_PI_4) || (angle <= -M_PI_4 && angle >= -3 * M_PI_4)) {
+                dx1 = 0; dy1 = 1; dx2 = 0; dy2 = -1;
+            } else if (angle >= 0) {
+                dx1 = 1; dy1 = 1; dx2 = -1; dy2 = -1;
+            } else {
+                dx1 = 1; dy1 = -1; dx2 = -1; dy2 = 1;
+            }
+
+
+            // Non-maximal suppression
+	    
+	    //It works by iterating through all pixel values, comparing the current value with the pixel value in the positive and negative gradient
+	    //directions, and suppressing the current value if it does not have the highest magnitude relative to its neighbors
+
+
+            if (gradient[index] >= gradient[(y + dy1) * width + x + dx1] &&
+                gradient[index] >= gradient[(y + dy2) * width + x + dx2]) {
+
+                // Hysteresis thresholding
+		
+                if (gradient[index] > highThreshold) //strong edge
+		{
+                    edge[index] = 255; 
+                }
+		else if (gradient[index] > lowThreshold) //maybe a edge(potentiel)
+		{
+                    edge[index] = 127; 
+                }
+            }
+        }
+    }
+
+    // Edge tracing
+
+    for (int y = 1; y < height - 1; y++) 
+    {
+        for (int x = 1; x < width - 1; x++)
+	{
+            int index = y * width + x;
+
+            if (edge[index] == 127) 
+	    {
+                // Check if any strong edge neighbors exist
+                for (int dy = -1; dy <= 1; dy++)
+		{
+                    for (int dx = -1; dx <= 1; dx++) 
+		    {
+                        if (edge[(y + dy) * width + x + dx] == 255) //if one exits than become a strong
+			{
+                            edge[index] = 255;
+                            break;
+                        }
+                    }
+                }
+                // If no strong edge neighbors, SUPPRESS
+                if (edge[index] != 255) 
+                    edge[index] = 0;
+            }
+        }
+    }
+
+    return edge;
+}
+
+
+
+
+
+
+
+/*
+double* nonMaximalSuppressionAndHysteresis(double* gradient, double* ang, int imagew, int imageh, double lowThreshold, double highThreshold) 
+{
+	double *edges = calloc(imagew * imageh, sizeof(double));
+
+
+    for (int y = 1; y < imageh -1; y++) 
+    {
+        for (int x = 1; x < imagew-1 ; x++) 
+        {
+            double magnitude = gradient[y * imagew + x];
+            double angle = ang[y * imagew + x]; // assuming you're storing angles as mentioned earlier
+
+	
+	    //It works by iterating through all pixel values, comparing the current value with the pixel value in the positive and negative gradient
+	    //directions, and suppressing the current value if it does not have the highest magnitude relative to its neighbors
+
+
+            // Determine direction (rounded to one of the four main directions: horizontal, vertical, and two diagonals)
+            int dx = (angle >= 0.7854 && angle <= 2.3562) ? 1 : ((angle <= -0.7854 && angle >= -2.3562) ? -1 : 0);
+            int dy = (angle <= 0.7854 && angle >= -0.7854) ? 1 : ((angle >= 2.3562 || angle <= -2.3562) ? -1 : 0);
+
+            // Compare current pixel with the neighbors in the gradient direction
+            if (magnitude > gradient[(y + dy) * imagew + x + dx] && magnitude > gradient[(y - dy) * imagew + x - dx])
+            {
+                edges[y * imagew + x] = magnitude; // keep the edge if it's a local maximum
+            }
+        }
+    }
+
+    // Hysteresis thresholding
+    // greater than highThreshold => most probably an edge pixel
+    // less than the high threshold value, but greater than the low threshold value => maybe an edge
+    // less than both the high and low threshold values => low probability of being an edge, SUPPRESS
+    for (int y = 1; y < imageh-1 ; y++) 
+    {
+        for (int x = 1; x < imagew -1; x++) 
+        {
+            double edgeStrength = edges[y * imagew + x];
+
+            if (edgeStrength > highThreshold) 
+            {
+                // an edge
+                edges[y * imagew + x] = 255;
+	    }
+	    else if (edgeStrength < lowThreshold) 
+	    {
+		    // Not an edge
+		    edges[y * imagew + x] = 0;
+	    }
+	    else 
+	    {
+		    //checks to see if a weak edge pixel is connected (neighbored by) a strong edge pixel.(HIGHER THAN HIGHTHRESHOLD)
+		    //If so, the weak edge is included, otherwise it’s suppressed.
+
+
+		    // Check 8 neighboring pixels to see if any of them are high thresholds
+		    int isEdge = 0; //false
+		    for (int ky = -1; ky <= 1 && isEdge==0; ky++) 
+		    {
+			    for (int kx = -1; kx <= 1 && isEdge==0; kx++) 
+			    {
+				    if (edges[(y + ky) * imagew + x + kx] > highThreshold) 
+				    {
+					    isEdge = 1;
+					    edges[y * imagew + x] = 255;
+				    }
+			    }
+		    }
+		    if (isEdge==0) 
+		    {
+			    edges[y * imagew + x] = 0;  // Not an edge by connection either
+		    }
+	    }
+	}
+    }
+    return edges;
+}
+
+
+//delete
+void visualizeGradient(SDL_Surface* image, double* gradient) {
+	SDL_LockSurface(image); 
+	Uint32* pixels = (Uint32*)image->pixels;
+
+	int width = image->w;
+	int height = image->h;
+
+	// Determine the maximum gradient value for normalization
+	double maxGradient = 0;
+	for (int i = 0; i < width * height; i++) {
+		if (gradient[i] > maxGradient) {
+			maxGradient = gradient[i];
+		}
+	}
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			int index = y * width + x;
+			// Normalize the gradient to fit within [0,255]
+			Uint8 intensity = (Uint8)(255.0 * gradient[index] / maxGradient);
+			pixels[index] = SDL_MapRGB(image->format, intensity, intensity, intensity);
+		}
+	}
+
+	SDL_UnlockSurface(image);
+}*/
+
+
+void Canny_edge_result (SDL_Surface* image)
+{
+	int width = image->w;
+	int height = image->h;
+	double Gx[3][3] = {
+		{-1, 0, 1},
+		{-2, 0, 2},
+		{-1, 0, 1}
+	};
+
+	double Gy[3][3] = {
+		{-1, -2, -1},
+		{ 0,  0,  0},
+		{ 1,  2,  1}
+	};
+
+    
+	double *ang = calloc(image->w * image->h,sizeof(double));
+
+
+	double* gradient = sobelFilter(image, Gx, Gy,ang) ;
+
+	// Determine the maximum gradient value for normalization
+	double maxGradient = 0;
+	for (int i = 0; i < width * height; i++) {
+		if (gradient[i] > maxGradient) {
+			maxGradient = gradient[i];
+		}
+	}
+
+	//visualizeGradient(image, gradient);
+	//IMG_SaveJPG(image, "grad.jpg", 100);
+
+
+	double* edge = nonMaximalSuppressionAndHysteresis( gradient,ang, image->w, image->h, maxGradient * 0.35, maxGradient*0.7); 
+
+	SDL_LockSurface(image); 
+
+	Uint32* pixels = (Uint32*)image->pixels;
+
+
+	for (int y = 0; y < height; y++)
+	{
+		for (int x =0; x < width; x++)
+		{
+			int index = y * width + x;
+
+			
+			if (edge[index] == 0)
+			{
+			
+				pixels[index] = SDL_MapRGB(image->format, 0, 0, 0);
+			} else
+			{
+				
+				pixels[index] = SDL_MapRGB(image->format, 255, 255, 255);
+			}
+		}
+	}
+
+	
+	SDL_UnlockSurface(image);
+	free(ang);
+	free(gradient);
+	free(edge);
+}
+
 

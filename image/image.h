@@ -36,4 +36,6 @@ void surface_to_inverse(SDL_Surface* surface);
 //bool White(Uint32 pixel, SDL_PixelFormat* format);
 void dilation(SDL_Surface* image);
 void erosion(SDL_Surface* image);
+void Canny_edge_result (SDL_Surface* image);
+
 #endif
