@@ -25,13 +25,19 @@
 
 
 
-void draw_line_on_surface(SDL_Surface *surface, int x0, int y0, int x1, int y1, Uint32 color) {
+void draw_line_on_surface(SDL_Renderer* renderer, SDL_Surface *surface, int x0, int y0, int x1, int y1, Uint32 color) {
+   /*
+    printf("drawing");
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 
-    printf( "drawing\n" );
+    SDL_RenderDrawLine(renderer, x0, y0, x1, y1);
+*/
+    
+    //printf( "drawing\n" );
     int dx = abs(x1 - x0);
     int dy = abs(y1 - y0);
     int sx = (x0 < x1) ? 1 : -1;
-    int sy = (y0 < y1) ? 1 : -1;
+    int sy = (y0 < y1) ? 1 : -1;//TODO debug here, always same values (1,1)
     int err = dx - dy;
 
     while (1) {
@@ -58,40 +64,48 @@ void draw_line_on_surface(SDL_Surface *surface, int x0, int y0, int x1, int y1, 
 
 
 
-void get_line_endpoints(SDL_Surface *surface, struct point* point, int theta, int image_width, int image_height) {
+void get_line_endpoints(SDL_Renderer *renderer, SDL_Surface *surface, struct point* point, int theta, int diagonal) {
     // Calculate diagonal (hypotenuse of the image)
-    double diagonal = sqrt(image_width * image_width + image_height * image_height);
-    double rho_max = diagonal;
-    double rho_min = -diagonal;
 
     // Calculate the end points of the line
-    int x1 = point->x + rho_max * -sin(theta);
-    int y1 = point->y + rho_max * cos(theta);
-    int x2 = point->x + rho_min * -sin(theta);
-    int y2 = point->y + rho_min * sin(theta);
 
-    printf("x1 = %d and y1 = %d and x2 = %d and y2 = %d\n", x1, y1, x2, y2 );
+
+    //int x1 = point->x + diagonal * cos(theta * M_PI/180);
+    //int y1 = point->y + diagonal * sin(theta * M_PI/180);
+
+
+    int x1 = point->x + diagonal * cos(theta);
+    int y1 = point->y + diagonal * sin(theta);
+
+    int x2 = point->x + diagonal * -cos(theta);
+    int y2 = point->y + diagonal * -sin(theta);
+
+    //printf("x1 = %d and y1 = %d and x2 = %d and y2 = %d\n", x1, y1, x2, y2 );
     // Define color for line (red in this case)
-    Uint32 color = SDL_MapRGBA(surface->format, 255, 0, 0, 255); // ARGB: Red, fully opaque
+    Uint32 color = SDL_MapRGBA(surface->format, 255, 0, 0, 255); // ARGB: Red, fully opaquei
     // Draw the line on the surface using the provided function
-    draw_line_on_surface(surface, x1, y1, x2, y2, color);
+    draw_line_on_surface(renderer, surface, x1, y1, x2, y2, color);
 }
 
 
-void find_peaks(SDL_Surface *surface, int** accumulator, int accumulator_height, int accumulator_width, int threshold, int max, int diagonal) {
 
-    for (int r = 0; r < accumulator_height; r++){
+void find_peaks(SDL_Renderer *renderer, SDL_Surface *surface, int** accumulator, int accumulator_height, int accumulator_width, double threshold, double max, int diagonal) {
+
+    for (int r = -diagonal; r < diagonal; r++){
         for (int theta = 0; theta < accumulator_width; theta++){
-            if (accumulator[r][theta] > threshold && accumulator[r][theta] < max) {
+            if (accumulator[r+diagonal][theta]/max >= threshold) {
+                int rad = theta  * (M_PI/180);
                 struct point p;
-                p.x = r * cos(theta);
-                p.y = r * sin(theta);
-                printf("accumulator[r][theta] == %d\n", accumulator[r][theta]);
-                printf("Peak was found, %d, %d\n", p.x, p.y);
-                get_line_endpoints(surface, &p, theta, accumulator_width, accumulator_height);
+                p.x = r * cos(rad);
+                p.y = r * sin(rad);
+                //printf("MAX = %d\n", max);
+                //printf("accumulator[r][theta] == %d\n", accumulator[r][theta]);
+                //printf("Peak was found, %d, %d\n", p.x, p.y);
+                get_line_endpoints(renderer, surface, &p, rad, diagonal);
             }
         }
     }
+    SDL_RenderPresent(renderer);
 }
 
 
@@ -239,28 +253,26 @@ int main(int argc, char **argv){
 
 
         // Find the maximum value in the accumulator
-        int max_value = 0;
+        double max_value = 0;
         for (int y = 0; y < accumulator_height; y++) {
             for (int x = 0; x < accumulator_width; x++) {
                 if (accumulator[y][x] > max_value) {
                     max_value = accumulator[y][x];
-                    printf("Max value :%d \n", max_value);
+                    printf("Max value :%F \n", max_value);
                 }
             }
         }
+
+        printf("Max = %f\n", max_value);
         int diagonal = sqrt(image_height * image_height + image_width * image_width);
-        int threshold = max_value * 0.4;
+        double threshold = max_value * 0.4;
 
         printf("calling find_peaks\n");
-        find_peaks(surface, accumulator, accumulator_width, accumulator_height, threshold, max_value, diagonal);
+        find_peaks(renderer, surface, accumulator, accumulator_width, accumulator_height, threshold, max_value, diagonal);
 
         printf("called find_peaks\n");
 
 
-        //Uint32 color = SDL_MapRGBA(surface->format, 255, 0, 0, 255);
-        //draw_line_on_surface(surface, 0, 0, image_height, image_width, color);
-
-        printf("max_value = %d", max_value);
 
 
         SDL_Surface* accumulator_surface = SDL_CreateRGBSurfaceWithFormat(0, accumulator_width, accumulator_height, 32, SDL_PIXELFORMAT_ARGB8888);

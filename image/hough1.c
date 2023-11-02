@@ -75,13 +75,6 @@ int** hough_transform(int** edge_image, int image_height, int image_width, int *
         exit(EXIT_FAILURE); // or any appropriate error handling
     }
 
-    // Initialize all points in accumulator to 0
-    for (int i = 0; i < *accumulator_height; i++) {
-        for (int j = 0; j < *accumulator_width; j++) {
-            accumulator[i][j] = 0;
-        }
-    }
-
     // Perform the Hough Transform
     for (int y = 0; y < image_height; y++) {
         for (int x = 0; x < image_width; x++) {
