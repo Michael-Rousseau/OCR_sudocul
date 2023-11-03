@@ -5,8 +5,14 @@ all: backtracking ocr
 ocr:
 	$(MAKE) -C ocr
 	mv ocr/xor .
-	mkdir data
+	mkdir -p data
 	cp -r ocr/data/* data/
+
+backtracking:
+	$(MAKE) -C backtracking
+	mv backtracking/solver .
+	mkdir -p data
+	cp -r backtracking/data/* data
 
 clean:
 	$(MAKE) -C ocr clean
