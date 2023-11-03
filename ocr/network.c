@@ -16,11 +16,7 @@ network *init_network(size_t *layers, size_t len) {
     double **values = malloc(len * sizeof(double*));
 
     for (size_t i = 0; i < len; i++) {
-        values[i] = malloc(layers[i] * sizeof(double));
-
-        for (size_t j = 0; j < layers[i]; j++) {
-            values[i][j] = 0;
-        }
+        values[i] = calloc(layers[i], sizeof(double));
     }
 
     double **biases = malloc((len - 1) * sizeof(double*));
@@ -29,16 +25,22 @@ network *init_network(size_t *layers, size_t len) {
 
     for (size_t i = 0; i < len - 1; i++) {
         biases[i] = malloc(layers[i + 1] * sizeof(double));
+        double *b_row = biases[i];
+
         costs[i] = malloc(layers[i + 1] * sizeof(double));
+        double *c_row = costs[i];
+
         weights[i] = malloc(layers[i + 1] * sizeof(double));
+        double **w_mat = weights[i];
 
         for (size_t j = 0; j < layers[i + 1]; j++) {
-            costs[i][j] = 0;
-            biases[i][j] = 0;
-            weights[i][j] = malloc(layers[i] * sizeof(double));
+            c_row[j] = 0;
+            b_row[j] = 0;
+            w_mat[j] = malloc(layers[i] * sizeof(double));
+            double *w_row = w_mat[j];
 
             for (size_t k = 0; k < layers[i]; k++) {
-                weights[i][j][k] = 0;
+                w_row[k] = 0;
             }
         }
     }

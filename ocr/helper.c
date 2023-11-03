@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <time.h>
 
 //use these functions to generate random bits, for XOR tests
 double drand(double min, double max) {
@@ -47,4 +48,9 @@ int is_int(const char *str) {
         if (str[i] < '0' || str[i] > '9')
             return 0;
     return 1;
+}
+
+double diff_timespec(const struct timespec* t1, const struct timespec* t0) {
+    double second = difftime(t1->tv_sec, t0->tv_sec);
+    return second + ((double)t1->tv_nsec - (double)t0->tv_nsec) / 1e9;
 }

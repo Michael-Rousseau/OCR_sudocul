@@ -1,4 +1,6 @@
 #include <stddef.h>
+#include <sys/wait.h>
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,32 +13,40 @@
 
 unsigned int RANDOM_SEED = 42;
 
-void gen_xor_input(double **input, double **expected) {
-    *input = get_random_bits(2);
-    *expected = malloc(sizeof(double));
-    **expected = (int) **input ^ (int) input[0][1];
-}
+int test_network(network *n, double *input, double *target) {
+    int i1 = (int) floor(drand(0, 2));
+    int i2 = (int) floor(drand(0, 2));
 
-int test_network(network *n) {
-    double *input;
-    double *target;
+    input[0] = (double) i1;
+    input[1] = (double) i2;
+    target[0] = (double) (i1 ^ i2);
 
-    gen_xor_input(&input, &target);
     feed_forward(n, input);
-
     back_prop(n, target);
 
-    double result = floor(n->values[n->len - 1][0] * 2) == *target;
-
-    free(target);
-    free(input);
-    return result;
+    return floor(n->values[n->len - 1][0] * 2) == *target;
 }
 
 void usage_error() {
-    printf("Usage:\n");
-    printf("TEST : ./main [-f file]|[-lh N N...] test NBTEST\n");
-    printf("LEARN: ./main [-f file]|[-lh N N...] learn NBTEST RATE\n");
+    FILE *file_in;
+    file_in = fopen("man_xor", "r");
+
+    if (file_in == NULL)
+        errx(EXIT_FAILURE, "%s\n", "Usage error, and man page wasn't found.");
+
+    size_t i = 0;
+    char *line = calloc(1000, sizeof(char));
+    while(fgets(line, 1000, file_in)) {
+        i++;
+        printf("%s", line);
+
+        for (size_t i = 0; i < 1000; i++)
+            line[i] = 0;
+    }
+
+    free(line);
+    fclose(file_in);
+
     errx(EXIT_FAILURE, "%s\n", "Wrong usage.");
 }
 
@@ -129,30 +139,71 @@ int main(int argc, char **argv) {
     if (NULL == n)
         usage_error();
 
+    struct timespec *t0 = malloc(sizeof(struct timespec));
+    clock_gettime(0, t0);
+
     if (1 == mode) {
         size_t valid = 0;
-        for (size_t i = 0; i < nb_tests; i++)
-            valid += test_network(n);
+        double *input = malloc(2 * sizeof(double));
+        double *output = malloc(sizeof(double));
 
-        printf("%zu/%zu\n", valid, nb_tests);
-        if (save_path)
+        if (NULL == input || NULL == output)
+            errx(EXIT_FAILURE, "%s\n", "Memory allocation failed");
+
+        for (size_t i = 0; i < nb_tests; i++)
+            valid += test_network(n, input, output);
+
+        struct timespec *t1 = malloc(sizeof(struct timespec));
+        clock_gettime(0, t1);
+        printf("TEST RESULTS: %zu/%zu (%fs)\n", valid, nb_tests, 
+                diff_timespec(t1, t0));
+
+        if (save_path) {
             export_network(n, save_path);
+            struct timespec *t2 = malloc(sizeof(struct timespec));
+            clock_gettime(0, t2);
+            printf("NETWORK EXPORTED IN %fs\n", diff_timespec(t2, t1));
+            free(t2);
+        }
+
+        free(input);
+        free(output);
+        free(t1);
     }
     else if (0 == mode) {
         size_t valid = 0;
+        double *input = malloc(2 * sizeof(double));
+        double *output = malloc(sizeof(double));
+
+        if (NULL == input || NULL == output)
+            errx(EXIT_FAILURE, "%s\n", "Memory allocation failed");
+
         for (size_t i = 0; i < nb_tests; i++) {
-            valid += test_network(n);
+            valid += test_network(n, input, output);
             learn(n, learning_rate);
         }
 
-        printf("%zu/%zu\n", valid, nb_tests);
-        if (save_path)
+        struct timespec *t1 = malloc(sizeof(struct timespec));
+        clock_gettime(0, t1);
+        printf("LEARN RESULTS: %zu TESTS IN %fs\n", nb_tests, 
+                diff_timespec(t1, t0));
+
+        if (save_path) {
             export_network(n, save_path);
+            struct timespec *t2 = malloc(sizeof(struct timespec));
+            clock_gettime(0, t2);
+            printf("NETWORK EXPORTED IN %fs\n", diff_timespec(t2, t1));
+            free(t2);
+        }
+
+        free(input);
+        free(output);
+        free(t1);
     }
     else
         usage_error();
 
-
+    free(t0);
     free_network(n);
     return 0;
 }
