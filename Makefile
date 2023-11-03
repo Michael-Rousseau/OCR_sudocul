@@ -4,8 +4,10 @@ SRC_DIRS := $(wildcard */)
 
 all: $(SRC_DIRS)
 
-clean:
-	$(RM) -r $(SRC_DIRS)
+clean: $(addsuffix -clean, $(SRC_DIRS))
 
 $(SRC_DIRS):
 	$(MAKE) -C $@
+
+%-clean:
+	$(MAKE) -C $* clean

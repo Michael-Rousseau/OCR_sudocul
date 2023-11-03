@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <err.h>
 #include <math.h>
-#include "../fileStream/files.h"
 
 
 unsigned int cast(char t)
