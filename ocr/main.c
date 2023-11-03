@@ -3,64 +3,34 @@
 #include <stdlib.h>
 #include <string.h>
 #include <err.h>
+#include <math.h>
 
-#include "../fileStream/files.h"
 #include "helper.h"
 #include "network.h"
 #include "ocr.h"
 
 unsigned int RANDOM_SEED = 42;
 
-void test_xor_network(network *n, size_t nb_tests) {
-    double *input1 = get_random_bits(nb_tests);
-    double *input2 = get_random_bits(nb_tests);
+void gen_xor_input(double **input, double **expected) {
+    *input = get_random_bits(2);
+    *expected = malloc(sizeof(double));
+    **expected = (int) **input ^ (int) input[0][1];
+}
 
-    double valid = 0;
+int test_network(network *n) {
+    double *input;
+    double *target;
 
-    double *input = malloc(2 * sizeof(double));
-    double *target = malloc(sizeof(double));
+    gen_xor_input(&input, &target);
+    feed_forward(n, input);
 
-    double j = 0;
-    for (size_t i = 0; i < nb_tests; i++) {
-        double i1 = input1[i];
-        double i2 = input2[i];
-        input[0] = i1;
-        input[1] = i2;
+    back_prop(n, target);
 
-        int expected = ((int)i1 + (int)i2) % 2;
+    double result = floor(n->values[n->len - 1][0] * 2) == *target;
 
-        feed_forward(n, input);
-        int result;
-        if (n->values[n->len - 1][0] < 0.5)
-            result = 0;
-        else
-            result = 1;
-
-        if (result == expected)
-            valid++;
-
-        *target = (double)expected;
-        back_prop(n, target);
-        learn(n, 0.9);
-
-        if (j == 1000) {
-            if (100 * valid / j >= 100) {
-                printf("Finished learning in %zu tries\n", i);
-                break;
-            }
-            printf("RATE: %3.2f%% (%zu)\n", 100 * valid / j, i);
-
-            j = 1;
-            valid = 0;
-        }
-        else
-            j++;
-    }
-
-    free(input);
     free(target);
-    free(input1);
-    free(input2);
+    free(input);
+    return result;
 }
 
 void usage_error() {
@@ -86,9 +56,13 @@ int main(int argc, char **argv) {
     size_t nb_tests = 0;
     double learning_rate = 0;
 
+    char *save_path;
+
     while (i < argc) {
         if (strcmp("-f", argv[i]) == 0) {
-            i += 1;
+            i++;
+            free(layers);
+
             if (i < argc)
                 n = import_network(argv[i]);
             else
@@ -99,7 +73,7 @@ int main(int argc, char **argv) {
         else if (strcmp("-lh", argv[i]) == 0) {
             i++;
 
-            if (!is_int(argv[i]))
+            if (i >= argc || !is_int(argv[i]))
                 usage_error();
 
             layers[0] = 2;
@@ -111,6 +85,16 @@ int main(int argc, char **argv) {
             }
             layers[layer_count - 1] = 1;
             n = rand_init_network(layers, layer_count, -1, 1, -1, 1);
+        }
+        else if (strcmp("-s", argv[i]) == 0) {
+            i++;
+
+            if (i >= argc)
+                save_path = "network.nw";
+            else
+                save_path = argv[i];
+
+            i++;
         }
         else if (strcmp("test", argv[i]) == 0) {
             mode = 1;
@@ -145,7 +129,29 @@ int main(int argc, char **argv) {
     if (NULL == n)
         usage_error();
 
-    printf("DONE!");
+    if (1 == mode) {
+        size_t valid = 0;
+        for (size_t i = 0; i < nb_tests; i++)
+            valid += test_network(n);
+
+        printf("%zu/%zu\n", valid, nb_tests);
+        if (save_path)
+            export_network(n, save_path);
+    }
+    else if (0 == mode) {
+        size_t valid = 0;
+        for (size_t i = 0; i < nb_tests; i++) {
+            valid += test_network(n);
+            learn(n, learning_rate);
+        }
+
+        printf("%zu/%zu\n", valid, nb_tests);
+        if (save_path)
+            export_network(n, save_path);
+    }
+    else
+        usage_error();
+
 
     free_network(n);
     return 0;

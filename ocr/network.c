@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -76,7 +77,7 @@ network *import_network(char *path) {
 
     network *n = malloc(sizeof(network));
 
-    fread(&(n->len), sizeof(double), 1, in);
+    fread(&(n->len), sizeof(size_t), 1, in);
     n->layers = malloc(n->len * sizeof(size_t));
 
     n->values = malloc(n->len * sizeof(double*));
@@ -201,20 +202,4 @@ void network_to_graph(network *n, char *path) {
     free(output);
     free(dest);
     free(new_dest);
-}
-
-void print_network(network *n) {
-    for (size_t i = 0; i < n->len - 1; i++) {
-        printf("LAYER %zu\n", i + 1);
-
-        for (size_t j = 0; j < n->layers[i + 1]; j++) {
-            printf("NODE %zu -> BIUS = %2.2f\n", j + 1, n->biases[i][j]);
-            for (size_t k = 0; k < n->layers[i]; k++) {
-                printf("w%zu=%2.2f ", k + 1, n->weights[i][j][k]);
-            }
-            printf("\n");
-        }
-
-        printf("\n");
-    }
 }

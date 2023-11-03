@@ -19,40 +19,20 @@ void feed_forward(network *n, double *inputs) {
         n->values[0][i] = inputs[i];
 
     for (size_t layer = 1; layer < n->len; layer++) {
-        for (size_t i = 0; i < n->layers[layer]; i++) {
+        double **wmat = n->weights[layer - 1];
+        double *v_inp = n->values[layer - 1];
+        double *v_out = n->values[layer];
+        double *b_row = n->biases[layer - 1];
 
+        for (size_t i = 0; i < n->layers[layer]; i++) {
+            double *wrow = wmat[i];
             double sum = 0;
 
             for (size_t j = 0; j < n->layers[layer - 1]; j++) {
-                sum += n->values[layer - 1][j] * n->weights[layer - 1][i][j];
+                sum += v_inp[j] * wrow[j];
             }
 
-            n->values[layer][i] = sigmoid(sum + n->biases[layer - 1][i]);
-        }
-    }
-}
-
-void v_feed_forward(network *n, double *inputs) {
-    for (size_t i = 0; i < n->layers[0]; i++)
-        n->values[0][i] = inputs[i];
-
-    for (size_t layer = 1; layer < n->len; layer++) {
-        printf("LAYER %zu\n", layer);
-        for (size_t i = 0; i < n->layers[layer]; i++) {
-            printf("NODE %zu\n", i + 1);
-
-            double sum = 0;
-
-            for (size_t j = 0; j < n->layers[layer - 1]; j++) {
-                sum += n->values[layer - 1][j] * n->weights[layer - 1][i][j];
-                printf("sum += %2.2f * %2.2f (=%2.2f)\n",
-                        n->values[layer - 1][j],
-                        n->weights[layer - 1][i][j],
-                        sum);
-            }
-
-            n->values[layer][i] = sigmoid(sum + n->biases[layer - 1][i]);
-            printf("New node value: %2.2f\n", n->values[layer][i]);
+            v_out[i] = sigmoid(sum + b_row[i]);
         }
     }
 }
@@ -74,18 +54,19 @@ void back_prop(network *n, double *expected) {
 
     for (size_t i = 0; i < n->layers[last]; i++) {
         double v = n->values[last][i];
-        n->costs[last - 1][i] = v * (1 - v) * (v - expected[i]);
+        n->costs[last - 1][i] += v * (1 - v) * (v - expected[i]);
     }
 
     for (size_t i = last - 1; i > 0; i--) {
         for (size_t j = 0; j < n->layers[i]; j++) {
-            n->costs[i - 1][j] = 0;
+            double new_cost =  0;
 
             for (size_t k = 0; k < n->layers[i + 1]; k++) {
-                n->costs[i - 1][j] += n->weights[i][k][j] * n->costs[i][k];
+                new_cost += n->weights[i][k][j] * n->costs[i][k];
             }
 
-            n->costs[i - 1][j] *= prime_sigmoid(n->values[i][j]);
+            new_cost *= prime_sigmoid(n->values[i][j]);
+            n->costs[i - 1][j] += new_cost;
         }
     }
 }
@@ -104,6 +85,12 @@ void learn(network *n, double speed) {
 
         for (size_t j = 0; j < n->layers[i + 1]; j++) {
             n->biases[i][j] -= speed * n->costs[i][j];
+        }
+    }
+
+    for (size_t i = 0; i < n->len - 1; i++) {
+        for (size_t j = 0; j < n->layers[i + 1]; j++) {
+            n->costs[i][j] = 0;
         }
     }
 }
