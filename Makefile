@@ -6,7 +6,7 @@ all:
 	mkdir build/data
 	mv src/xor build/
 	mv src/solver build/
-	cp -r src/data build/data/
+	cp -r src/data/* build/data/
 
 clean:
 	$(MAKE) -C src clean
