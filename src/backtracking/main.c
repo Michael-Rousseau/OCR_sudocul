@@ -26,6 +26,10 @@ int main(int argc, char **argv)
     else
         dim =9;
     unsigned int **FinalGrid = allocGrid(dim);
+//    char grid[100];
+  //  snprintf(grid, sizeof(grid), "./data/%s", argv[1]);
+
+    //gridReader(dim, FinalGrid, grid);
     gridReader(dim, FinalGrid, argv[1]);
     solve(FinalGrid,0,0,dim);
     char* name = argv[1];
