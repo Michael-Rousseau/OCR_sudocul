@@ -19,12 +19,16 @@ char **file_readlines(char *path) {
 
     size_t i = 0;
     char *line = calloc(1000, sizeof(char));
+    if(line == NULL)
+        errx(EXIT_FAILURE, "failed to open file");
     while(fgets(line, 1000, file_in)) {
         i++;
         result = realloc(result, (i + 1) * sizeof(char*));
         result[i - 1] = line;
         result[i - 1][strlen(line) - 1] = 0;
         line = calloc(1000, sizeof(char));
+        if(line == NULL)
+            errx(EXIT_FAILURE, "failed to allocate memory");
     }
     result[i] = NULL;
 
@@ -38,6 +42,8 @@ char *file_to_str(char *path) {
     char **lines = file_readlines(path);
 
     char *result = calloc(1, sizeof(char));
+    if(result== NULL)
+        errx(EXIT_FAILURE, "failed to allocate memory");
 
     size_t c = 0;
     for (size_t i = 0; lines[i]; i++) {

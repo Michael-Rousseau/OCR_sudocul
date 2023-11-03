@@ -23,6 +23,8 @@ unsigned int cast(char t)
             return 14;
         case 'F':
             return 15;
+        case 'G':
+            return 16;
         default:
             return t-'0';
     }
@@ -42,7 +44,7 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
         return;
     }
     char car;
-    unsigned int grid[dimension * dimension];
+    char grid[dimension * dimension];
     size_t index = 0;
     while((car = fgetc(file)) != EOF)
     {
@@ -50,12 +52,14 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
         {
             grid[index] = 0;
         }
-        else if((car > '0'  && car <='9') )
+        else if((car > '0'  && car <='9'))
         {
             grid[index] = car -'0';
         }
-        else if((car >= 'A' && car <= 'F'))
-            grid[index] = cast(car);
+        else if((car >= 'A' && car <= 'G'))
+        {
+            grid[index] = car;
+        }
 
         else if(car == '\0' || car == ' ')
         {
@@ -63,6 +67,7 @@ void gridReader(unsigned int dimension, int** FinalGrid, char* _path)
         }
         else if(car != '\n')
         {
+            printf("%c\n", car);
             errx(1, "FILE DOESN'T RESPECT THE FORMAT");
         }
         if(car != '\n' && car != '\0' && car != ' ')
@@ -87,15 +92,25 @@ void gridWriter(unsigned int dim, unsigned int** FinalGrid, char* _path)
     }
     for (size_t i = 0; i < dim; ++i)
     {
-        if(i % 3 == 0 && i != 0)
+        if(i % (size_t)SqDim == 0 && i != 0)
             fprintf(file, "\n");
         for (size_t j = 0; j < dim; ++j)
         {
-            if(j % (int)SqDim == 0 && j !=0)
-                fprintf(file," %u", FinalGrid[i][j]);
+            if(j % (size_t)SqDim == 0 && j !=0)
+            {
+                if(FinalGrid[i][j] <= 9 && FinalGrid[i][j] >0)
+                    fprintf(file, " %u", FinalGrid[i][j]);
+                else
+                    fprintf(file," %c", FinalGrid[i][j]);
+            }
             else
-                fprintf(file, "%u", FinalGrid[i][j]);
-            if (j == dim - 1) {
+            {
+                if(FinalGrid[i][j] <= 9 && FinalGrid[i][j] >0)
+                    fprintf(file, "%u", FinalGrid[i][j]);
+                else
+                    fprintf(file,"%c", FinalGrid[i][j]);
+            }
+            if (j == dim-1 ) {
                 fprintf(file, "\n");
             }
         }

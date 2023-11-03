@@ -2,12 +2,36 @@
 #include <stdlib.h>
 #include <math.h>
 
+
+unsigned int to_cast(char t)
+{
+    switch(t)
+    {
+        case 65:
+            return 10;
+        case 66:
+            return 11;
+        case 67:
+            return 12;
+        case 68:
+            return 13;
+        case 69:
+            return 14;
+        case 70:
+            return 15;
+        case 71:
+            return 16;
+        default:
+            return t;
+    }
+}
+
 unsigned int ValidRow(unsigned int **grid, unsigned int x,
         unsigned int val, unsigned int dim)
 {
     for(size_t i = 0; i< dim; ++i)
     {
-        if(grid[x][i] == val)
+        if(to_cast(grid[x][i]) == val)
         {
             return 0;
         }
@@ -20,7 +44,7 @@ unsigned int ValidColumn(unsigned int **grid, unsigned int y,
 {
     for(size_t i = 0; i<dim; ++i)
     {
-        if(grid[i][y] == val)
+        if(to_cast(grid[i][y]) == val)
         {
             return 0;
         }
@@ -31,7 +55,7 @@ unsigned int ValidColumn(unsigned int **grid, unsigned int y,
 unsigned int ValidSquare(unsigned int **grid, unsigned int x, unsigned int y,
         unsigned int val, unsigned int dim)
 {
-    int where = 3;
+    int where = (int)sqrt(dim);
     y-= y%where;
     x-= x%where;
 
@@ -39,14 +63,13 @@ unsigned int ValidSquare(unsigned int **grid, unsigned int x, unsigned int y,
     {
         for(int j = 0; j<where; ++j)
         {
-            if(grid[x+i][y+j] == val)
+            if(to_cast(grid[x+i][y+j] )== val)
             {
                 return 0;
             }
         }
     }
     return 1;
-    dim++;
 }
 
 unsigned int BePlaced(unsigned int **grid, unsigned int x, unsigned int y,
@@ -77,6 +100,8 @@ unsigned int solve(unsigned int **grid, unsigned int x, unsigned int y,
     {
         if (BePlaced(grid, x, y, val, dim))
         {
+            if(val >=10 && val <=16)
+                val+=55;
             grid[x][y] = val;
             if (solve(grid, x, y + 1, dim))
                 return 1;
