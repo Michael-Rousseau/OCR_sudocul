@@ -1,13 +1,12 @@
-SRC_DIRS := $(wildcard */)
+.PHONY: all clean
 
-.PHONY: all clean $(SRC_DIRS)
+all:
+	$(MAKE) -C src
+	mkdir build
+	mkdir build/data
+	mv src/xor build/
+	cp -r src/data build/data/
 
-all: $(SRC_DIRS)
-
-clean: $(addsuffix -clean, $(SRC_DIRS))
-
-$(SRC_DIRS):
-	$(MAKE) -C $@
-
-%-clean:
-	$(MAKE) -C $* clean
+clean:
+	$(MAKE) -C src clean
+	rm -rf build
