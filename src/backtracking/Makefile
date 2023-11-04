@@ -18,5 +18,6 @@ clean:
 	${RM} ${OBJ}
 	${RM} ${EXE}
 	${RM} solver
+	rm *.result
 
 # END
