@@ -24,7 +24,15 @@
 #include "joanneh.h"
 //#include "detection.h"
 
+int original_image_width = 0;
+int original_image_height = 0;
 
+void update_render_scale(SDL_Renderer* renderer, int new_width, int new_height) 
+{
+    float scale_x = (float)new_width / original_image_width;
+    float scale_y = (float)new_height / original_image_height;
+    SDL_RenderSetScale(renderer, scale_x, scale_y);
+}
 
 void draw(SDL_Renderer* renderer, SDL_Texture* texture)
 {
@@ -43,8 +51,8 @@ void drawk(SDL_Renderer* renderer, SDL_Texture* texture, struct Line* lines,int 
 	if (render != 0)
 		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-	//SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	//SDL_RenderClear(renderer);
+//	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+//	SDL_RenderClear(renderer);
 
 
 	// Draw detected lines
@@ -105,6 +113,8 @@ void event_loop_image(SDL_Renderer* renderer, SDL_Texture* t_image)
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED)
 				{
+					//update_render_scale(renderer, event.window.data1, event.window.data2);
+
 					draw(renderer, t_image);
 					break;
 				}
@@ -132,6 +142,8 @@ void event_loop_image_l(SDL_Renderer* renderer, SDL_Texture* t_image, struct Lin
 			case SDL_WINDOWEVENT:
 				if (event.window.event == SDL_WINDOWEVENT_RESIZED)
 				{
+					update_render_scale(renderer, event.window.data1, event.window.data2);
+
 					drawk(renderer, t_image,line, n);
 					break;
 				}
@@ -151,7 +163,8 @@ void event_loop_image_test_averagelines(SDL_Renderer* renderer, SDL_Texture* t_i
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     //drawl(renderer, t_image, lines);
-                    drawl(lines, numline,renderer, t_image);
+		    update_render_scale(renderer, event.window.data1, event.window.data2);
+		    drawl(lines, numline,renderer, t_image);
                     break;
                 }
         }
@@ -171,7 +184,9 @@ void event_loop_image_test_sq(SDL_Renderer* renderer, SDL_Texture* t_image, stru
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     //drawl(renderer, t_image, lines);
-                    draw_squares(renderer, t_image, squares , num);
+                    	update_render_scale(renderer, event.window.data1, event.window.data2);
+
+			draw_squares(renderer, t_image, squares , num);
 
                     break;
                 }
@@ -202,6 +217,9 @@ int main(int argc, char **argv){
 	SDL_Surface* surface = load_image(argv[2]);
 	if (surface == NULL)
 		errx(EXIT_FAILURE, "%s", SDL_GetError());
+	
+	original_image_width = surface->w;
+	original_image_height = surface->h;
 
 	int image_width = surface->w;
 	int image_height = surface->h;
