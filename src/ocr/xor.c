@@ -51,7 +51,7 @@ void usage_error() {
 }
 
 int main(int argc, char **argv) {
-    srand(RANDOM_SEED);
+    // srand(RANDOM_SEED);
 
     if (argc < 3)
         usage_error();
@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
     size_t nb_tests = 0;
     double learning_rate = 0;
 
-    char *save_path;
+    char *save_path = NULL;
 
     while (i < argc) {
         if (strcmp("-f", argv[i]) == 0) {
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
         printf("TEST RESULTS: %zu/%zu (%fs)\n", valid, nb_tests,
                 diff_timespec(&t1, &t0));
 
-        if (save_path) {
+        if (NULL != save_path) {
             export_network(n, save_path);
             struct timespec t2;
             clock_gettime(0, &t2);
