@@ -1,21 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  image.c
- *
- *    Description:  
- *
- *        Version:  1.0
- *        Created:  20/09/2023 15:07:09
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Dr. Fritz Mehner (mn), mehner@fh-swf.de
- *        Company:  FH Südwestfalen, Iserlohn
- *
- * =====================================================================================
- */
-
 #include <err.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -139,7 +121,8 @@ Uint32* integral_image(SDL_Surface* surface) {
             if (y == 0) {
                 integral[y * surface->w + x] = sum;
             } else {
-                integral[y * surface->w + x] = integral[(y - 1) * surface->w + x] + sum;
+                integral[y * surface->w + x] = integral[(y - 1) *
+                    surface->w + x] + sum;
             }
         }
     }
@@ -148,7 +131,8 @@ Uint32* integral_image(SDL_Surface* surface) {
     return integral;
 }
 
-Uint8 fast_local_threshold(Uint32* integral, int x, int y, int neighborhood_size, int width, int height) {
+Uint8 fast_local_threshold(Uint32* integral, int x, int y,
+        int neighborhood_size, int width, int height) {
     int side = neighborhood_size / 2;
     int x1 = x - side - 1;
     int y1 = y - side - 1;
@@ -162,47 +146,20 @@ Uint8 fast_local_threshold(Uint32* integral, int x, int y, int neighborhood_size
 
     int count = (x2 - x1) * (y2 - y1);
 
-    Uint32 sum = integral[y2 * width + x2] - integral[y1 * width + x2] - integral[y2 * width + x1] + integral[y1 * width + x1];
+    Uint32 sum = integral[y2 * width + x2] - integral[y1 * width + x2] -
+        integral[y2 * width + x1] + integral[y1 * width + x1];
     return (Uint8)(sum / count);
 }
 
 
 
 
-/*Uint8 calculate_local_threshold(SDL_Surface* surface, int x, int y, int neighborhood_size) {
-    int sum = 0;
-    int count = 0;
-    int side = neighborhood_size / 2; // calculate half the size of the neighborhood
-    SDL_LockSurface(surface); // make sure to lock the surface before directly accessing pixels
-
-    for (int i = -side; i <= side; i++) {
-        for (int j = -side; j <= side; j++) {
-            int newX = x + i;
-            int newY = y + j;
-            // Check if we are still within the image boundaries
-            if (newX >= 0 && newX < surface->w && newY >= 0 && newY < surface->h) {
-                Uint32 pixel = ((Uint32*)surface->pixels)[newY * surface->w + newX];
-                Uint8 r, g, b;
-                SDL_GetRGB(pixel, surface->format, &r, &g, &b);
-                Uint8 average = (r + g + b) / 3; // or another method to convert to grayscale if needed
-                sum += average;
-                count++;
-            }
-        }
-    }
-
-    SDL_UnlockSurface(surface); // unlock the surface
-
-    if (count == 0) return 0; // avoid division by zero
-    return (Uint8)(sum / count); // return the mean value
-}
-*/
-
 void surface_to_blackwhite(SDL_Surface* surface) {
     int neighborhood_size = 20;
     if (neighborhood_size % 2 == 0) neighborhood_size++;
 
-    SDL_Surface* copy = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGB888, 0);
+    SDL_Surface* copy = SDL_ConvertSurfaceFormat(surface,
+            SDL_PIXELFORMAT_RGB888, 0);
     if (!copy) {
         errx(EXIT_FAILURE, "Unable to create surface copy: %s", SDL_GetError());
     }
@@ -212,7 +169,8 @@ void surface_to_blackwhite(SDL_Surface* surface) {
     SDL_LockSurface(surface);
     for (int y = 0; y < surface->h; y++) {
         for (int x = 0; x < surface->w; x++) {
-            Uint8 local_threshold = fast_local_threshold(integral, x, y, neighborhood_size, copy->w, copy->h);
+            Uint8 local_threshold = fast_local_threshold(integral, x, y,
+                    neighborhood_size, copy->w, copy->h);
 
             Uint32 pixel = ((Uint32*)surface->pixels)[y * surface->w + x];
             Uint8 r, g, b;
@@ -220,9 +178,11 @@ void surface_to_blackwhite(SDL_Surface* surface) {
             Uint8 average = (r + g + b) / 3;
 
             if (average < local_threshold) {
-                ((Uint32*)surface->pixels)[y * surface->w + x] = SDL_MapRGB(surface->format, 0, 0, 0);
+                ((Uint32*)surface->pixels)[y * surface->w + x] =
+                    SDL_MapRGB(surface->format, 0, 0, 0);
             } else {
-                ((Uint32*)surface->pixels)[y * surface->w + x] = SDL_MapRGB(surface->format, 255, 255, 255);
+                ((Uint32*)surface->pixels)[y * surface->w + x] =
+                    SDL_MapRGB(surface->format, 255, 255, 255);
             }
         }
     }
@@ -240,12 +200,12 @@ void surface_to_blackwhite(SDL_Surface* surface) {
 // pixel_color: Color of the pixel to adjust in the RGB format.
 // format: Format of the pixel used by the surface.
 // contrast: Contrast adjustment factor (e.g., 1.5 for increasing contrast).
-Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format, float contrast)
+Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format,
+        float contrast)
 {
     Uint8 r, g, b;
     SDL_GetRGB(pixel_color, format, &r, &g, &b);
 
-    // Here, we shift the range from [0, 255] to [-128, 127] before adjusting contrast
     float shifted_contrast_scale = (contrast - 1.0) * 128.0; //1
 
     // Adjust contrast
@@ -299,7 +259,8 @@ float** generate_Kernel(int ksize, float sigma)
 
 
     //The kernel matrix is a double pointer
-    //we assign a specified amount of memory for an arvray of size ksize of type floats
+    //we assign a specified amount of Memory
+    //for an arvray of size ksize of type floats
 
     float** kernel = (float**)malloc(ksize * sizeof(float*));
 
@@ -309,7 +270,8 @@ float** generate_Kernel(int ksize, float sigma)
     for (int y = 0; y < ksize; y++) {
         for (int x = 0; x < ksize; x++) {
 
-            //x and y must be coordinates such that 0 is in the center of the kernel
+            //x and y must be coordinates such that 0
+            //is in the center of the kernel
             int mx = x - center;
             int my = y - center;
             double tmp = -(mx * mx + my * my) / (2 * sigma * sigma);
@@ -319,7 +281,8 @@ float** generate_Kernel(int ksize, float sigma)
         }
     }
 
-    //Normalizing the kernel -> ensures no undesirable change in the image's brightness (the filter behaves consistently).
+    //Normalizing the kernel -> ensures no undesirable change in the
+    //image's brightness (the filter behaves consistently).
     for (int y = 0; y < ksize; y++) {
         for (int x = 0; x < ksize; x++) {
             kernel[y][x] /= sum;
@@ -336,7 +299,8 @@ void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface
     int imageWidth = image->w;
     int imageHeight = image->h;
 
-    //filteredimage =  a separate output image, with the same dimensions as the original image
+    //filteredimage =  a separate output image, with the same
+    //dimensions as the original image
 
     int center = kernelsize /2;
 
@@ -349,7 +313,9 @@ void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface
             float finalb = 0.0;
             float finalg = 0.0;
 
-            //For each pixel, we multiply the pixel values in the image with the corresponding values in the kernel and accumulates the results.
+            //For each pixel, we multiply the pixel values in the image with
+            //the corresponding values in the kernel and accumulates the
+            //results.
             for (int ky = 0; ky < kernelsize; ky++) {
                 for (int kx = 0; kx < kernelsize; kx++) {
 
@@ -359,7 +325,8 @@ void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface
                     int Yf = y + ky - center;
 
                     //check if we are outside of the array
-                    if (Xf >= 0 && Xf < imageWidth && Yf < imageHeight && Xf >=0) {
+                    if (Xf >= 0 && Xf < imageWidth && Yf < imageHeight &&
+                            Xf >=0) {
                         Uint32* pixelinitial = (Uint32*)image->pixels;
 
 
@@ -372,11 +339,14 @@ void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface
                         finalb += kernel[kx][ky] *b;
                         finalg += kernel[kx][ky] *g;
                     }
-                    //if we are outside of the image boundaries, the values are treated as being zero.
+                    //if we are outside of the image boundaries,
+                    //the values are treated as being zero.
                 }
             }
-            Uint32 newPixelValue = SDL_MapRGBA(filteredimage->format, (Uint8)finalr, (Uint8)finalg, (Uint8)finalb, 255);
-            ((Uint32*)filteredimage->pixels)[y * imageWidth + x] = newPixelValue;
+            Uint32 newPixelValue = SDL_MapRGBA(filteredimage->format,
+                    (Uint8)finalr, (Uint8)finalg, (Uint8)finalb, 255);
+            ((Uint32*)filteredimage->pixels)[y * imageWidth + x] =
+                newPixelValue;
 
 
         }
@@ -396,7 +366,8 @@ void surface_to_reducenoise(SDL_Surface* surface)
     // Generate the Gaussian kernel
     float** kernel = generate_Kernel(kernelSize, sigma);
 
-    SDL_Surface* outputimage = SDL_CreateRGBSurface(0, surface->w, surface->h, 32, 0, 0, 0, 0);
+    SDL_Surface* outputimage = SDL_CreateRGBSurface(0, surface->w,
+            surface->h, 32, 0, 0, 0, 0);
     if (outputimage == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -421,7 +392,7 @@ void surface_to_reducenoise(SDL_Surface* surface)
 
 
 //Dilation = adds pixels to the boundaries of objects in an image.
-//we will be using it to Strengthen the grid lines and 
+//we will be using it to Strengthen the grid lines and
 //fill in any breaks or gaps in the grid lines.
 
 int White (Uint32 pixel, SDL_PixelFormat* format)
@@ -433,15 +404,18 @@ int White (Uint32 pixel, SDL_PixelFormat* format)
     return 0;
 }
 
-void dilation(SDL_Surface* image) 
+void dilation(SDL_Surface* image)
 {
-	SDL_Surface* outputimage = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
+	SDL_Surface* outputimage = SDL_CreateRGBSurface(0, image->w,
+                image->h, 32, 0, 0, 0, 0);
 
 	int centerkernel = 1;
 	int wimage = image->w;
     	int himage = image->h;
-	//Dilate should turn on any pixel that is touching a pixel in the north, east, south, or west direction (no diagonals) that is already turned on in the input.
-	
+	//Dilate should turn on any pixel that is touching a pixel in the north,
+        //east, south, or west direction (no diagonals) that is already turned
+        //on in the input.
+
 	SDL_LockSurface(image);
 	SDL_LockSurface(outputimage);
 
@@ -449,7 +423,8 @@ void dilation(SDL_Surface* image)
 	{
 		for(int x = centerkernel; x < wimage - centerkernel; x++)
 		{
-			//the presence of a single foreground pixel anywhere in the neighborhood will result in a foreground output
+			//the presence of a single foreground pixel anywhere in
+                        //the neighborhood will result in a foreground output
 			//
                         Uint32 pixeli = ((Uint32*)image->pixels)[y * wimage +x];
 			if (White(pixeli, image->format) == 1)
@@ -457,19 +432,26 @@ void dilation(SDL_Surface* image)
 				//the surroundings should be set to white;
 				//ys = y surroundings
 
-				for (int ys = -centerkernel; ys < centerkernel+1; ys++)
+				for (int ys = -centerkernel;
+                                        ys < centerkernel+1; ys++)
 				{
-					for (int xs  = -centerkernel; xs< centerkernel+1;xs++)
+					for (int xs  = -centerkernel;
+                                                xs< centerkernel+1;xs++)
 					{
-						((Uint32*)outputimage->pixels)[(y + ys) * outputimage->w + (x + xs)] = SDL_MapRGB(image->format, 255, 255, 255);
+						((Uint32*)outputimage->pixels)
+                                                    [(y + ys) * outputimage->w +
+                                                    (x + xs)] = SDL_MapRGB(image
+                                                            ->format, 255, 255,
+                                                            255);
 					}
 				}
 			}
 		}
 	}
 	//SDL_BlitSurface(outputimage, NULL, image, NULL);
-	
-	memcpy(image->pixels, outputimage->pixels, image->w * image->h * sizeof(Uint32));
+
+	memcpy(image->pixels, outputimage->pixels, image->w * image->h *
+                sizeof(Uint32));
 	SDL_UnlockSurface(image);
     	SDL_UnlockSurface(outputimage);
     	SDL_FreeSurface(outputimage);
@@ -479,9 +461,10 @@ void dilation(SDL_Surface* image)
 
 
 //Erosion removes pixels on object boundaries.
-//we will  be using it to removing any small noise or speckles present in the image.
+//we will  be using it to removing any small noise or speckles present in the
+//image.
 // and ensure that numbers in the cells are not connected to the grid lines.
- 
+
 
 void erosion(SDL_Surface* image)
 {
@@ -489,41 +472,53 @@ void erosion(SDL_Surface* image)
 	int wimage = image->w;
     	int himage = image->h;
 
-	SDL_Surface* outputimage = SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
+	SDL_Surface* outputimage = SDL_CreateRGBSurface(0, image->w, image->h,
+                32, 0, 0, 0, 0);
 
 	for (int y = centerkernel; y < himage - centerkernel; y++)
 	{
 		for(int x = centerkernel; x < wimage - centerkernel; x++)
 		{
-			
-			//a pixel will be set to the background value if any other pixels in the neighborhood are background.
+
+			//a pixel will be set to the background value if any
+                        //other pixels in the neighborhood are background.
 			int black =  0;
-			
+
 			for (int ys = -centerkernel; ys < centerkernel+1; ys++)
 				{
 					if (black == 0){
-					for (int xs  = -centerkernel; xs< centerkernel+1;xs++)
+					for (int xs  = -centerkernel; xs<
+                                                centerkernel+1;xs++)
 					{
 						if (black ==0)
 						{
-							Uint32 pixeli = ((Uint32*)image->pixels)[(y+ys) * wimage +(xs+x)];
+							Uint32 pixeli =
+                                                            ((Uint32*)image->
+                                                             pixels)[(y+ys)
+                                                            * wimage +(xs+x)];
 
 							 Uint8 r, g, b;
-							 SDL_GetRGB(pixeli, image->format, &r, &g, &b);
-							 if (r==0&& g == 0&&b ==0)
+							 SDL_GetRGB(pixeli,
+                                                                 image->format,
+                                                                 &r, &g, &b);
+							 if (r==0&& g ==
+                                                                 0&&b ==0)
 								 black =1;
-					
+
 
 						}
 					}
 					}
 				}
 			if (black == 0)
-				((Uint32*)outputimage->pixels)[ y * outputimage->w +x] = SDL_MapRGB(image->format, 255, 255, 255);
+				((Uint32*)outputimage->pixels)
+                                    [ y * outputimage->w +x] =
+                                    SDL_MapRGB(image->format, 255, 255, 255);
 
 		}
 	}
-	memcpy(image->pixels, outputimage->pixels, image->w * image->h * sizeof(Uint32));
+	memcpy(image->pixels, outputimage->pixels, image->w * image->h
+                * sizeof(Uint32));
 	SDL_UnlockSurface(image);
     	SDL_UnlockSurface(outputimage);
     	SDL_FreeSurface(outputimage);
@@ -532,7 +527,8 @@ void erosion(SDL_Surface* image)
 //canny edge detection
 
 
-double* sobelFilter(SDL_Surface *image, double Gx[3][3], double Gy[3][3], double* ang) 
+double* sobelFilter(SDL_Surface *image, double Gx[3][3], double Gy[3][3],
+        double* ang)
 {
 	int imagew = image->w;
 	int imageh = image->h;
@@ -551,15 +547,19 @@ double* sobelFilter(SDL_Surface *image, double Gx[3][3], double Gy[3][3], double
 			{
 				for(int kx = -1; kx <= 1; kx++)
 				{
-					Uint32 neighborPixel = pixels[(y + ky) * imagew + x + kx];
+					Uint32 neighborPixel = pixels[(y + ky)
+                                            * imagew + x + kx];
 					Uint8 intensity;
-					SDL_GetRGB(neighborPixel, image->format, &intensity, &intensity, &intensity);  
-					// Get the intensity (0 for black, 255 for white)
+					SDL_GetRGB(neighborPixel, image->format,
+                                                &intensity, &intensity,
+                                                &intensity);
+					// Get the intensity (0 for black,
+                                        // 255 for white)
 
 					gx += Gx[ky + 1][kx + 1] * intensity;
 					gy += Gy[ky + 1][kx + 1] * intensity;
 				}
-			} 
+			}
 			int outputindex = y * imagew + x;
 
 			double angle = atan2f(gy, gx);
@@ -567,27 +567,31 @@ double* sobelFilter(SDL_Surface *image, double Gx[3][3], double Gy[3][3], double
 
 			float magnitude = sqrt(gx*gx + gy*gy);
 
-			gradient[outputindex] = magnitude;  // Store the magnitude
+			gradient[outputindex] = magnitude;
+                        // Store the magnitude
 		}
 	}
 
 	SDL_UnlockSurface(image);
 	return gradient;
-	
+
 }
 
-//Non-Maximal Suppression -> "thin" the edges. 
-//For each pixel in the gradient image, we compare its magnitude to the magnitude of its neighbors along the gradient direction. 
-//If the pixel's magnitude  > its neighbors', it remains unchanged; otherwise, it's set to zero.
-double* nonMaximalSuppressionAndHysteresis(double* gradient, double* ang, int width, int height, double lowThreshold, double highThreshold) 
+//Non-Maximal Suppression -> "thin" the edges.
+//For each pixel in the gradient image, we compare its magnitude to the
+//magnitude of its neighbors along the gradient direction.
+//If the pixel's magnitude  > its neighbors', it remains unchanged;
+//otherwise, it's set to zero.
+double* nonMaximalSuppressionAndHysteresis(double* gradient, double*
+        ang, int width, int height, double lowThreshold, double highThreshold)
 {
     double* edge = (double*)calloc(width * height, sizeof(double));
-    if (!edge) 
+    if (!edge)
         return NULL;
 
-    for (int y = 1; y < height - 1; y++) 
+    for (int y = 1; y < height - 1; y++)
     {
-        for (int x = 1; x < width - 1; x++) 
+        for (int x = 1; x < width - 1; x++)
 	{
             int index = y * width + x;
             double angle = ang[index];
@@ -596,9 +600,11 @@ double* nonMaximalSuppressionAndHysteresis(double* gradient, double* ang, int wi
 	    // 1st -> find neighboring pixels based on the gradient direction
             int dx1, dy1, dx2, dy2;
 	    //MI_PI_4 is 45
-            if ((angle >= -M_PI_4 && angle < M_PI_4) || (angle <= -3 * M_PI_4 || angle >= 3 * M_PI_4)) {
-                dx1 = 1; dy1 = 0; dx2 = -1; dy2 = 0; 
-            } else if ((angle >= M_PI_4 && angle < 3 * M_PI_4) || (angle <= -M_PI_4 && angle >= -3 * M_PI_4)) {
+            if ((angle >= -M_PI_4 && angle < M_PI_4) ||
+                    (angle <= -3 * M_PI_4 || angle >= 3 * M_PI_4)) {
+                dx1 = 1; dy1 = 0; dx2 = -1; dy2 = 0;
+            } else if ((angle >= M_PI_4 && angle < 3 * M_PI_4) ||
+                    (angle <= -M_PI_4 && angle >= -3 * M_PI_4)) {
                 dx1 = 0; dy1 = 1; dx2 = 0; dy2 = -1;
             } else if (angle >= 0) {
                 dx1 = 1; dy1 = 1; dx2 = -1; dy2 = -1;
@@ -608,23 +614,27 @@ double* nonMaximalSuppressionAndHysteresis(double* gradient, double* ang, int wi
 
 
             // Non-maximal suppression
-	    
-	    //It works by iterating through all pixel values, comparing the current value with the pixel value in the positive and negative gradient
-	    //directions, and suppressing the current value if it does not have the highest magnitude relative to its neighbors
+
+	    //It works by iterating through all pixel values, comparing the
+            //current value with the pixel value in the positive and negative
+            //gradient
+	    //directions, and suppressing the current value if it does not
+            //have the highest magnitude relative to its neighbors
 
 
             if (gradient[index] >= gradient[(y + dy1) * width + x + dx1] &&
                 gradient[index] >= gradient[(y + dy2) * width + x + dx2]) {
 
                 // Hysteresis thresholding
-		
+
                 if (gradient[index] > highThreshold) //strong edge
 		{
-                    edge[index] = 255; 
+                    edge[index] = 255;
                 }
-		else if (gradient[index] > lowThreshold) //maybe a edge(potentiel)
+		else if (gradient[index] > lowThreshold)
+                    //maybe a edge(potentiel)
 		{
-                    edge[index] = 127; 
+                    edge[index] = 127;
                 }
             }
         }
@@ -632,20 +642,21 @@ double* nonMaximalSuppressionAndHysteresis(double* gradient, double* ang, int wi
 
     // Edge tracing
 
-    for (int y = 1; y < height - 1; y++) 
+    for (int y = 1; y < height - 1; y++)
     {
         for (int x = 1; x < width - 1; x++)
 	{
             int index = y * width + x;
 
-            if (edge[index] == 127) 
+            if (edge[index] == 127)
 	    {
                 // Check if any strong edge neighbors exist
                 for (int dy = -1; dy <= 1; dy++)
 		{
-                    for (int dx = -1; dx <= 1; dx++) 
+                    for (int dx = -1; dx <= 1; dx++)
 		    {
-                        if (edge[(y + dy) * width + x + dx] == 255) //if one exits than become a strong
+                        if (edge[(y + dy) * width + x + dx] == 255)
+                            //if one exits than become a strong
 			{
                             edge[index] = 255;
                             break;
@@ -653,7 +664,7 @@ double* nonMaximalSuppressionAndHysteresis(double* gradient, double* ang, int wi
                     }
                 }
                 // If no strong edge neighbors, SUPPRESS
-                if (edge[index] != 255) 
+                if (edge[index] != 255)
                     edge[index] = 0;
             }
         }
@@ -668,113 +679,6 @@ double* nonMaximalSuppressionAndHysteresis(double* gradient, double* ang, int wi
 
 
 
-/*
-double* nonMaximalSuppressionAndHysteresis(double* gradient, double* ang, int imagew, int imageh, double lowThreshold, double highThreshold) 
-{
-	double *edges = calloc(imagew * imageh, sizeof(double));
-
-
-    for (int y = 1; y < imageh -1; y++) 
-    {
-        for (int x = 1; x < imagew-1 ; x++) 
-        {
-            double magnitude = gradient[y * imagew + x];
-            double angle = ang[y * imagew + x]; // assuming you're storing angles as mentioned earlier
-
-	
-	    //It works by iterating through all pixel values, comparing the current value with the pixel value in the positive and negative gradient
-	    //directions, and suppressing the current value if it does not have the highest magnitude relative to its neighbors
-
-
-            // Determine direction (rounded to one of the four main directions: horizontal, vertical, and two diagonals)
-            int dx = (angle >= 0.7854 && angle <= 2.3562) ? 1 : ((angle <= -0.7854 && angle >= -2.3562) ? -1 : 0);
-            int dy = (angle <= 0.7854 && angle >= -0.7854) ? 1 : ((angle >= 2.3562 || angle <= -2.3562) ? -1 : 0);
-
-            // Compare current pixel with the neighbors in the gradient direction
-            if (magnitude > gradient[(y + dy) * imagew + x + dx] && magnitude > gradient[(y - dy) * imagew + x - dx])
-            {
-                edges[y * imagew + x] = magnitude; // keep the edge if it's a local maximum
-            }
-        }
-    }
-
-    // Hysteresis thresholding
-    // greater than highThreshold => most probably an edge pixel
-    // less than the high threshold value, but greater than the low threshold value => maybe an edge
-    // less than both the high and low threshold values => low probability of being an edge, SUPPRESS
-    for (int y = 1; y < imageh-1 ; y++) 
-    {
-        for (int x = 1; x < imagew -1; x++) 
-        {
-            double edgeStrength = edges[y * imagew + x];
-
-            if (edgeStrength > highThreshold) 
-            {
-                // an edge
-                edges[y * imagew + x] = 255;
-	    }
-	    else if (edgeStrength < lowThreshold) 
-	    {
-		    // Not an edge
-		    edges[y * imagew + x] = 0;
-	    }
-	    else 
-	    {
-		    //checks to see if a weak edge pixel is connected (neighbored by) a strong edge pixel.(HIGHER THAN HIGHTHRESHOLD)
-		    //If so, the weak edge is included, otherwise it’s suppressed.
-
-
-		    // Check 8 neighboring pixels to see if any of them are high thresholds
-		    int isEdge = 0; //false
-		    for (int ky = -1; ky <= 1 && isEdge==0; ky++) 
-		    {
-			    for (int kx = -1; kx <= 1 && isEdge==0; kx++) 
-			    {
-				    if (edges[(y + ky) * imagew + x + kx] > highThreshold) 
-				    {
-					    isEdge = 1;
-					    edges[y * imagew + x] = 255;
-				    }
-			    }
-		    }
-		    if (isEdge==0) 
-		    {
-			    edges[y * imagew + x] = 0;  // Not an edge by connection either
-		    }
-	    }
-	}
-    }
-    return edges;
-}
-
-
-//delete
-void visualizeGradient(SDL_Surface* image, double* gradient) {
-	SDL_LockSurface(image); 
-	Uint32* pixels = (Uint32*)image->pixels;
-
-	int width = image->w;
-	int height = image->h;
-
-	// Determine the maximum gradient value for normalization
-	double maxGradient = 0;
-	for (int i = 0; i < width * height; i++) {
-		if (gradient[i] > maxGradient) {
-			maxGradient = gradient[i];
-		}
-	}
-
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
-			int index = y * width + x;
-			// Normalize the gradient to fit within [0,255]
-			Uint8 intensity = (Uint8)(255.0 * gradient[index] / maxGradient);
-			pixels[index] = SDL_MapRGB(image->format, intensity, intensity, intensity);
-		}
-	}
-
-	SDL_UnlockSurface(image);
-}*/
 
 
 void Canny_edge_result (SDL_Surface* image)
@@ -793,7 +697,7 @@ void Canny_edge_result (SDL_Surface* image)
 		{ 1,  2,  1}
 	};
 
-    
+
 	double *ang = calloc(image->w * image->h,sizeof(double));
 
 
@@ -811,9 +715,11 @@ void Canny_edge_result (SDL_Surface* image)
 	//IMG_SaveJPG(image, "grad.jpg", 100);
 
 
-	double* edge = nonMaximalSuppressionAndHysteresis( gradient,ang, image->w, image->h, maxGradient * 0.35, maxGradient*0.7); 
+	double* edge = nonMaximalSuppressionAndHysteresis(
+                gradient,ang, image->w, image->h, maxGradient *
+                0.35, maxGradient*0.7);
 
-	SDL_LockSurface(image); 
+	SDL_LockSurface(image);
 
 	Uint32* pixels = (Uint32*)image->pixels;
 
@@ -824,20 +730,22 @@ void Canny_edge_result (SDL_Surface* image)
 		{
 			int index = y * width + x;
 
-			
+
 			if (edge[index] == 0)
 			{
-			
-				pixels[index] = SDL_MapRGB(image->format, 0, 0, 0);
+
+				pixels[index] =
+                                    SDL_MapRGB(image->format, 0, 0, 0);
 			} else
 			{
-				
-				pixels[index] = SDL_MapRGB(image->format, 255, 255, 255);
+
+				pixels[index] =
+                                    SDL_MapRGB(image->format, 255, 255, 255);
 			}
 		}
 	}
 
-	
+
 	SDL_UnlockSurface(image);
 	free(ang);
 	free(gradient);

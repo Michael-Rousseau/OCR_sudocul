@@ -11,7 +11,8 @@ struct Square {
     struct Point bottomright;
 };
 
-void horizontal_vertical_lines( struct Line* lines, int len, struct Line* horizon, struct Line* vertical)
+void horizontal_vertical_lines( struct Line* lines, int len,
+        struct Line* horizon, struct Line* vertical)
 {
 	//thtea en degree
 	int j = 0, k = 0;
@@ -37,13 +38,12 @@ void sort_horizontal_lines(struct Line* horizon, int len)
 	int i, j;
 	struct Line compare;
 
-	for (i = 1; i < len; i++) 
+	for (i = 1; i < len; i++)
 	{
 		//printf("(%f,%f)",horizon[i].start.x,horizon[i].start.y);
 		compare = horizon[i];
 		j = i - 1;
 
-		// Move elements that are greater than key to one position ahead of their current position
 		while (j >= 0 && horizon[j].start.y > compare.start.y)
 		{
 			horizon[j + 1] = horizon[j];
@@ -53,10 +53,6 @@ void sort_horizontal_lines(struct Line* horizon, int len)
 	}
 
 
-/*	for(int k = 0; k <len; k++)
-		printf("(%f,%f) \n",horizon[k].start.x,horizon[k].start.y);
-	printf("\n");*/
-
 }
 
 void sort_vertical_lines(struct Line* vertical, int len)
@@ -64,12 +60,13 @@ void sort_vertical_lines(struct Line* vertical, int len)
 	int i, j;
 	struct Line compare;
 
-	for (i = 1; i < len; i++) 
+	for (i = 1; i < len; i++)
 	{
 		compare = vertical[i];
 		j = i - 1;
 
-		// Move elements that are greater than key to one position ahead of their current position
+		// Move elements that are greater than key to one position
+                // ahead of their current position
 		while (j >= 0 && vertical[j].start.x > compare.start.x)
 		{
 			vertical[j + 1] = vertical[j];
@@ -84,7 +81,8 @@ void sort_vertical_lines(struct Line* vertical, int len)
 }
 
 
-void fillsquares(struct Line* vertical, struct Line* horizon, struct Square* squares)
+void fillsquares(struct Line* vertical, struct Line* horizon,
+        struct Square* squares)
 {
     int len = 8;  // As there are 8 vertical and 8 horizontal lines
     int nx = 0;
@@ -105,44 +103,11 @@ void fillsquares(struct Line* vertical, struct Line* horizon, struct Square* squ
             squares[nx].bottomright.y = horizon[i + 1].start.y;
             squares[nx].bottomright.x = vertical[j + 1].start.x;
 
-/*
-            	printf("%i \n",i);
-	//	printf("%f", horizon[i].start.y);
-        printf("Top Left: (%f, %f)\n", squares[nx].topleft.x, squares[nx].topleft.y);
-        printf("Top Right: (%f, %f)\n", squares[nx].topright.x, squares[nx].topright.y);     
-	printf("Bottom Right: (%f, %f)\n", squares[nx].bottomright.x, squares[nx].bottomright.y);
-	printf("Bottom Left: (%f, %f)\n", squares[nx].bottomleft.x, squares[nx].bottomleft.y);
-	printf("\n");*/
-
 	    nx++;
         }
     }
 }
 
-/*
-void fillsquares(struct Line* vertical, struct Line* horizon,struct Square* squares)
-{
-	int len = 16;
-	int nx= 0;
-
-	for (int i = 0; i< len-1; i++)
-	{
-		squares[nx].topleft.y = horizon[i].start.y;	
-		squares[nx].topleft.x = vertical[i].start.x;
-
-		squares[nx].topright.y = horizon[i].start.y;	
-		squares[nx].topright.x = vertical[i+1].start.x;
-
-		squares[nx].bottomleft.y = horizon[i+1].start.y;	
-		squares[nx].bottomleft.x = vertical[i].start.x;
-
-		squares[nx].bottomright.y = horizon[i+1].start.y;	
-		squares[nx].bottomright.x = vertical[i+1].start.x;
-
-
-		nx++;
-	}
-}*/
 
 
 void printvalues(struct Line* lines, int len)
@@ -151,7 +116,7 @@ void printvalues(struct Line* lines, int len)
     struct Line* vertical = calloc(8, sizeof(struct Line));
 
     horizontal_vertical_lines(lines, len, horizon, vertical);
-    
+
     sort_horizontal_lines(horizon, 8);
     for (int i = 0;i<8; i++)
     {
@@ -174,10 +139,14 @@ void printvalues(struct Line* lines, int len)
    for (int i = 0; i < 49; i++)
     {
 	printf("%i \n",i);
-        printf("Top Left: (%f, %f)\n", squares[i].topleft.x, squares[i].topleft.y);
-        printf("Top Right: (%f, %f)\n", squares[i].topright.x, squares[i].topright.y);     
-	printf("Bottom Right: (%f, %f)\n", squares[i].bottomright.x, squares[i].bottomright.y);
-	printf("Bottom Left: (%f, %f)\n", squares[i].bottomleft.x, squares[i].bottomleft.y);
+        printf("Top Left: (%f, %f)\n", squares[i].topleft.x,
+                squares[i].topleft.y);
+        printf("Top Right: (%f, %f)\n", squares[i].topright.x,
+                squares[i].topright.y);
+	printf("Bottom Right: (%f, %f)\n", squares[i].bottomright.x,
+                squares[i].bottomright.y);
+	printf("Bottom Left: (%f, %f)\n", squares[i].bottomleft.x,
+                squares[i].bottomleft.y);
 	printf("\n");
 
     }
