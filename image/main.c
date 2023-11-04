@@ -46,8 +46,7 @@ void draw_test_averagelines(SDL_Renderer* renderer, SDL_Texture* texture, struct
 
 	drawl(lines, 26, renderer);
 
-	
-	
+		
 /*	   for (int i = 0; i <26;i++)
 	   {
 

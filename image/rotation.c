@@ -26,6 +26,7 @@ SDL_Surface* RotateImage(SDL_Surface* image, double angledegree)
 	SDL_UnlockSurface(rot);
 
 
+	//FAIRE MODULO 360 FMOD!!!!!!!!!!!!!!!! if 0 DO NOTHINGGGGGG
 
 	for(int y = 0; y < h2; y++)
 	{
@@ -47,8 +48,8 @@ SDL_Surface* RotateImage(SDL_Surface* image, double angledegree)
 
 			if (truex >= 0 && truey >=0 && truex <w1 && truey <h1)
 				((Uint32*)rot->pixels)[y * w2 + x]= ((Uint32*)image->pixels)[truey * w1 + truex];
-			//else
-			//	((Uint32*)rot->pixels)[y * w2 + x] = 0x00000000; //transparent
+			else
+				((Uint32*)rot->pixels)[y * w2 + x] = 0x000000; //transparent sdl rgb
 			}
 	}
 

@@ -4,6 +4,7 @@
 #define startThreshold 15
 #define endThreshold 15
 
+
 struct Point {
     float x;
     float y;
