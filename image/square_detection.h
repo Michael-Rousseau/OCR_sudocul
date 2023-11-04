@@ -14,7 +14,7 @@ struct Line {
 	    struct Point end;
 };
 */
-
+#include "detection.h"
 struct Squares {
     struct Point topleft;
     struct Point topright;
