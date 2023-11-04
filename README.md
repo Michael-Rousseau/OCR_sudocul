@@ -1,13 +1,21 @@
-# BUILD THE PROJECT
-`make`
+# OCR SUDOCUL
 
-# CLEAN THE PROJECT
-`make clean`
+A program that solves sudokus with a photo of the grid.
 
-# EXECUTABLES
-In the build folder.
+## BUILD THE PROJECT
+`git clone https://github.com/Michael-Rousseau/OCR_sudocul.git`
+`cd OCR_sudocul`
+Use the command `make` at the root of the project.
 
-## XOR
+## CLEAN THE PROJECT
+`make clean` at the root of the project.
+
+## EXECUTABLES
+All executables can be found in the build folder (at the root).
+
+## DOCMENTATION
+
+### XOR
 
 NAME
     xor - play with a XOR neural network

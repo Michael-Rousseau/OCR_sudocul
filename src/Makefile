@@ -15,10 +15,10 @@ backtracking:
 	cp -r backtracking/data/* data
 
 detection:
-	$(MAKE) -C hough
-	mv hough/detection .
+	$(MAKE) -C image_processing
+	mv image_processing/detection .
 	mkdir -p data
-	cp -r hough/data/* data
+	cp -r image_processing/data/* data
 
 clean:
 	$(MAKE) -C ocr clean
