@@ -1,0 +1,8 @@
+# BUILD THE PROJECT
+`make`
+
+# CLEAN THE PROJECT
+`make clean`
+
+# EXECUTABLES
+cd ./build
