@@ -2,20 +2,20 @@
 
 CC = gcc
 CPPFLAGS =
-CFLAGS = -Wall -Wextra  `pkg-config --cflags sdl2 SDL2_image` -g
+CFLAGS = -Wall -Wextra `pkg-config --cflags sdl2 SDL2_image` -g
 LDFLAGS =
 LDLIBS = `pkg-config --libs sdl2 SDL2_image` -lm
 
-all: main
+all: detection
 
-SRC = main.c image.c rotation.c detection.c square_detection.c
+SRC = detection.c image.c hough.c
 DEPS = ${SRC:.c=.d}
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=}
 
 .PHONY: clean
 
-main: image.o main.o rotation.o detection.o square_detection.o
+detection: image.o detection.o hough.o
 
 clean:
 	${RM} ${DEPS}
@@ -23,4 +23,3 @@ clean:
 	${RM} ${EXE}
 
 # END
-

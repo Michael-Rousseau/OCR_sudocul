@@ -1,351 +1,211 @@
-
-#include <err.h>
+#include <stdio.h>
+#include <stdbool.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include "image.h"
-#include "hough.h"
+#include "detection.h"
+#include <math.h>
 
-int original_image_width = 0;
-int original_image_height = 0;
 
-void update_render_scale(SDL_Renderer* renderer, int new_width, int new_height)
+#define true 1
+#define false 0
+
+
+float distance(struct Point a, struct Point b) 
 {
-    float scale_x = (float)new_width / original_image_width;
-    float scale_y = (float)new_height / original_image_height;
-    SDL_RenderSetScale(renderer, scale_x, scale_y);
+	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
 
-void draw(SDL_Renderer* renderer, SDL_Texture* texture)
+int thelinebelongs(struct Line l1, struct Line l2) 
 {
-	int render = SDL_RenderCopy(renderer, texture, NULL, NULL);
-	if (render != 0)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-	SDL_RenderPresent(renderer);
+	//if (fabs(l1.rho - l2.rho) <= rhoThreshold && fabs(l1.theta - l2.theta) <= thetaThreshold)
+
+	float startDistance = distance(l1.start, l2.start);
+	float endDistance = distance(l1.end, l2.end);
+
+	if (startDistance < startThreshold && endDistance < endThreshold)
+		return 1;
+	return 0;
+} 
+
+void addtogroup(struct Line line, struct Linegroup* group) 
+{
+	group->average.start.x = (group->average.start.x * group->numlines + line.start.x) / (group->numlines + 1);
+	group->average.start.y = (group->average.start.y * group->numlines + line.start.y) / (group->numlines + 1);
+	group->average.end.x = (group->average.end.x * group->numlines + line.end.x) / (group->numlines + 1);
+	group->average.end.y = (group->average.end.y * group->numlines + line.end.y) / (group->numlines + 1);
+	group->numlines +=1;
 }
 
+int averagelines(struct Line* line, int len,  struct Linegroup** group) {
+	int n = 10;
+	int ncurrent = 0;
 
-
-void drawk(SDL_Renderer* renderer, SDL_Texture* texture,
-        struct Line* lines,int num_lines)
-{
-	int render = SDL_RenderCopy(renderer, texture, NULL, NULL);
-	if (render != 0)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-//	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-//	SDL_RenderClear(renderer);
-
-
-	// Draw detected lines
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        // Red color for lines
-	for (int i = 0; i < num_lines; i++) {
-		SDL_RenderDrawLine(renderer, lines[i].start.x,
-                        lines[i].start.y, lines[i].end.x, lines[i].end.y);
-	}
-	// SDL_RenderPresent(renderer);
-
-	SDL_RenderPresent(renderer);
-}
-
-
-void draw_squares(SDL_Renderer* renderer, SDL_Texture* texture,
-        struct Squares* squares ,int num_lines)
-{
-	int render = SDL_RenderCopy(renderer, texture, NULL, NULL);
-	if (render != 0)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-//	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-//	SDL_RenderClear(renderer);
-
-
-	// Draw detected lines
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        // Red color for lines
-	for (int i = 0; i < num_lines; i++) {
-	//	SDL_RenderDrawLine(renderer, 100,500, 500,500);
-		printf("draw squares start x %f, y %f \n",
-                        squares[i].topleft.x, squares[i].topleft.y);
-
-		SDL_RenderDrawLine(renderer, squares[i].topleft.x,
-                        squares[i].topleft.y, squares[i].topleft.x +1,
-                        squares[i].topleft.y+1 );
-		SDL_RenderDrawLine(renderer, squares[i].topright.x,
-                        squares[i].topright.y,squares[i].topright.x +1,
-                        squares[i].topright.y+1);
-		SDL_RenderDrawLine(renderer, squares[i].bottomright.x,
-                        squares[i].bottomright.y, squares[i].bottomright.x+1,
-                        squares[i].bottomright.y+1);
-
-		SDL_RenderDrawLine(renderer,squares[i].bottomleft.x,
-                        squares[i].bottomleft.y,squares[i].bottomleft.x+1,
-                        squares[i].bottomleft.y +1);
-
-
-	}
-	 //SDL_RenderPresent(renderer);
-
-	SDL_RenderPresent(renderer);
-}
-
-
-
-void event_loop_image(SDL_Renderer* renderer, SDL_Texture* t_image)
-{
-	SDL_Event event;
-
-	draw(renderer, t_image);
-	while (1)
+	for(int i = 0; i < len; i++) 
 	{
-		SDL_WaitEvent(&event);
-
-		switch (event.type)
+		int loner = true;
+		for(int j = 0; j < ncurrent; j++) 
 		{
-			case SDL_QUIT:
-				return;
-			case SDL_WINDOWEVENT:
-				if (event.window.event ==
-                                        SDL_WINDOWEVENT_RESIZED)
+			if(thelinebelongs(line[i], group[j]->average) == 1)
+			{
+				addtogroup(line[i], group[j]);
+				loner = false;
+			}
+		}
+		if (loner) 
+		{
+			if(ncurrent == n) 
+			{
+				n *= 2;
+				group = realloc(group, n * sizeof(struct Linegroup*));
+
+				if (!group) 
 				{
-
-					draw(renderer, t_image);
-					break;
+					fprintf(stderr, "Memory allocation failed.\n");
+					exit(EXIT_FAILURE);
 				}
-		}
-	}
-}
 
-
-
-
-
-void event_loop_image_l(SDL_Renderer* renderer, SDL_Texture* t_image,
-        struct Line* line, int n)
-{
-	SDL_Event event;
-
-	draw(renderer, t_image);
-	while (1)
-	{
-		SDL_WaitEvent(&event);
-
-		switch (event.type)
-		{
-			case SDL_QUIT:
-				return;
-			case SDL_WINDOWEVENT:
-				if (event.window.event ==
-                                        SDL_WINDOWEVENT_RESIZED)
+				for (int j = ncurrent; j < n; j++) 
 				{
-					update_render_scale(renderer,
-                                                event.window.data1,
-                                                event.window.data2);
-
-					drawk(renderer, t_image,line, n);
-					break;
+					group[j] = NULL;
 				}
+			}
+			group[ncurrent] = calloc(1, sizeof(struct Linegroup));
+			if (!group[ncurrent]) 
+			{
+				fprintf(stderr, "Memory allocation failed.\n");
+				exit(EXIT_FAILURE);
+			}
+			group[ncurrent]->average.start.x = line[i].start.x;	
+			group[ncurrent]->average.start.y = line[i].start.y;
+
+			group[ncurrent]->average.end.x = line[i].end.x;	
+			group[ncurrent]->average.end.y = line[i].end.y;
+
+			group[ncurrent]->numlines = 1;
+			ncurrent++;
 		}
 	}
-}
-void event_loop_image_test_averagelines(SDL_Renderer* renderer, SDL_Texture*
-        t_image, struct Line* lines ,int numline) {
-    SDL_Event event;
+	return ncurrent;
 
-    draw(renderer, t_image);
-    while (1) {
-        SDL_WaitEvent(&event);
-
-        switch (event.type) {
-            case SDL_QUIT:
-                return;
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    //drawl(renderer, t_image, lines);
-		    update_render_scale(renderer, event.window.data1,
-                            event.window.data2);
-		    drawl(lines, numline,renderer, t_image);
-                    break;
-                }
-        }
-    }
 }
 
-void event_loop_image_test_sq(SDL_Renderer* renderer, SDL_Texture* t_image,
-        struct Squares* squares,int num) {
-    SDL_Event event;
+void drawl(struct Line* line, int len, SDL_Renderer* renderer)
+{
+	struct Linegroup** group = calloc(len, sizeof(struct Linegroup*)); // use len as it represents the number of lines
+	if (!group) {
+		fprintf(stderr, "Memory allocation failed.\n");
+		exit(EXIT_FAILURE);
+	}
+	int nmax = averagelines(line, len, group);
 
-    draw(renderer, t_image);
-    while (1) {
-        SDL_WaitEvent(&event);
-
-        switch (event.type) {
-            case SDL_QUIT:
-                return;
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    //drawl(renderer, t_image, lines);
-                    	update_render_scale(renderer, event.window.data1,
-                                event.window.data2);
-
-			draw_squares(renderer, t_image, squares , num);
-
-                    break;
-                }
-        }
-    }
+	for(int i = 0; i < nmax; i++)
+	{
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // Red color for the lines
+		SDL_RenderDrawLine(renderer, group[i]->average.start.x, group[i]->average.start.y, 
+				group[i]->average.end.x, group[i]->average.end.y);
+	}
+	for (int i = 0; i < nmax; i++)
+		free(group[i]);
+	free(group);
 }
 
 
 
 
 
-int main(int argc, char **argv){
-
-	if (argc != 3)
-		errx(EXIT_FAILURE, "Usage: image-file");
-
-	if (SDL_Init(SDL_INIT_VIDEO) != 0)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-	SDL_Window* window = SDL_CreateWindow("Dynamic Fractal Canopy",
-                0, 0, 400, 400, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-	if (window == NULL)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-	SDL_Renderer* renderer = SDL_CreateRenderer(window, -1,
-                SDL_RENDERER_ACCELERATED);
-	if (renderer == NULL)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-	SDL_Surface* surface = load_image(argv[2]);
-	if (surface == NULL)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-	original_image_width = surface->w;
-	original_image_height = surface->h;
-
-	int image_width = surface->w;
-	int image_height = surface->h;
-	SDL_SetWindowSize(window, image_width, image_height);
 
 
-	if (strcmp(argv[1],"hough") ==0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+float distance(struct Point a, struct Point b)
+{
+    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+
+int thelinebelongs (struct Line l1, struct Line l2)
+{
+    if (fabs(l1.rho - l2.rho) < rhoThreshold && fabs(l1.theta - l2.theta) < thetaThreshold)
+	    return 1;
+    return 0;
+} 
+
+void addtogroup(struct Line line, struct Linegroup*  group)
+{
+	group->average.start.x =(group->average.start.x * group.numlines + line.start.x) / (group.numlines + 1);
+	group->average->star =(group->average->start->y * group->numlines + line->start->y) / (group->numlines + 1);
+	group->average.end- =(group->average.end * group.numlines + line.end) / (group.numlines + 1);
+	group->average->end->y =(group->average->end->y * group->numlines + line->end->y) / (group->numlines + 1);
+	group->numlines +=1;
+}
+
+
+int averagelines( struct Line* line,int len, SDL_Surface* image, struct Linegroup** group) 
+{
+
+	int n = 10;
+	//Linegroup** group = calloc(n,sizeof(struct Linegroup*));
+	int ncurrent = 0;
+
+	for(int i = 0; i < len; i++)
 	{
-		//struct Line* lines= performHoughTransform(surface);
-		//
-		struct DetectedLines detected = performHoughTransform(surface);
-		struct Line* lines = detected.lines;
-		int num_lines = detected.count;
-
-		for (int i = 0; i < num_lines; ++i) {
-			printf("Line %d: Start (%f, %f) - End (%f, %f)\n", i,
-                                lines[i].start.x, lines[i].start.y,
-                                lines[i].end.x, lines[i].end.y);
-
-		}
-
-		SDL_Texture* texture = SDL_CreateTextureFromSurface(
-                        renderer, surface);
-		if (texture == NULL)
-			errx(EXIT_FAILURE, "%s", SDL_GetError());
-		event_loop_image_l(renderer, texture,lines, num_lines);
-
-		// Cleanup
-		free(lines);
-	//	free(detected);
-		SDL_DestroyTexture(texture);
-	}
-
-	else if  (strcmp(argv[1], "detection") == 0)
-	{
-			struct DetectedLines detected =
-                            performHoughTransform(surface);
-			struct Line* lines = detected.lines;
-			int num_lines = detected.count;
-
-			SDL_Texture* grayscale_texture =
-                            SDL_CreateTextureFromSurface(renderer, surface);
-			if (grayscale_texture == NULL)
-				errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-			SDL_FreeSurface(surface);
-			event_loop_image_test_averagelines(renderer,
-                                grayscale_texture, lines, num_lines);
-			SDL_DestroyTexture(grayscale_texture);
-
-		//	free(detected);
-			free(lines);
-
-		}
-
-	else if (strcmp(argv[1], "square") == 0) {
-			struct DetectedLines detected =
-                            performHoughTransform(surface);
-			struct Line* lines = detected.lines;
-			int num_lines = detected.count;
-
-			printvalues(lines,num_lines);
-
-
-
-	}
-	else if (strcmp(argv[1], "drawsquare") == 0)
-	{
-		struct DetectedLines detected = performHoughTransform(surface);
-		struct Line* lin = detected.lines;
-		int num = detected.count;
-
-
-		struct DetectedLines d2 = averagearray(lin, num);
-		struct Line* lines = d2.lines;
-		int num_lines = d2.count;
-		printf("num line main %i \n", num_lines);
-
-		for (int i = 0; i < num_lines; i++)
+		int loner = true; //0 if the line does not have a group
+		for(int j = 0; j <=ncurrent; j++)
 		{
-			printf(" i = %i",i);
-			printf("%f",lines[i].start.x);
-			printf("%f",lines[i].start.y);
-			printf("%f",lines[i].end.x);
-			printf("%f \n",lines[i].end.y);
+			if(thelinebelongs( line[i], group[j]) == 1)
+			{
+				addtogroup(line[i], group[j]);
+				loner = false;
+			}
+			
 		}
+		if (loner)
+		{
+			if(ncurrent == n)
+			{
+				n*=2;
+				group = realloc(group, n* sizeof(struct Linegroup*));
+			}
+			group[ncurrent] = calloc(1, sizeof(struct Linegroup));
+			group[ncurrent]->average.start = line[i].star;
+			group->average->start->y = line[i]->start->y;
+			group[ncurrent]->averag.>end = line[i].end;
+			group->average->end->y = line[i]->end->y;
+			group->numlines = 1;
+			ncurrent++;
 
-
-		struct Squares* sq = drawsquares( lines, num_lines );
-	//	printf("n carre main %i", (num_lines/2 -1) * (num_lines/2 -1));
-
-		SDL_Texture* grayscale_texture =
-                    SDL_CreateTextureFromSurface(renderer, surface);
-		if (grayscale_texture == NULL)
-			errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-		SDL_FreeSurface(surface);
-		event_loop_image_test_sq(renderer, grayscale_texture,
-                        sq, (num_lines/2 -1) * (num_lines/2 -1));
-		SDL_DestroyTexture(grayscale_texture);
-
-		//	free(detected);
-		free(lines);
-		free(sq);
-
-
+		}
 	}
-
-		else {
-			errx(EXIT_FAILURE, "Unsupported filter: %s", argv[1]);
-		}
-
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-	return EXIT_SUCCESS;
+	return ncurrent;
 }
 
 
 
+void drawl(SDL_Surface*image, struct Line* line, int len,SDL_Renderer* renderer)
+{	struct Linegroup** group = calloc(n,sizeof(struct Linegroup*));
 
+	int nmax = averagelines(line, len, image,group);
 
+		for(int i = 0; i < nmax; i++)
+		{
 
-
+			SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // Red color for the lines
+			SDL_RenderDrawLine(renderer, group[i]->average.start.x, group[i]->average.start.y,group[i]->average.end.x, group[i]->average.end.y);
+		}
+}*/

@@ -1,6 +1,6 @@
 .PHONY: all clean backtracking ocr
 
-all: backtracking ocr detection
+all: backtracking ocr detection processing
 
 ocr:
 	$(MAKE) -C ocr
@@ -15,12 +15,21 @@ backtracking:
 	cp -r backtracking/data/* data
 
 detection:
+	$(MAKE) -C edge_detection
+	mv edge_detection/detection .
+	mkdir -p data
+	cp -r edge_detection/data/* data
+
+processing:
 	$(MAKE) -C image_processing
-	mv image_processing/detection .
+	mv image_processing/processing .
 	mkdir -p data
 	cp -r image_processing/data/* data
 
 clean:
 	$(MAKE) -C ocr clean
-	$(RM) solver xor detection
+	$(MAKE) -C backtracking clean
+	$(MAKE) -C image_processing clean
+	$(MAKE) -C edge_detection clean
+	$(RM) solver xor detection processing
 	rm -rf data

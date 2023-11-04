@@ -7,6 +7,7 @@ all:
 	mv src/xor build/
 	mv src/detection build/
 	mv src/solver build/
+	mv src/processing build/
 	cp -r src/data/* build/data/
 	rm -rf src/data
 
