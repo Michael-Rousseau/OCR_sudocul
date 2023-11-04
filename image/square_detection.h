@@ -1,20 +1,7 @@
 #ifndef SQUARE_DETECTION_H
 #define SQUARE_DETECTION_H
 
-/*struct Point {
-	
-    float x;
-    float y;
-};
-
-struct Line {
-	    float rho ;
-	    float theta;
-	    struct Point start;
-	    struct Point end;
-};
-*/
-
+#include "detection.h"
 struct Squares {
     struct Point topleft;
     struct Point topright;

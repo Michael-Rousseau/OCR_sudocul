@@ -18,8 +18,8 @@ struct Line {
 };
 
  struct Linegroup {
-    struct Line average;  
-    int numlines; 
+    struct Line average;
+    int numlines;
 } ;
 
 

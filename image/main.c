@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  renderer.c
- *
- *    Description: Load and preprocess images 
- *
- *        Version:  1.0
- *        Created:  20/09/2023 15:03:34
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Dr. Fritz Mehner (mn), mehner@fh-swf.de
- *        Company:  FH Südwestfalen, Iserlohn
- *
- * =====================================================================================
- */
 
 #include <err.h>
 #include <SDL2/SDL.h>
@@ -37,7 +20,8 @@ void draw(SDL_Renderer* renderer, SDL_Texture* texture)
 }
 
 
-void draw_test_averagelines(SDL_Renderer* renderer, SDL_Texture* texture, struct Line* lines)
+void draw_test_averagelines(SDL_Renderer* renderer, SDL_Texture* texture,
+        struct Line* lines)
 {
 	int render = SDL_RenderCopy(renderer, texture, NULL, NULL);
 	if (render != 0)
@@ -46,14 +30,15 @@ void draw_test_averagelines(SDL_Renderer* renderer, SDL_Texture* texture, struct
 
 	drawl(lines, 26, renderer);
 
-		
+
 /*	   for (int i = 0; i <26;i++)
 	   {
 
 	   SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
 
 	// Draw a line
-	SDL_RenderDrawLine(renderer, lines[i].start.x ,lines[i].start.y, lines[i].end.x, lines[i].end.y);
+	SDL_RenderDrawLine(renderer, lines[i].start.x ,lines[i].start.y,
+        lines[i].end.x, lines[i].end.y);
 	}
 
 	*/
@@ -62,7 +47,8 @@ void draw_test_averagelines(SDL_Renderer* renderer, SDL_Texture* texture, struct
 }
 
 
-void event_loop_image_test_averagelines(SDL_Renderer* renderer, SDL_Texture* t_image, struct Line* lines) {
+void event_loop_image_test_averagelines(SDL_Renderer* renderer,
+        SDL_Texture* t_image, struct Line* lines) {
     SDL_Event event;
 
     draw(renderer, t_image);
@@ -107,7 +93,8 @@ void event_loop_image(SDL_Renderer* renderer, SDL_Texture* t_image)
 }
 
 
-void print_accumulator(int** accumulator, int accumulator_height, int accumulator_width) {
+void print_accumulator(int** accumulator, int accumulator_height,
+        int accumulator_width) {
     for (int i = 0; i < accumulator_height; i++) {
         for (int j = 0; j < accumulator_width; j++) {
             printf("%d ", accumulator[i][j]);
@@ -125,11 +112,13 @@ int main(int argc, char** argv)
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-    SDL_Window* window = SDL_CreateWindow("Dynamic Fractal Canopy", 0, 0, 400, 400, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    SDL_Window* window = SDL_CreateWindow("Dynamic Fractal Canopy", 0, 0,
+            400, 400, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if (window == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1,
+            SDL_RENDERER_ACCELERATED);
     if (renderer == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -146,7 +135,8 @@ int main(int argc, char** argv)
     if (strcmp(argv[1], "grayscale") == 0) {
 
         surface_to_grayscale(surface);
-        SDL_Texture* grayscale_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Texture* grayscale_texture = SDL_CreateTextureFromSurface(renderer,
+                surface);
         if (grayscale_texture == NULL)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -159,7 +149,8 @@ int main(int argc, char** argv)
     } else if (strcmp(argv[1], "blackwhite") == 0) {
 
         surface_to_blackwhite(surface);
-        SDL_Texture* blackwhite_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Texture* blackwhite_texture = SDL_CreateTextureFromSurface(renderer,
+                surface);
         if (blackwhite_texture == NULL)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -171,7 +162,8 @@ int main(int argc, char** argv)
     } else if (strcmp(argv[1], "bright") == 0) {
 
         surface_to_contrast(surface, 2);
-        SDL_Texture* contrast_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Texture* contrast_texture = SDL_CreateTextureFromSurface(renderer,
+                surface);
         if (contrast_texture == NULL)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -183,7 +175,8 @@ int main(int argc, char** argv)
     } else if (strcmp(argv[1], "dark") == 0) {
 
         surface_to_contrast(surface, 0.1);
-        SDL_Texture* contrast_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Texture* contrast_texture = SDL_CreateTextureFromSurface(renderer,
+                surface);
         if (contrast_texture == NULL)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -195,7 +188,8 @@ int main(int argc, char** argv)
     } else if (strcmp(argv[1], "reducenoise") ==0) {
 
         surface_to_reducenoise(surface);
-        SDL_Texture* blur_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Texture* blur_texture = SDL_CreateTextureFromSurface(renderer,
+                surface);
         if (blur_texture == NULL)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -206,7 +200,8 @@ int main(int argc, char** argv)
 
     } else if (strcmp(argv[1], "inverse") == 0) {
         surface_to_inverse(surface);
-        SDL_Texture* inverse_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Texture* inverse_texture = SDL_CreateTextureFromSurface(renderer,
+                surface);
         if (inverse_texture == NULL){
             errx(EXIT_FAILURE, "%s", SDL_GetError());
         }
@@ -240,7 +235,7 @@ int main(int argc, char** argv)
 	IMG_SaveJPG(surface,"dilation.jpg",100);
 
 	erosion(surface);
-	IMG_SaveJPG(surface,"erosion.jpg",100); 
+	IMG_SaveJPG(surface,"erosion.jpg",100);
 
 	Canny_edge_result (surface);
 	IMG_SaveJPG(surface,"canny.jpg",100);
@@ -249,7 +244,8 @@ int main(int argc, char** argv)
 //	IMG_SaveJPG(surface,"hough.jpg",100);
 
 
-        SDL_Texture* process_texture = SDL_CreateTextureFromSurface(renderer, surface);
+        SDL_Texture* process_texture = SDL_CreateTextureFromSurface(renderer,
+                surface);
         if (process_texture == NULL)
             errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -274,7 +270,8 @@ int main(int argc, char** argv)
         int accumulator_height;
         int accumulator_width;
 
-        int** accumulator = hough_transform(edge_image, image_height, image_width, &accumulator_height, &accumulator_width);
+        int** accumulator = hough_transform(edge_image, image_height,
+        image_width, &accumulator_height, &accumulator_width);
 
         printf("Accumulator:\n");
         print_accumulator(accumulator, accumulator_height, accumulator_width);
@@ -290,7 +287,8 @@ int main(int argc, char** argv)
     {
 
 	    if (argc > 3) {  // Check if enough arguments are provided
-		    double angle = atof(argv[3]);  // Convert the argument to a double
+		    double angle = atof(argv[3]);
+                    // Convert the argument to a double
 		    SDL_Surface* im = RotateImage(surface, angle);
 		    IMG_SavePNG(im,"rot.jpg");
 
@@ -302,12 +300,13 @@ int main(int argc, char** argv)
 
 		    SDL_FreeSurface(surface);
 		    SDL_FreeSurface(im);
-	
+
 		    SDL_DestroyTexture(im_txt);
-	    }  
+	    }
     }   else if (strcmp(argv[1], "square") == 0) {
 
-	    struct Line lines[16];  // There are 8 horizontal and 8 vertical lines
+	    struct Line lines[16];  // There are 8 horizontal and
+                                    // 8 vertical lines
 	    int L = 500;
 	    // Vertical lines
 	    lines[0] = (struct Line){L/9, 0.0, {L/9, 0}, {L/9, L}};
@@ -349,7 +348,8 @@ int main(int argc, char** argv)
 	    lines[5] = (struct Line){0, 1.5708, {0, 30}, {0, 700}};*/
 
 
-	    struct Line lines[26];  // There are 8 horizontal and 8 vertical lines
+	    struct Line lines[26];  // There are 8 horizontal
+                                    // and 8 vertical lines
 	    int L = 500;
 	    // Vertical lines
 	    lines[0] = (struct Line){L/9, 0.0, {L/9, 0}, {L/9, L}};
@@ -375,35 +375,46 @@ int main(int argc, char** argv)
 	    // Also assume a small deviation factor, say 5 pixels
 	    const int deviation = 5;
 
-	    // Noisy lines around the first vertical line 
-	    lines[16] = (struct Line){L/9 - deviation, 0.0, {L/9 - deviation, 0}, {L/9 - deviation, L}};
+	    // Noisy lines around the first vertical line
+	    lines[16] = (struct Line){L/9 - deviation, 0.0,
+                {L/9 - deviation, 0}, {L/9 - deviation, L}};
 	    lines[17] = (struct Line){L/9, 0.0, {L/9, 0}, {L/9, L}};
-	    lines[18] = (struct Line){L/9 + deviation, 0.0, {L/9 + deviation, 0}, {L/9 + deviation, L}};
-	    lines[19] = (struct Line){L/9 - 2*deviation, 0.0, {L/9 - 2*deviation, 0}, {L/9 - 2*deviation, L}};
-	    lines[20] = (struct Line){L/9 + 2*deviation, 0.0, {L/9 + 2*deviation, 0}, {L/9 + 2*deviation, L}};
+	    lines[18] = (struct Line){L/9 + deviation, 0.0,
+                {L/9 + deviation, 0}, {L/9 + deviation, L}};
+	    lines[19] = (struct Line){L/9 - 2*deviation, 0.0,
+                {L/9 - 2*deviation, 0}, {L/9 - 2*deviation, L}};
+	    lines[20] = (struct Line){L/9 + 2*deviation, 0.0,
+                {L/9 + 2*deviation, 0}, {L/9 + 2*deviation, L}};
 
 	    // Noisy lines around the first horizontal line
-	    lines[21] = (struct Line){0.0, 1.5708, {0, L/9 - deviation}, {L, L/9 - deviation}};
+	    lines[21] = (struct Line){0.0, 1.5708, {0, L/9 - deviation},
+                {L, L/9 - deviation}};
 	    lines[22] = (struct Line){0.0, 1.5708, {0, L/9}, {L, L/9}};
-	    lines[23] = (struct Line){0.0, 1.5708, {0, L/9 + deviation}, {L, L/9 + deviation}};
-	    lines[23] = (struct Line){0.0, 1.5708, {0, L/9 - 2*deviation}, {L, L/9 - 2*deviation}};
-	    lines[25] = (struct Line){0.0, 1.5708, {0, L/9 + 2*deviation}, {L, L/9 + 2*deviation}};
-	    
+	    lines[23] = (struct Line){0.0, 1.5708, {0, L/9 + deviation},
+                {L, L/9 + deviation}};
+	    lines[23] = (struct Line){0.0, 1.5708, {0, L/9 - 2*deviation},
+                {L, L/9 - 2*deviation}};
+	    lines[25] = (struct Line){0.0, 1.5708, {0, L/9 + 2*deviation},
+                {L, L/9 + 2*deviation}};
 
 
-	    SDL_Texture* grayscale_texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+	    SDL_Texture* grayscale_texture =
+                SDL_CreateTextureFromSurface(renderer, surface);
 	    if (grayscale_texture == NULL)
 		    errx(EXIT_FAILURE, "%s", SDL_GetError());
 
 	    SDL_FreeSurface(surface);
-	    event_loop_image_test_averagelines(renderer, grayscale_texture, lines);
+	    event_loop_image_test_averagelines(renderer, grayscale_texture,
+                    lines);
 	    SDL_DestroyTexture(grayscale_texture);
     }
 
     /* PLEASE LEAVE THE EXAMPLE !
 	       if (strcmp(argv[1], "FILTER NAME") == 0){
 	       surface_to_"FILTER NAME"(surface);
-	       SDL_Texture* "FILTER NAME"_texture = SDL_CreateTextureFromSurface(renderer, surface);
+	       SDL_Texture* "FILTER NAME"_texture =
+               SDL_CreateTextureFromSurface(renderer, surface);
 	       if ("FILTER NAME"_texture == NULL)
 	       errx(EXIT_FAILURE, "%s", SDL_GetError());
 
