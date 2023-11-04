@@ -1,7 +1,7 @@
 #ifndef SQUARE_DETECTION_H
 #define SQUARE_DETECTION_H
 
-struct Point {
+/*struct Point {
 	
     float x;
     float y;
@@ -13,7 +13,7 @@ struct Line {
 	    struct Point start;
 	    struct Point end;
 };
-
+*/
 
 struct Squares {
     struct Point topleft;
