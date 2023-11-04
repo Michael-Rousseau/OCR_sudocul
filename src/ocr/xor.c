@@ -29,7 +29,7 @@ int test_network(network *n, double *input, double *target) {
 
 void usage_error() {
     FILE *file_in;
-    file_in = fopen("man_xor", "r");
+    file_in = fopen("data/man_xor", "r");
 
     if (file_in == NULL)
         errx(EXIT_FAILURE, "%s\n", "Usage error, and man page wasn't found.");
