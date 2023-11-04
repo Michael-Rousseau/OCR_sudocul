@@ -5,8 +5,10 @@ all:
 	mkdir -p build
 	mkdir -p build/data
 	mv src/xor build/
+	mv src/detection build/
 	mv src/solver build/
 	cp -r src/data/* build/data/
+	rm -rf src/data
 
 clean:
 	$(MAKE) -C src clean

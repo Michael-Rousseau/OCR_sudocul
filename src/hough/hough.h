@@ -1,5 +1,5 @@
-#ifndef JOANNEC_H
-#define JOANNEC_H
+#ifndef HOUGH_H
+#define HOUGH_H
 
 
 #define startThreshold 100

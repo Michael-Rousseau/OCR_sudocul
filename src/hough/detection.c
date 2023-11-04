@@ -3,7 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "image.h"
-#include "joanneh.h"
+#include "hough.h"
 
 int original_image_width = 0;
 int original_image_height = 0;

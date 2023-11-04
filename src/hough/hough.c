@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <err.h>
-#include "joanneh.h"
+#include "hough.h"
 
 
 

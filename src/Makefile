@@ -1,6 +1,6 @@
 .PHONY: all clean backtracking ocr
 
-all: backtracking ocr
+all: backtracking ocr detection
 
 ocr:
 	$(MAKE) -C ocr
@@ -14,7 +14,13 @@ backtracking:
 	mkdir -p data
 	cp -r backtracking/data/* data
 
+detection:
+	$(MAKE) -C hough
+	mv hough/detection .
+	mkdir -p data
+	cp -r hough/data/* data
+
 clean:
 	$(MAKE) -C ocr clean
-	$(RM) solver xor
+	$(RM) solver xor detection
 	rm -rf data
