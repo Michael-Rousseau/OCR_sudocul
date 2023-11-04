@@ -3,6 +3,7 @@
 
 
 #define startThreshold 100
+
 #define endThreshold 100
 
 struct Point {

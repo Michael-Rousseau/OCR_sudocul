@@ -290,7 +290,7 @@ int main(int argc, char** argv)
 		    double angle = atof(argv[3]);
                     // Convert the argument to a double
 		    SDL_Surface* im = RotateImage(surface, angle);
-		    IMG_SavePNG(im,"rot.jpg");
+		    IMG_SaveJPG(im,"rot.jpg",100);
 
 
 		    SDL_Texture* im_txt = SDL_CreateTextureFromSurface(renderer, im);
