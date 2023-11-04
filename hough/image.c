@@ -1,20 +1,3 @@
-/*
- * =====================================================================================
- *
- *       Filename:  image.c
- *
- *    Description:  
- *
- *        Version:  1.0
- *        Created:  20/09/2023 15:07:09
- *       Revision:  none
- *       Compiler:  gcc
- *
- *         Author:  Dr. Fritz Mehner (mn), mehner@fh-swf.de
- *        Company:  FH Südwestfalen, Iserlohn
- *
- * =====================================================================================
- */
 
 #include <err.h>
 #include <SDL2/SDL.h>
@@ -139,7 +122,8 @@ Uint32* integral_image(SDL_Surface* surface) {
             if (y == 0) {
                 integral[y * surface->w + x] = sum;
             } else {
-                integral[y * surface->w + x] = integral[(y - 1) * surface->w + x] + sum;
+                integral[y * surface->w + x] = integral[(y - 1) *
+                    surface->w + x] + sum;
             }
         }
     }
@@ -148,7 +132,8 @@ Uint32* integral_image(SDL_Surface* surface) {
     return integral;
 }
 
-Uint8 fast_local_threshold(Uint32* integral, int x, int y, int neighborhood_size, int width, int height) {
+Uint8 fast_local_threshold(Uint32* integral, int x, int y,
+        int neighborhood_size, int width, int height) {
     int side = neighborhood_size / 2;
     int x1 = x - side - 1;
     int y1 = y - side - 1;
@@ -162,47 +147,19 @@ Uint8 fast_local_threshold(Uint32* integral, int x, int y, int neighborhood_size
 
     int count = (x2 - x1) * (y2 - y1);
 
-    Uint32 sum = integral[y2 * width + x2] - integral[y1 * width + x2] - integral[y2 * width + x1] + integral[y1 * width + x1];
+    Uint32 sum = integral[y2 * width + x2] - integral[y1 * width + x2] -
+        integral[y2 * width + x1] + integral[y1 * width + x1];
     return (Uint8)(sum / count);
 }
 
 
 
-
-/*Uint8 calculate_local_threshold(SDL_Surface* surface, int x, int y, int neighborhood_size) {
-    int sum = 0;
-    int count = 0;
-    int side = neighborhood_size / 2; // calculate half the size of the neighborhood
-    SDL_LockSurface(surface); // make sure to lock the surface before directly accessing pixels
-
-    for (int i = -side; i <= side; i++) {
-        for (int j = -side; j <= side; j++) {
-            int newX = x + i;
-            int newY = y + j;
-            // Check if we are still within the image boundaries
-            if (newX >= 0 && newX < surface->w && newY >= 0 && newY < surface->h) {
-                Uint32 pixel = ((Uint32*)surface->pixels)[newY * surface->w + newX];
-                Uint8 r, g, b;
-                SDL_GetRGB(pixel, surface->format, &r, &g, &b);
-                Uint8 average = (r + g + b) / 3; // or another method to convert to grayscale if needed
-                sum += average;
-                count++;
-            }
-        }
-    }
-
-    SDL_UnlockSurface(surface); // unlock the surface
-
-    if (count == 0) return 0; // avoid division by zero
-    return (Uint8)(sum / count); // return the mean value
-}
-*/
-
 void surface_to_blackwhite(SDL_Surface* surface) {
     int neighborhood_size = 15;
     if (neighborhood_size % 2 == 0) neighborhood_size++;
 
-    SDL_Surface* copy = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_RGB888, 0);
+    SDL_Surface* copy = SDL_ConvertSurfaceFormat(surface,
+            SDL_PIXELFORMAT_RGB888, 0);
     if (!copy) {
         errx(EXIT_FAILURE, "Unable to create surface copy: %s", SDL_GetError());
     }
@@ -212,7 +169,8 @@ void surface_to_blackwhite(SDL_Surface* surface) {
     SDL_LockSurface(surface);
     for (int y = 0; y < surface->h; y++) {
         for (int x = 0; x < surface->w; x++) {
-            Uint8 local_threshold = fast_local_threshold(integral, x, y, neighborhood_size, copy->w, copy->h);
+            Uint8 local_threshold = fast_local_threshold(integral, x, y,
+                    neighborhood_size, copy->w, copy->h);
 
             Uint32 pixel = ((Uint32*)surface->pixels)[y * surface->w + x];
             Uint8 r, g, b;
@@ -220,9 +178,11 @@ void surface_to_blackwhite(SDL_Surface* surface) {
             Uint8 average = (r + g + b) / 3;
 
             if (average < local_threshold) {
-                ((Uint32*)surface->pixels)[y * surface->w + x] = SDL_MapRGB(surface->format, 0, 0, 0);
+                ((Uint32*)surface->pixels)[y * surface->w + x] =
+                    SDL_MapRGB(surface->format, 0, 0, 0);
             } else {
-                ((Uint32*)surface->pixels)[y * surface->w + x] = SDL_MapRGB(surface->format, 255, 255, 255);
+                ((Uint32*)surface->pixels)[y * surface->w + x] =
+                    SDL_MapRGB(surface->format, 255, 255, 255);
             }
         }
     }
@@ -240,12 +200,14 @@ void surface_to_blackwhite(SDL_Surface* surface) {
 // pixel_color: Color of the pixel to adjust in the RGB format.
 // format: Format of the pixel used by the surface.
 // contrast: Contrast adjustment factor (e.g., 1.5 for increasing contrast).
-Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format, float contrast)
+Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format,
+        float contrast)
 {
     Uint8 r, g, b;
     SDL_GetRGB(pixel_color, format, &r, &g, &b);
 
-    // Here, we shift the range from [0, 255] to [-128, 127] before adjusting contrast
+    // Here, we shift the range from [0, 255] to [-128, 127]
+    // before adjusting contrast
     float shifted_contrast_scale = (contrast - 1.0) * 128.0;
 
     // Adjust contrast
@@ -299,7 +261,6 @@ float** generate_Kernel(int ksize, float sigma)
 
 
     //The kernel matrix is a double pointer
-    //we assign a specified amount of memory for an arvray of size ksize of type floats
 
     float** kernel = (float**)malloc(ksize * sizeof(float*));
 
@@ -309,7 +270,6 @@ float** generate_Kernel(int ksize, float sigma)
     for (int y = 0; y < ksize; y++) {
         for (int x = 0; x < ksize; x++) {
 
-            //x and y must be coordinates such that 0 is in the center of the kernel
             int mx = x - center;
             int my = y - center;
             double tmp = -(mx * mx + my * my) / (2 * sigma * sigma);
@@ -319,7 +279,6 @@ float** generate_Kernel(int ksize, float sigma)
         }
     }
 
-    //Normalizing the kernel -> ensures no undesirable change in the image's brightness (the filter behaves consistently).
     for (int y = 0; y < ksize; y++) {
         for (int x = 0; x < ksize; x++) {
             kernel[y][x] /= sum;
@@ -331,13 +290,11 @@ float** generate_Kernel(int ksize, float sigma)
 
 
 
-void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface* filteredimage)
+void applyblur (SDL_Surface * image, float** kernel,
+        int kernelsize, SDL_Surface* filteredimage)
 {
     int imageWidth = image->w;
     int imageHeight = image->h;
-
-    //filteredimage =  a separate output image, with the same dimensions as the original image
-
     int center = kernelsize /2;
 
 
@@ -349,7 +306,6 @@ void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface
             float finalb = 0.0;
             float finalg = 0.0;
 
-            //For each pixel, we multiply the pixel values in the image with the corresponding values in the kernel and accumulates the results.
             for (int ky = 0; ky < kernelsize; ky++) {
                 for (int kx = 0; kx < kernelsize; kx++) {
 
@@ -359,7 +315,8 @@ void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface
                     int Yf = y + ky - center;
 
                     //check if we are outside of the array
-                    if (Xf >= 0 && Xf < imageWidth && Yf < imageHeight && Xf >=0) {
+                    if (Xf >= 0 && Xf < imageWidth && Yf < imageHeight
+                            && Xf >=0) {
                         Uint32* pixelinitial = (Uint32*)image->pixels;
 
 
@@ -372,11 +329,14 @@ void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface
                         finalb += kernel[kx][ky] *b;
                         finalg += kernel[kx][ky] *g;
                     }
-                    //if we are outside of the image boundaries, the values are treated as being zero.
+                    //if we are outside of the image boundaries,
+                    //the values are treated as being zero.
                 }
             }
-            Uint32 newPixelValue = SDL_MapRGBA(filteredimage->format, (Uint8)finalr, (Uint8)finalg, (Uint8)finalb, 255);
-            ((Uint32*)filteredimage->pixels)[y * imageWidth + x] = newPixelValue;
+            Uint32 newPixelValue = SDL_MapRGBA(filteredimage->format,
+                    (Uint8)finalr, (Uint8)finalg, (Uint8)finalb, 255);
+            ((Uint32*)filteredimage->pixels)[y * imageWidth + x] =
+                newPixelValue;
 
 
         }
@@ -396,7 +356,8 @@ void surface_to_reducenoise(SDL_Surface* surface)
     // Generate the Gaussian kernel
     float** kernel = generate_Kernel(kernelSize, sigma);
 
-    SDL_Surface* outputimage = SDL_CreateRGBSurface(0, surface->w, surface->h, 32, 0, 0, 0, 0);
+    SDL_Surface* outputimage = SDL_CreateRGBSurface(0,
+            surface->w, surface->h, 32, 0, 0, 0, 0);
     if (outputimage == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 

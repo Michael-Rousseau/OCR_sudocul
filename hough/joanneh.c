@@ -45,7 +45,8 @@ int accu_maxvalue(int ** accumulator,int rows, int cols)
 
 
 int isNearZero(double value, double epsilon) {
-    if (fabs(value) < epsilon || fabs(value - M_PI) < epsilon || fabs(value - M_PI_2) < epsilon)
+    if (fabs(value) < epsilon || fabs(value - M_PI) < epsilon ||
+            fabs(value - M_PI_2) < epsilon)
 	    return 1;
     return 0;
 }
@@ -53,7 +54,8 @@ int isNearZero(double value, double epsilon) {
 
 struct DetectedLines performHoughTransform(SDL_Surface *surface)
 {
-	const double DIAGONAL = sqrt(surface->w * surface->w+ surface->h * surface->h);
+	const double DIAGONAL = sqrt(surface->w * surface->w+
+                surface->h * surface->h);
 
 	const int RHO_MAX = (int)(2 * DIAGONAL ) +1;
 
@@ -92,7 +94,8 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 				for (int t = 0; t < theta_s; t++)
 				{
 					double currentTheta = t * theta;
-					double rho = (x * cos(currentTheta )) + (y * sin(currentTheta));
+					double rho = (x * cos(currentTheta ))
+                                            + (y * sin(currentTheta));
 
 					int rhoIndex = (int)(rho + RHO_OFFSET);
 
@@ -115,7 +118,8 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 		int maxval = accu_maxvalue(accumulator, RHO_MAX, theta_s);
 
 
-		// The threshold will depend on your specific application and image characteristics
+		// The threshold will depend on your specific
+                // application and image characteristics
 		int lineindex= 0;
 		const int THRESHOLD = maxval * 0.2;
 
@@ -134,51 +138,16 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 
 
 
-			/*		// Vertical lines
-					if ((isNearZero(foundTheta, epsilon) ==1) || (isNearZero(foundTheta, epsilon)==1))
-					{
-						int x = round(foundRho);
-						if (x >= 0 && x < w)
-						{
-
-							if (lineindex == n) {
-								n *= 2;
-								lines = (struct Line*) realloc(lines, n * sizeof(struct Line));
-							}
-							lines[lineindex].start.x = x;
-							lines[lineindex].end.x = x;
-							lines[lineindex].start.y = 0;
-							lines[lineindex].end.y = h;
-							lineindex++;
-						}
-					}
-
-					// Horizontal lines
-					else if (isNearZero(foundTheta, epsilon) ==1 )
-					{
-						int y = round(foundRho);
-						if (y >= 0 && y < h)
-						{
-							if (lineindex == n) {
-								n *= 2;
-								lines = (struct Line*) realloc(lines, n * sizeof(struct Line));
-							}
-							lines[lineindex].start.x = 0;
-							lines[lineindex].end.x = w;
-							lines[lineindex].start.y = y;
-							lines[lineindex].end.y = y;
-							lineindex++;
-						}
-					}
-
-*/
-
 
 					int x1, y1, x2, y2;
-					if ( foundTheta< 0.01 ||  fabs(foundTheta - M_PI) < 0.01) { //works perfectly //near 0 or pi
+					if ( foundTheta< 0.01 ||
+                                                fabs(foundTheta - M_PI)
+                                                < 0.01)
+                                        { //works perfectly //near 0 or pi
 
 				// Line is approximately vertical
-						x1 = x2 = foundRho / cos(foundTheta);
+						x1 = x2 =
+                                                    foundRho / cos(foundTheta);
 						y1 = 0;
 						y2 = h;
 
@@ -186,10 +155,13 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 						if (x1 >= w) x1 = x2 = w-1;
 
 
-					} else if  ( fabs(foundTheta - M_PI/2 ) < 0.01) {
-						// Line is approximately horizontal
+					} else if  ( fabs(foundTheta -
+                                                    M_PI/2 ) < 0.01) {
+				    // Line is approximately horizontal
 
-						y1 = y2 = (foundRho / sin (foundTheta ));
+						y1 = y2 =
+                                                    (foundRho
+                                                     / sin (foundTheta ));
 						x1 = 0;
 						x2 = w;
 
@@ -202,9 +174,12 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 					} else {
 						// diagonal
 						x1 = 0;
-						y1 = foundRho / sin(foundTheta) ;
+						y1 = foundRho
+                                                    / sin(foundTheta) ;
 						x2 = w;
-						y2 = ((foundRho - x2 * cos(foundTheta)) / sin(foundTheta) );
+						y2 = ((foundRho -
+                                                            x2 *
+                                        cos(foundTheta)) / sin(foundTheta) );
 
 						x1 = x2 =y1=y2 = 0;
 
@@ -212,7 +187,9 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 
 					if (lineindex == n) {
 						n *= 2;
-						lines = (struct Line*) realloc(lines, n * sizeof(struct Line));
+						lines = (struct Line*)
+                                                    realloc(lines,
+                                    n * sizeof(struct Line));
 					}
 
 					lines[lineindex].start.x = x1;
@@ -223,33 +200,6 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 					lines[lineindex].rho = foundRho;
 					lineindex++;
 
-				/*	double maxthetarad = (t -90) * M_PI /180;
-
-					int x0 = (int) ((r- DIAGONAL) * (-sin(maxthetarad)));
-					int y0 = (int) ((r-DIAGONAL) * cos(maxthetarad));
-
-					int x1 = x0 + DIAGONAL * (cos(maxthetarad));
-					int y1 = y0 + DIAGONAL + sin(maxthetarad);
-
-					if (x0==0 & y0 ==0){
-						x1 = y1=0;}
-
-					if (abs(x1-x0) <10){
-						x1 = x0;
-						x1+=10;
-						x0+=10;
-					}*/
-
-				/*	if (lineindex == n) {
-						n *= 2;
-						lines = (struct Line*) realloc(lines, n * sizeof(struct Line));
-					}
-
-					lines[lineindex].start.x = x0;
-					lines[lineindex].end.x = x1;
-					lines[lineindex].start.y = y0;
-					lines[lineindex].end.y = y1;
-					lineindex++;*/
 
 
 			}}
@@ -259,9 +209,9 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 		}
 		free(accumulator);
 
-		//lines = (struct Line*) realloc(lines, lineindex * sizeof(struct Line));
 
-		struct Line* temp = (struct Line*) realloc(lines, lineindex * sizeof(struct Line));
+		struct Line* temp = (struct Line*) realloc(lines,
+                        lineindex * sizeof(struct Line));
 		if (temp == NULL) {
 			// Handle memory allocation failure
 		}
@@ -292,7 +242,8 @@ float distance(struct Point a, struct Point b)
 int thelinebelongs(struct Line l1, struct Line l2)
 {
 
-	//if (fabs(l1.rho - l2.rho) <= rhoThreshold && fabs(l1.theta - l2.theta) <= thetaThreshold)
+	//if (fabs(l1.rho - l2.rho) <= rhoThreshold && fabs(l1.theta -
+        //l2.theta) <= thetaThreshold)
 
 	float startDistance = distance(l1.start, l2.start);
 	float endDistance = distance(l1.end, l2.end);
@@ -304,10 +255,14 @@ int thelinebelongs(struct Line l1, struct Line l2)
 
 void addtogroup(struct Line line, struct Linegroup* group)
 {
-	group->average.start.x = (group->average.start.x * group->numlines + line.start.x) / (group->numlines + 1);
-	group->average.start.y = (group->average.start.y * group->numlines + line.start.y) / (group->numlines + 1);
-	group->average.end.x = (group->average.end.x * group->numlines + line.end.x) / (group->numlines + 1);
-	group->average.end.y = (group->average.end.y * group->numlines + line.end.y) / (group->numlines + 1);
+	group->average.start.x = (group->average.start.x * group->numlines
+                + line.start.x) / (group->numlines + 1);
+	group->average.start.y = (group->average.start.y * group->numlines
+                + line.start.y) / (group->numlines + 1);
+	group->average.end.x = (group->average.end.x * group->numlines
+                + line.end.x) / (group->numlines + 1);
+	group->average.end.y = (group->average.end.y * group->numlines
+                + line.end.y) / (group->numlines + 1);
 	group->average.theta = line.theta;
 		group->average.rho = line.rho;
 	group->numlines +=1;
@@ -333,11 +288,13 @@ int averagelines(struct Line* line, int len,  struct Linegroup** group) {
 			if(ncurrent == n)
 			{
 				n *= 2;
-				group = realloc(group, n * sizeof(struct Linegroup*));
+				group = realloc(group, n *
+                                        sizeof(struct Linegroup*));
 
 				if (!group)
 				{
-					fprintf(stderr, "Memory allocation failed.\n");
+					fprintf(stderr,
+                                                "Memory allocation failed.\n");
 					exit(EXIT_FAILURE);
 				}
 
@@ -371,9 +328,11 @@ int averagelines(struct Line* line, int len,  struct Linegroup** group) {
 
 
 
-void drawl(struct Line* line, int len, SDL_Renderer* renderer, SDL_Texture* texture)
+void drawl(struct Line* line, int len, SDL_Renderer* renderer,
+        SDL_Texture* texture)
 {
-	struct Linegroup** group = calloc(len, sizeof(struct Linegroup*)); // use len as it represents the number of lines
+	struct Linegroup** group = calloc(len, sizeof(struct Linegroup*));
+        // use len as it represents the number of lines
 	if (!group) {
 		fprintf(stderr, "Memory allocation failed.\n");
 		exit(EXIT_FAILURE);
@@ -391,11 +350,16 @@ void drawl(struct Line* line, int len, SDL_Renderer* renderer, SDL_Texture* text
 
 	for(int i = 0; i < nmax; i++)
 	{
-		printf("start x %f y %f, end x%f y %f", group[i]->average.start.x, group[i]->average.start.y,
-				group[i]->average.end.x, group[i]->average.end.y);
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE); // Red color for the lines
-		SDL_RenderDrawLine(renderer, group[i]->average.start.x, group[i]->average.start.y,
-				group[i]->average.end.x, group[i]->average.end.y);
+		printf("start x %f y %f, end x%f y %f", group[i]->
+                        average.start.x, group[i]->average.start.y,
+				group[i]->average.end.x, group[i]->
+                                average.end.y);
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0,
+                        SDL_ALPHA_OPAQUE); // Red color for the lines
+		SDL_RenderDrawLine(renderer, group[i]->average.start.x,
+                        group[i]->average.start.y,
+				group[i]->average.end.x, group[i]->
+                                average.end.y);
 	}
 	SDL_RenderPresent(renderer);
 
@@ -407,7 +371,8 @@ void drawl(struct Line* line, int len, SDL_Renderer* renderer, SDL_Texture* text
 
 struct DetectedLines averagearray(struct Line* Line, int len)
 {
-	struct Linegroup** group = calloc(len, sizeof(struct Linegroup*)); // use len as it represents the number of lines
+	struct Linegroup** group = calloc(len, sizeof(struct Linegroup*));
+        // use len as it represents the number of lines
 	if (!group) {
 		fprintf(stderr, "Memory allocation failed.\n");
 		exit(EXIT_FAILURE);
@@ -452,7 +417,8 @@ struct DetectedLines averagearray(struct Line* Line, int len)
 
 
 
-void horizontal_vertical_lines( struct Line* lines, int len, struct Line* horizon, struct Line* vertical)
+void horizontal_vertical_lines( struct Line* lines, int len, struct
+        Line* horizon, struct Line* vertical)
 {
 	//thtea en degree
 	int j = 0, k = 0;
@@ -489,7 +455,8 @@ void sort_horizontal_lines(struct Line* horizon, int len)
 		compare = horizon[i];
 		j = i - 1;
 
-		// Move elements that are greater than key to one position ahead of their current position
+		// Move elements that are greater
+                // than key to one position ahead of their current position
 		while (j >= 0 && horizon[j].start.y > compare.start.y)
 		{
 			horizon[j + 1] = horizon[j];
@@ -515,7 +482,8 @@ void sort_vertical_lines(struct Line* vertical, int len)
 		compare = vertical[i];
 		j = i - 1;
 
-		// Move elements that are greater than key to one position ahead of their current position
+		// Move elements that are greater
+                // than key to one position ahead of their current position
 		while (j >= 0 && vertical[j].start.x > compare.start.x)
 		{
 			vertical[j + 1] = vertical[j];
@@ -530,7 +498,8 @@ void sort_vertical_lines(struct Line* vertical, int len)
 }
 
 
-void fillsquares(struct Line* vertical, struct Line* horizon, struct Squares* squares, int len)
+void fillsquares(struct Line* vertical, struct Line* horizon,
+        struct Squares* squares, int len)
 {
     int nx = 0;
 
@@ -590,10 +559,14 @@ void printvalues(struct Line* lines, int len)
 	for (int i = 0; i < num_squares; i++)
 	{
 		printf("%i \n",i);
-		printf("Top Left: (%f, %f)\n", squares[i].topleft.x, squares[i].topleft.y);
-		printf("Top Right: (%f, %f)\n", squares[i].topright.x, squares[i].topright.y);
-		printf("Bottom Right: (%f, %f)\n", squares[i].bottomright.x, squares[i].bottomright.y);
-		printf("Bottom Left: (%f, %f)\n", squares[i].bottomleft.x, squares[i].bottomleft.y);
+		printf("Top Left: (%f, %f)\n",
+                        squares[i].topleft.x, squares[i].topleft.y);
+		printf("Top Right: (%f, %f)\n",
+                        squares[i].topright.x, squares[i].topright.y);
+		printf("Bottom Right: (%f, %f)\n",
+                        squares[i].bottomright.x, squares[i].bottomright.y);
+		printf("Bottom Left: (%f, %f)\n",
+                        squares[i].bottomleft.x, squares[i].bottomleft.y);
 		printf("\n");
 
 	}
@@ -644,48 +617,3 @@ struct Squares* drawsquares(struct Line* lines, int len)
 
 
 
-
-
-/*
-
-void printvalues(struct Line* lines, int len)
-{
-    struct Line* horizon = calloc(len/2, sizeof(struct Line));
-    struct Line* vertical = calloc(len/2, sizeof(struct Line));
-
-    horizontal_vertical_lines(lines, len, horizon, vertical);
-
-    sort_horizontal_lines(horizon, len/2);
-    for (int i = 0;i< len/2; i++)
-    {
-	   // printf("x %f", horizon[i].start.x);
-	    printf("y %f \n", horizon[i].start.y);
-    }
-
-
-    sort_vertical_lines(vertical, len/2);
-
-     for (int i = 0;i< len /2; i++)
-    {
-	   // printf("x %f", horizon[i].start.x);
-	    printf("vertical y %f \n", vertical[i].start.x);
-    }
-
-    struct Square* squares = calloc(len * len, sizeof(struct Square));
-    fillsquares(vertical,horizon,squares, len*len);
-
-   for (int i = 0; i < len * len ; i++)
-    {
-	printf("%i \n",i);
-        printf("Top Left: (%f, %f)\n", squares[i].topleft.x, squares[i].topleft.y);
-        printf("Top Right: (%f, %f)\n", squares[i].topright.x, squares[i].topright.y);
-	printf("Bottom Right: (%f, %f)\n", squares[i].bottomright.x, squares[i].bottomright.y);
-	printf("Bottom Left: (%f, %f)\n", squares[i].bottomleft.x, squares[i].bottomleft.y);
-	printf("\n");
-
-    }
-    free(horizon);
-    free(vertical);
-    free(squares);
-}
-*/

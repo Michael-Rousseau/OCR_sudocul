@@ -24,8 +24,8 @@ struct DetectedLines{
 
 
  struct Linegroup {
-    struct Line average;  
-    int numlines; 
+    struct Line average;
+    int numlines;
 } ;
 
 struct Squares {
@@ -44,8 +44,9 @@ struct Squares* drawsquares(struct Line* lines, int len);
 
 struct DetectedLines averagearray(struct Line* Line, int len);
 
-void drawl(struct Line* line, int len,SDL_Renderer* renderer, SDL_Texture* texture);
+void drawl(struct Line* line, int len,SDL_Renderer* renderer,
+        SDL_Texture* texture);
 
-struct DetectedLines performHoughTransform(SDL_Surface *surface); 
+struct DetectedLines performHoughTransform(SDL_Surface *surface);
 
 #endif
