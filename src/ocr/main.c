@@ -1,7 +1,7 @@
 #include "helper.h"
 #include "network.h"
 #include "ocr.h"
-#include "parserMNIST/mnist.h"
+#include "mnist.h"
 
 #include <err.h>
 #include <stddef.h>
@@ -11,7 +11,7 @@
 
 size_t LAYER_COUNT = 3;
 
-#define NUM_IMAGE 200
+#define NUM_IMAGE 3
 #define LEARNING_RATE 0.9
 
 double *load_image(char *filename) {
@@ -27,7 +27,7 @@ double *load_image(char *filename) {
   }
 
   // Read and parse the header
-  fscanf(file, "%s %d %d %d", magic_number, &width, &height, &max_value);
+  fscanf(file, "%s\n %d\n %d\n %d", magic_number, &width, &height, &max_value);
   if (magic_number[0] != 'P' ||
       (magic_number[1] != '2' && magic_number[1] != '5')) {
     printf("Invalid PGM format\n");
@@ -64,7 +64,6 @@ void create_and_save_PGM() {
 
 int right_number(network *n, size_t i) {
   load_mnist();
-  // TODO: maybe apply softmax here
   return n->values[n->len - 1][test_label[i]] == 1;
 }
 
