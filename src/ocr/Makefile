@@ -2,15 +2,15 @@
 
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -ggdb3 -fsanitize=address -lm
+CFLAGS = -Wall -Wextra -fsanitize=address -lm -g
 LDFLAGS = -fsanitize=address -lm
 LDLIBS =
 
-SRC = xor.c helper.c network.c ocr.c
+SRC = xor.c helper.c network.c ocr.c main.c
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=.d}
 
-xor: ${OBJ}
+main: ${OBJ}
 
 .PHONY: clean
 

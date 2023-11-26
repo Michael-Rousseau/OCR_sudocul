@@ -49,7 +49,7 @@ void usage_error() {
 
     errx(EXIT_FAILURE, "%s\n", "Wrong usage.");
 }
-
+/*
 int main(int argc, char **argv) {
     // srand(RANDOM_SEED);
 
@@ -202,3 +202,4 @@ int main(int argc, char **argv) {
     free_network(n);
     return 0;
 }
+*/
