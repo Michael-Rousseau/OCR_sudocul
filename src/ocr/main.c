@@ -52,24 +52,6 @@ double *load_image(char *filename) {
   return image;
 }
 
-int good(network* n)//TODO always 5
-{
-    int r = 0;
-    double vr = 0;
-    double newvr;
-    for(int i = 0; i < 10; ++i)
-    {
-        newvr = n->values[n -> len-1][i];
-        if(newvr > vr)
-        {
-            vr = newvr;
-            r = i;
-        }
-    }
-    
-    printf(" r = %d\n", r);
-    return r;
-}
 
 void load_and_train(network *n) {
   double *current_image;
@@ -81,7 +63,7 @@ void load_and_train(network *n) {
 
   load_mnist();
   for (int i = 0; i < NUM_IMAGES; ++i) {
-    int a = snprintf(filename, sizeof(filename), "./data/image_%d.pgm", i); // Adjust the filename format based on your dataset
+    int a = snprintf(filename, sizeof(filename), "./data/image_%d.pgm", i);
     if (a == -1)
       err(1, "Error writing in tab");
 
@@ -94,7 +76,7 @@ void load_and_train(network *n) {
     target_output[train_label[i]] = 1; 
 
     feed_forward(n, current_image);
-    if (good(n) == train_label[i])
+    if (read_output(n) == train_label[i])
       rate++;
 
     back_prop(n, target_output);
