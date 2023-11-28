@@ -1,2 +1,2 @@
-rm image_*
+rm data/image_*
 make clean

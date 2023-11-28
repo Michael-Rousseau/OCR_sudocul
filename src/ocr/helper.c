@@ -2,12 +2,16 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
 
 //use these functions to generate random bits, for XOR tests
 double drand(double min, double max) {
     return ((float) rand() / (float) RAND_MAX) * (max - min) + min;
 }
 
+double xavier_scale(size_t input_size, size_t output_size) {
+    return sqrt(2.0 / (input_size + output_size));
+}
 double *get_random_bits(size_t n) {
     double *r = malloc(n * sizeof(double));
 

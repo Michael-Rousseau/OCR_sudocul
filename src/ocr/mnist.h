@@ -180,6 +180,6 @@ void save_mnist_pgm(double data_image[][SIZE], int index) {
     }
   }
   char imgName[MAX_FILENAME];
-  snprintf(imgName, sizeof(imgName), "image_%i.pgm", index);
+  snprintf(imgName, sizeof(imgName), "./data/image_%i.pgm", index);
   save_image(n, imgName); 
 }
