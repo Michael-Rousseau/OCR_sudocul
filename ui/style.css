@@ -1,3 +1,4 @@
+
 window {
     background-color: #17071F; /* Dark background for the window */
 }
@@ -28,5 +29,15 @@ filechooserbutton:hover {
     background-color: #17071F; /* Slightly lighter green when hovering */
 }
 
+
+button.changed-number {
+    background-image: none; /* Remove any background image */
+    background-color: pink; /* Light salmon color for changed numbers */
+    color: white; /* Brown text color for changed numbers */
+}
+
+button.changed-number:hover {
+    background-color: violet; /* Slightly darker salmon on hover */
+}
 
 
