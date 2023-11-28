@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-size_t LAYER_COUNT = 4;
+size_t LAYER_COUNT = 3;
 
-#define NUM_IMAGES 5000
-#define LEARNING_RATE 0.1
+#define NUM_IMAGES 50000
+#define LEARNING_RATE 0.9
 
 double *load_image(char *filename) {
   FILE *file;
@@ -52,24 +52,23 @@ double *load_image(char *filename) {
   return image;
 }
 
-int max(network *n) {
-  int r = 0;
-  double valr = 0;
-  for (int i = 0; i < 10; ++i) {
-    double newr = n->values[n->len - 1][i];
-    printf("newr: %f\n i: %d\n", newr, i);
-    if (newr > valr) {
-      valr = newr;
-      r = i;
+int good(network* n)//TODO always 5
+{
+    int r = 0;
+    double vr = 0;
+    double newvr;
+    for(int i = 0; i < 10; ++i)
+    {
+        newvr = n->values[n -> len-1][i];
+        if(newvr > vr)
+        {
+            vr = newvr;
+            r = i;
+        }
     }
-  }
-  printf("get: %d\n", r);
-  return r;
-}
-
-int right_number(network *n, size_t i) {
-  load_mnist();
-  return max(n) == train_label[i];
+    
+    printf(" r = %d\n", r);
+    return r;
 }
 
 void load_and_train(network *n) {
@@ -77,11 +76,12 @@ void load_and_train(network *n) {
   char filename[256];
   size_t rate = 0;
   size_t cpi = 0;
-  int *target_output = malloc(10 * sizeof(int));
+  int* target_output = calloc(10, sizeof(int));
+
 
   load_mnist();
   for (int i = 0; i < NUM_IMAGES; ++i) {
-    int a = snprintf(filename, sizeof(filename), "./data/image_%d.pgm", i);
+    int a = snprintf(filename, sizeof(filename), "./data/image_%d.pgm", i); // Adjust the filename format based on your dataset
     if (a == -1)
       err(1, "Error writing in tab");
 
@@ -90,25 +90,25 @@ void load_and_train(network *n) {
     if (current_image == NULL)
       errx(1, "Didn't get the image from load");
 
+
+    target_output[train_label[i]] = 1; 
+
     feed_forward(n, current_image);
-    if (right_number(n, i))
+    if (good(n) == train_label[i])
       rate++;
 
-    int target = (train_label)[i];
-    printf("target: %d\n", target);
-
-    target_output[target] = 1;
     back_prop(n, target_output);
     learn(n, LEARNING_RATE);
 
-    target_output[(int)target] = 1;
-    if (i % 100 == 0 && i != 0) // Adjust the print frequency as needed
+    target_output[train_label[i]] = 0;
+    if (i % 10 == 0 && i != 0)
       printf("Accuracy at iteration %d: %.2f%%\n", i, (double)rate / i * 100.0);
+
     cpi = i;
   }
-  free(target_output);
 
   printf("Final accuracy: %.2f%%\n", (double)rate / cpi * 100.0);
+  free(target_output);
 }
 
 void build_Images(int i) {
@@ -122,10 +122,10 @@ int main() {
   size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
   layers[0] = 784;
   layers[1] = 1000;
-  layers[2] = 16;
-  layers[3] = 10;
+  layers[2] = 10;
   network *n = xavier_init_network(layers, LAYER_COUNT);
 
+//  build_Images(50000);
   load_and_train(n);
 
   free_network(n);
