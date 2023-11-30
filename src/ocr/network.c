@@ -68,7 +68,6 @@ network *xavier_init_network(size_t *layers, size_t len) {
       }
     }
   }
-
   return n;
 }
 

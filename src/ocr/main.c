@@ -52,14 +52,12 @@ double *load_image(char *filename) {
   return image;
 }
 
-
 void load_and_train(network *n) {
   double *current_image;
   char filename[256];
   size_t rate = 0;
   size_t cpi = 0;
-  int* target_output = calloc(10, sizeof(int));
-
+  int *target_output = calloc(10, sizeof(int));
 
   load_mnist();
   for (int i = 0; i < NUM_IMAGES; ++i) {
@@ -68,18 +66,19 @@ void load_and_train(network *n) {
       err(1, "Error writing in tab");
 
     current_image = load_image(filename);
+    for (size_t i = 0; i < 784; ++i)
+      current_image[1] /= 255.0;
 
     if (current_image == NULL)
       errx(1, "Didn't get the image from load");
 
-
-    target_output[train_label[i]] = 1; 
+    target_output[train_label[i]] = 1;
 
     feed_forward(n, current_image);
-    if (read_output(n) == train_label[i])
+    if (read_output(n) == (size_t)train_label[i])
       rate++;
 
-    back_prop(n, target_output);
+    back_prop(n, (int *)target_output);
     learn(n, LEARNING_RATE);
 
     target_output[train_label[i]] = 0;
@@ -107,7 +106,7 @@ int main() {
   layers[2] = 10;
   network *n = xavier_init_network(layers, LAYER_COUNT);
 
-//  build_Images(50000);
+  //  build_Images(50000);
   load_and_train(n);
 
   free_network(n);
