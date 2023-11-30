@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "err.h"
 #include "helper.h"
 #include "network.h"
 
@@ -40,7 +41,45 @@ double softmax_derivative(double softmax_value) {
 double sigmoid(double x) { return 1 / (1 + exp(-x)); }
 
 double prime_sigmoid(double x) { return x * (1 - x); }
+/*
+void feed_forward(network *n, double *inputs) {
+  for (size_t i = 0; i < n->layers[0]; i++)
+    n->values[0][i] = inputs[i];
 
+  for (size_t layer = 1; layer < n->len - 1; layer++) {
+    double **wmat = n->weights[layer - 1];
+    double *v_inp = n->values[layer - 1];
+    double *v_out = n->values[layer];
+    double *b_row = n->biases[layer - 1];
+
+    for (size_t i = 0; i < n->layers[layer]; i++) {
+      double *wrow = wmat[i];
+      double sum = 0;
+
+      for (size_t j = 0; j < n->layers[layer - 1]; j++) {
+        sum += v_inp[j] * wrow[j];
+      }
+
+      // Apply ReLU activation
+      v_out[i] = fmax(0, sum + b_row[i]);
+    }
+  }
+  size_t last = n->len - 1;
+  double *output_layer_input = n->values[last - 1];
+  double *output_layer_output = n->values[last];
+  double *output_layer_biases = n->biases[last - 1];
+
+  for (size_t i = 0; i < n->layers[last]; i++) {
+    double sum = output_layer_biases[i];
+
+    for (size_t j = 0; j < n->layers[last - 1]; j++) {
+      sum += n->weights[last - 1][i][j] * output_layer_input[j];
+    }
+
+    // Softmax (assuming the last layer is the output layer)
+    output_layer_output[i] = exp(sum);
+  }
+}*/
 void feed_forward(network *n, double *inputs) {
   for (size_t i = 0; i < n->layers[0]; i++)
     n->values[0][i] = inputs[i];
@@ -82,11 +121,16 @@ void feed_forward(network *n, double *inputs) {
 size_t read_output(network *n) {
   size_t last = n->len - 1;
 
+  int counter_null = 0;
   size_t max = 0;
   for (size_t i = 1; i < n->layers[last]; i++) {
-    printf("last vaues[%zu] : %f\n", i, n->values[last][i]);
+    //    printf("last vaues[%zu] : %f\n", i, n->values[last][i]);
+    if (n->values[last][i] == 0.0)
+      counter_null++;
     if (n->values[last][i] > n->values[last][max])
       max = i;
+    if (counter_null > 5)
+      errx(1, "stop");
   }
 
   return max;
@@ -127,4 +171,3 @@ void learn(network *n, double speed) {
     }
   }
 }
-

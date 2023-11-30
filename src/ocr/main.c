@@ -10,23 +10,59 @@
 #include <string.h>
 
 size_t LAYER_COUNT = 3;
-
+//TODO the problem should be in the table given in parameters
 #define NUM_IMAGES 50000
-#define LEARNING_RATE 0.9
+#define LEARNING_RATE 0.01
 
+void train_batch(network *n, double speed, double **batch_inputs,
+                 int **batch_targets, size_t batch_size) {
+  for (size_t batch = 0; batch < batch_size; ++batch) {
+    feed_forward(n, batch_inputs[batch]);
+    back_prop(n, batch_targets[batch]);
+    learn(n, speed);
+  }
+}
+
+void train(network *n, double speed, double **inputs, int **targets,
+           size_t num_samples, size_t num_epochs, size_t batch_size) {
+  for (size_t epoch = 0; epoch < num_epochs; ++epoch) {
+    size_t correct_predictions = 0;
+
+    for (size_t start = 0; start < num_samples; start += batch_size) {
+      size_t end = start + batch_size;
+      if (end > num_samples) {
+        end = num_samples;
+      }
+
+      size_t current_batch_size = end - start;
+      double **batch_inputs = &inputs[start];
+      int **batch_targets = &targets[start];
+      train_batch(n, speed, batch_inputs, batch_targets, current_batch_size);
+      for (size_t i = 0; i < current_batch_size; ++i) {
+        feed_forward(n, batch_inputs[i]);
+        if (read_output(n) == (*batch_targets[i]))
+          correct_predictions++;
+        if ((start + i + 1) % 1000 == 0) {
+          double accuracy_so_far =
+              (double)correct_predictions / (start + i + 1) * 100.0;
+          printf("Epoch %zu - Tests: %zu - Accuracy: %.2f%%\n", epoch + 1,
+                 start + i + 1, accuracy_so_far);
+        }
+      }
+    }
+    double accuracy = (double)correct_predictions / num_samples * 100.0;
+    printf("Epoch %zu - Final Accuracy: %.2f%%\n", epoch + 1, accuracy);
+  }
+}
 double *load_image(char *filename) {
   FILE *file;
   char magic_number[3];
   int width, height, max_value, pixel;
-
-  // Open the file for reading
   file = fopen(filename, "rb");
   if (file == NULL) {
     errx(1, "Error opening file");
     return NULL;
   }
-
-  // Read and parse the header
   fscanf(file, "%s\n %d\n %d\n %d", magic_number, &width, &height, &max_value);
   if (magic_number[0] != 'P' ||
       (magic_number[1] != '2' && magic_number[1] != '5')) {
@@ -34,16 +70,12 @@ double *load_image(char *filename) {
     fclose(file);
     return NULL;
   }
-
-  // Allocate memory for the image
   double *image = (double *)malloc(width * height * sizeof(double));
   if (image == NULL) {
     errx(1, "Memory allocation failed");
     fclose(file);
     return NULL;
   }
-
-  // Read the pixel data
   for (int i = 0; i < width * height; i++) {
     fscanf(file, "%d", &pixel);
     image[i] = pixel;
@@ -53,43 +85,44 @@ double *load_image(char *filename) {
 }
 
 void load_and_train(network *n) {
-  double *current_image;
-  char filename[256];
-  size_t rate = 0;
-  size_t cpi = 0;
-  int *target_output = calloc(10, sizeof(int));
+  double **inputs = malloc(NUM_IMAGES * sizeof(double *));
+  int **targets = malloc(NUM_IMAGES * sizeof(int *));
 
   load_mnist();
+
   for (int i = 0; i < NUM_IMAGES; ++i) {
+    char filename[256];
     int a = snprintf(filename, sizeof(filename), "./data/image_%d.pgm", i);
     if (a == -1)
       err(1, "Error writing in tab");
 
-    current_image = load_image(filename);
+    double *current_image = load_image(filename);
+
     for (size_t i = 0; i < 784; ++i)
-      current_image[1] /= 255.0;
+      current_image[i] /= 255.0;
 
     if (current_image == NULL)
       errx(1, "Didn't get the image from load");
 
+    int *target_output = calloc(10, sizeof(int));
     target_output[train_label[i]] = 1;
 
-    feed_forward(n, current_image);
-    if (read_output(n) == (size_t)train_label[i])
-      rate++;
-
-    back_prop(n, (int *)target_output);
-    learn(n, LEARNING_RATE);
-
-    target_output[train_label[i]] = 0;
-    if (i % 10 == 0 && i != 0)
-      printf("Accuracy at iteration %d: %.2f%%\n", i, (double)rate / i * 100.0);
-
-    cpi = i;
+    inputs[i] = current_image;
+    targets[i] = target_output;
   }
 
-  printf("Final accuracy: %.2f%%\n", (double)rate / cpi * 100.0);
-  free(target_output);
+  size_t num_samples = NUM_IMAGES;
+  size_t num_epochs = 10;
+  size_t batch_size = 32;
+
+  train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size);
+
+  for (int i = 0; i < NUM_IMAGES; ++i) {
+    free(inputs[i]);
+    free(targets[i]);
+  }
+  free(inputs);
+  free(targets);
 }
 
 void build_Images(int i) {
@@ -102,7 +135,7 @@ void build_Images(int i) {
 int main() {
   size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
   layers[0] = 784;
-  layers[1] = 1000;
+  layers[1] = 16;
   layers[2] = 10;
   network *n = xavier_init_network(layers, LAYER_COUNT);
 

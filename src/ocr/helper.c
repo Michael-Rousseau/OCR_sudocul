@@ -9,6 +9,9 @@ double drand(double min, double max) {
     return ((float) rand() / (float) RAND_MAX) * (max - min) + min;
 }
 
+double he_scale(size_t input_size) {
+  return sqrt(2.0 / input_size);
+}
 double xavier_scale(size_t input_size, size_t output_size) {
     return sqrt(2.0 / (input_size + output_size));
 }

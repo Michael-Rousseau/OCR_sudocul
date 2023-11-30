@@ -30,3 +30,4 @@ void free_network(network *network);
 
 void print_network(network *n);
 void network_to_graph(network *n, char *path);
+network *he_init_network(size_t *layers, size_t len);

@@ -55,6 +55,19 @@ network *init_network(size_t *layers, size_t len) {
   return n;
 }
 
+network *he_init_network(size_t *layers, size_t len) {
+  network *n = init_network(layers, len);
+
+  for (size_t i = 0; i < n->len - 1; i++) {
+    for (size_t j = 0; j < n->layers[i + 1]; j++) {
+      n->biases[i][j] = drand(-1.0, 1.0) * he_scale(n->layers[i]);
+      for (size_t k = 0; k < n->layers[i]; k++) {
+        n->weights[i][j][k] = drand(-1.0, 1.0) * he_scale(n->layers[i]);
+      }
+    }
+  }
+  return n;
+}
 network *xavier_init_network(size_t *layers, size_t len) {
   network *n = init_network(layers, len);
 
@@ -62,6 +75,7 @@ network *xavier_init_network(size_t *layers, size_t len) {
     for (size_t j = 0; j < n->layers[i + 1]; j++) {
       n->biases[i][j] =
           drand(-1.0, 1.0) * xavier_scale(n->layers[i], n->layers[i + 1]);
+
       for (size_t k = 0; k < n->layers[i]; k++) {
         n->weights[i][j][k] =
             drand(-1.0, 1.0) * xavier_scale(n->layers[i], n->layers[i + 1]);
