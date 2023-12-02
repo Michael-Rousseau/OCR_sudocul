@@ -28,7 +28,7 @@ void softmax(unsigned int k, double *z) {
     sum += exp(z[i] - max_val);
   }
 
-  sum = sum == 0 ? 1 : sum;
+sum = sum < 1e-8 ? 1e-8 : sum;
   for (unsigned i = 0; i < k; i++) {
     z[i] = exp(z[i] - max_val) / sum;
   }

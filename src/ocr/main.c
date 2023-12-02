@@ -10,7 +10,6 @@
 #include <string.h>
 
 size_t LAYER_COUNT = 3;
-//TODO the problem should be in the table given in parameters
 #define NUM_IMAGES 50000
 #define LEARNING_RATE 0.1
 
@@ -26,10 +25,10 @@ void train_batch(network *n, double speed, double **batch_inputs,
 void train(network *n, double speed, double **inputs, int **targets,
            size_t num_samples, size_t num_epochs, size_t batch_size) {
     load_mnist();
-    size_t index =0;
   for (size_t epoch = 0; epoch < num_epochs; ++epoch) {
     size_t correct_predictions = 0;
 
+    size_t index =0;
     for (size_t start = 0; start < num_samples; start += batch_size) {
       size_t end = start + batch_size;
       if (end > num_samples) {
@@ -42,15 +41,14 @@ void train(network *n, double speed, double **inputs, int **targets,
       train_batch(n, speed, batch_inputs, batch_targets, current_batch_size);
       for (size_t i = 0; i < current_batch_size; ++i) {
         feed_forward(n, batch_inputs[i]);
-//        printf("result: %zu\nexpected: %d\n", read_output(n), train_label[index++]);
-        if(*batch_targets[read_output(n)])
-//        if (read_output(n) == (*batch_targets[i]))
+        //printf("result: %zu\nexpected: %d\n", read_output(n), train_label[index++]);
+        if((int)read_output(n) == train_label[index++])
           correct_predictions++;
         if ((start + i + 1) % 1000 == 0) {
           double accuracy_so_far =
               (double)correct_predictions / (start + i + 1) * 100.0;
-          printf("Epoch %zu - Tests: %zu - Accuracy: %.2f%%\n", epoch + 1,
-                 start + i + 1, accuracy_so_far);
+          printf("Epoch %zu - Tests: %zu - Accuracy: %.2f%%\n Correct: %zu\n", epoch + 1,
+                 start + i + 1, accuracy_so_far, correct_predictions);
         }
       }
     }
@@ -116,8 +114,8 @@ void load_and_train(network *n) {
   }
 
   size_t num_samples = NUM_IMAGES;
-  size_t num_epochs = 10;
-  size_t batch_size = 10;
+  size_t num_epochs = 1;
+  size_t batch_size = 1;
 
   train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size);
 
@@ -136,16 +134,22 @@ void build_Images(int i) {
   }
 }
 
+void test_from_load()
+{
+    network* n = import_network("testnetwork");
+
+}
 int main() {
   size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
   layers[0] = 784;
-  layers[1] = 160;
+  layers[1] = 300;
   layers[2] = 10;
   network *n = xavier_init_network(layers, LAYER_COUNT);
 
-    build_Images(NUM_IMAGES);
+//build_Images(NUM_IMAGES);
   load_and_train(n);
 
+    export_network(n, "testnetwork");
   free_network(n);
   return 0;
 }
