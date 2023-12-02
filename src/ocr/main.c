@@ -41,7 +41,7 @@ void train(network *n, double speed, double **inputs, int **targets,
       train_batch(n, speed, batch_inputs, batch_targets, current_batch_size);
       for (size_t i = 0; i < current_batch_size; ++i) {
         feed_forward(n, batch_inputs[i]);
-        //printf("result: %zu\nexpected: %d\n", read_output(n), train_label[index++]);
+        //printf("result: %zu\nexpected: %d\n", read_output(n), train_label[index]);
         if((int)read_output(n) == train_label[index++])
           correct_predictions++;
         if ((start + i + 1) % 1000 == 0) {
@@ -62,7 +62,7 @@ double *load_image(char *filename) {
   int width, height, max_value, pixel;
   file = fopen(filename, "rb");
   if (file == NULL) {
-    errx(1, "Error opening file");
+    errx(1, "call build_Images");
     return NULL;
   }
   fscanf(file, "%s\n %d\n %d\n %d", magic_number, &width, &height, &max_value);
@@ -145,6 +145,8 @@ int main() {
   layers[1] = 300;
   layers[2] = 10;
   network *n = xavier_init_network(layers, LAYER_COUNT);
+
+  //first: call build_images and then comment it
 
 //build_Images(NUM_IMAGES);
   load_and_train(n);
