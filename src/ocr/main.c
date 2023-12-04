@@ -2,6 +2,7 @@
 #include "mnist.h"
 #include "network.h"
 #include "ocr.h"
+#include <emmintrin.h>
 
 #include <err.h>
 #include <stddef.h>
@@ -10,7 +11,7 @@
 #include <string.h>
 
 size_t LAYER_COUNT = 3;
-#define NUM_IMAGES 50000
+#define NUM_IMAGES 10000
 #define LEARNING_RATE 0.1
 
 void train_batch(network *n, double speed, double **batch_inputs,
@@ -57,36 +58,6 @@ void train(network *n, double speed, double **inputs, int **targets,
     printf("Epoch %zu - Final Accuracy: %.2f%%\n", epoch + 1, accuracy);
   }
 }
-double *load_image(char *filename) {
-  FILE *file;
-  char magic_number[3];
-  int width, height, max_value, pixel;
-  file = fopen(filename, "rb");
-  if (file == NULL) {
-    errx(1, "call build_Images");
-    return NULL;
-  }
-  fscanf(file, "%s\n %d\n %d\n %d", magic_number, &width, &height, &max_value);
-  if (magic_number[0] != 'P' ||
-      (magic_number[1] != '2' && magic_number[1] != '5')) {
-    printf("Invalid PGM format\n");
-    fclose(file);
-    return NULL;
-  }
-  double *image = (double *)malloc(width * height * sizeof(double));
-  if (image == NULL) {
-    errx(1, "Memory allocation failed");
-    fclose(file);
-    return NULL;
-  }
-  for (int i = 0; i < width * height; i++) {
-    fscanf(file, "%d", &pixel);
-    image[i] = pixel;
-  }
-  fclose(file);
-  return image;
-}
-
 void load_and_train(network *n) {
   double **inputs = malloc(NUM_IMAGES * sizeof(double *));
   int **targets = malloc(NUM_IMAGES * sizeof(int *));
@@ -100,12 +71,12 @@ void load_and_train(network *n) {
       err(1, "Error writing in tab");
 
     double *current_image = train_image[i];
-    for (size_t i = 0; i < 784; ++i)
+    for (size_t i = 0; i < 784; i += 2)
     {
-        if(current_image[i] > 0.5)
-            current_image[i] = 1;
-        else
-         current_image[i] = 0;
+        __m128d image_vector = _mm_loadu_pd(&current_image[i]);
+        __m128d threshold_vector = _mm_set1_pd(0.5);
+        __m128d result_vector = _mm_cmpgt_pd(image_vector, threshold_vector);
+        _mm_storeu_pd(&current_image[i], result_vector);
     }
 
 
@@ -120,8 +91,8 @@ void load_and_train(network *n) {
   }
 
   size_t num_samples = NUM_IMAGES;
-  size_t num_epochs = 10;
-  size_t batch_size = 10;
+  size_t num_epochs = 1;
+  size_t batch_size = 1;
 
   train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size);
 
@@ -130,13 +101,6 @@ void load_and_train(network *n) {
   }
   free(inputs);
   free(targets);
-}
-
-void build_Images(int i) {
-  load_mnist();
-  for (int a = 0; a < i; ++a) {
-    save_mnist_pgm(train_image, a);
-  }
 }
 
 void test_from_load(int nb_test) {
@@ -164,6 +128,9 @@ void test_from_load(int nb_test) {
   double final = (double)accuracy / (double)nb_test; 
   printf("final : %f\n", final * 100);
 }
+
+
+
 int main() {
   size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
   layers[0] = 784;
@@ -176,8 +143,8 @@ int main() {
   // build_Images(NUM_IMAGES);
  load_and_train(n);
 
-   export_network(n, "testnetwork");
-  test_from_load(1000);
+//   export_network(n, "testnetwork");
+  //test_from_load(1000);
 
   free_network(n);
   return 0;
