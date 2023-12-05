@@ -11,7 +11,7 @@
 #include <string.h>
 
 size_t LAYER_COUNT = 3;
-#define NUM_IMAGES 10000
+#define NUM_IMAGES 50000
 #define LEARNING_RATE 0.1
 
 void train_batch(network *n, double speed, double **batch_inputs,
@@ -104,7 +104,7 @@ void load_and_train(network *n) {
 }
 
 void test_from_load(int nb_test) {
-  network *n = import_network("testnetwork");
+  network *n = import_network("threadnetwork.nw");
   load_mnist();
   int accuracy = 0;
   for (int i = 0; i < nb_test; ++i) {
@@ -119,7 +119,7 @@ void test_from_load(int nb_test) {
          inputs[i] = 0;
     }
     feed_forward(n, inputs);
-    if(read_output(n) == expected)
+    if((int)read_output(n) == expected)
     {
         accuracy++;
     }
@@ -143,7 +143,7 @@ int main() {
   // build_Images(NUM_IMAGES);
  load_and_train(n);
 
-//   export_network(n, "testnetwork");
+   export_network(n, "threadnetwork.nw");
   //test_from_load(1000);
 
   free_network(n);

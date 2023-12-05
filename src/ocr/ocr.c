@@ -3,6 +3,7 @@
 #include <emmintrin.h>
 #include <pthread.h>
 
+#include "thread_pool.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -109,6 +110,82 @@ void feed_forward(network *n, double *inputs) {
 
   softmax(n->layers[last], output_layer_output);
 }
+/*
+void* feed_forward_task(void *arg) {
+    FeedForwardTask *task = (FeedForwardTask*)arg;
+    network *n = task->n;
+    double *inputs = task->inputs;
+    double *output = task->output;
+    size_t layer = task->layer;
+
+    double **wmat = n->weights[layer - 1];
+    double *v_inp = n->values[layer - 1];
+    double *v_out = n->values[layer];
+    double *b_row = n->biases[layer - 1];
+
+    for (size_t i = 0; i < n->layers[layer]; i++) {
+        double *wrow = wmat[i];
+        double sum = 0;
+        __m128d sum_vector = _mm_setzero_pd();
+
+        for (size_t j = 0; j < n->layers[layer - 1]; j += 2) {
+            __m128d v_inp_vector = _mm_loadu_pd(&v_inp[j]);
+            __m128d wrow_vector = _mm_loadu_pd(&wrow[j]);
+            sum_vector = _mm_add_pd(sum_vector, _mm_mul_pd(v_inp_vector,
+wrow_vector));
+        }
+        sum += sum_vector[0] + sum_vector[1];
+
+        for (size_t j = n->layers[layer - 1] & ~1; j < n->layers[layer - 1];
+j++) { sum += v_inp[j] * wrow[j];
+        }
+
+        v_out[i] = sigmoid(sum + b_row[i]);
+    }
+
+    if (layer == n->len - 1) {
+        double *output_layer_input = n->values[layer - 1];
+
+        for (size_t i = 0; i < n->layers[layer]; i++) {
+            double sum = n->biases[layer - 1][i];
+
+            for (size_t j = 0; j < n->layers[layer - 1]; j++) {
+                sum += n->weights[layer - 1][i][j] * output_layer_input[j];
+            }
+
+            output[i] = sum;
+        }
+
+        softmax(n->layers[layer], output);
+    }
+
+    pthread_exit(NULL);
+}
+
+void feed_forward(network *n, double *inputs, double *output, ThreadPool *pool)
+{ for (size_t i = 0; i < n->layers[0]; i++) { n->values[0][i] = inputs[i];
+    }
+
+    size_t num_layers = n->len - 1;
+    size_t num_tasks = num_layers;
+    int *task_states = (int*)malloc(num_tasks * sizeof(int));
+    FeedForwardTask *tasks = (FeedForwardTask*)malloc(num_tasks *
+sizeof(FeedForwardTask)); for (size_t i = 0; i < num_tasks; i++) {
+        task_states[i] = 1;
+        tasks[i].n = n;
+        tasks[i].inputs = inputs;
+        tasks[i].output = output;
+        tasks[i].layer = i + 1;
+    }
+
+    submit_task(pool, num_tasks, task_states);
+    while (pool->tasks_completed < num_tasks) {
+        // Optionally, perform other tasks in the main thread
+    }
+    free(task_states);
+    free(tasks);
+}
+*/
 
 void *back_prop_thread(void *arg) {
   struct ThreadData *data = (struct ThreadData *)arg;
@@ -185,7 +262,6 @@ void *learn_thread(void *arg) {
 }
 
 void learn(network *n, double speed) {
-  size_t last = n->len - 1;
   pthread_t threads[NUM_THREADS];
   struct ThreadData threadData[NUM_THREADS];
   pthread_mutex_t mutex;
