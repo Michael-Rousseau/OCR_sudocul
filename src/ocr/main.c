@@ -2,6 +2,8 @@
 #include "mnist.h"
 #include "network.h"
 #include "ocr.h"
+#include "png.h"
+#include "png_lib.h"
 
 #include <err.h>
 #include <stddef.h>
@@ -30,7 +32,7 @@ void train(network *n, double speed, double **inputs, int **targets,
 
     size_t index = 0;
     for (size_t start = 0; start < num_samples; start += batch_size) {
-      size_t end = start +batch_size ;
+      size_t end = start + batch_size;
       if (end > num_samples) {
         end = num_samples;
       }
@@ -44,8 +46,7 @@ void train(network *n, double speed, double **inputs, int **targets,
         if ((int)read_output(n) == train_label[index++])
           correct_predictions++;
         if ((start + i + 1) % 1000 == 0) {
-          double accuracy_so_far =
-              (double)correct_predictions / (10.0);
+          double accuracy_so_far = (double)correct_predictions / (10.0);
           printf("Epoch %zu - Tests: %zu - Accuracy: %.2f%%\n Correct: %zu\n",
                  epoch + 1, start + i + 1, accuracy_so_far,
                  correct_predictions);
@@ -88,47 +89,46 @@ double *load_image(char *filename) {
 }
 
 void load_and_train(network *n) {
-    double **inputs = malloc(NUM_IMAGES * sizeof(double *));
-    int **targets = malloc(NUM_IMAGES * sizeof(int *));
+  double **inputs = malloc(NUM_IMAGES * sizeof(double *));
+  int **targets = malloc(NUM_IMAGES * sizeof(int *));
 
-    const char *folder = "./data/digits_im/0/";  // Replace with the actual folder path
-    char **pngFiles;
-    int numFiles;
+  const char *folder =
+      "./data/digits_im/0/"; // Replace with the actual folder path
+  char **pngFiles;
+  int numFiles;
 
-    get_png_files(folder, &pngFiles, &numFiles);
+  get_png_files(folder, &pngFiles, &numFiles);
 
-    // Length of images dimensions:
-    // images[9 (label)][NB_IMAGES][784]
-    double ***images;
-    load_images(&images, pngFiles, NUM_IMAGES);
+  // Length of images dimensions:
+  // images[9 (label)][NB_IMAGES][784]
+  double ***images;
+  load_images(&images, pngFiles, NUM_IMAGES);
 
-    int i;
-    for (int label = 0; label < 9; ++label) {
-        for(int num = 0; num < 30; num++)
-        {
-            double *current_image = images[label][i++];
-            int *target_output = calloc(10, sizeof(int));
-            target_output[label] = 1;
+  int i = 0;
+  for (int label = 0; label < 9; ++label) {
+    for (int num = 0; num < 30; num++) {
+      double *current_image = images[label][i];
+      int *target_output = calloc(10, sizeof(int));
+      target_output[label] = 1;
 
-            inputs[i++] = current_image;
-            targets[i++] = target_output;
-        }
+      inputs[i] = current_image;
+      targets[i++] = target_output;
     }
-    size_t num_samples = NUM_IMAGES;
-    size_t num_epochs = 1;
-    size_t batch_size = 1;
+  }
+  size_t num_samples = 9*30;
+  size_t num_epochs = 1;
+  size_t batch_size = 1;
 
-    train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size);
+  train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size);
 
-    for (int i = 0; i < NUM_IMAGES; ++i) {
-        free(targets[i]);
-    }
-    free(inputs);
-    free(targets);
-    free_file_names(&pngFiles, numFiles);
-    free_images(&images, numFiles);
+  for (int i = 0; i < NUM_IMAGES; ++i) {
+    free(targets[i]);
+  }
+  free(inputs);
+  free(targets);
+  free_file_names(&pngFiles, numFiles);
+  free_images(&images, numFiles);
 }
-
 
 void build_Images(int i) {
   load_mnist();
@@ -145,21 +145,19 @@ void test_from_load(int nb_test) {
     int expected = test_label[i];
 
     double *inputs = test_image[i];
-    for (int j = 0; j < 784; ++j)
-    {
-        if(inputs[i] >0.5)
-            inputs[i] = 1;
-        else
-         inputs[i] = 0;
+    for (int j = 0; j < 784; ++j) {
+      if (inputs[i] > 0.5)
+        inputs[i] = 1;
+      else
+        inputs[i] = 0;
     }
     feed_forward(n, inputs);
-    if(read_output(n) == expected)
-    {
-        accuracy++;
+    if (read_output(n) == expected) {
+      accuracy++;
     }
     printf("result: %zu\nexpected: %d\n", read_output(n), expected);
   }
-  double final = (double)accuracy / (double)nb_test; 
+  double final = (double)accuracy / (double)nb_test;
   printf("final : %f\n", final * 100);
 }
 int main() {
@@ -172,10 +170,10 @@ int main() {
   // first: call build_images and then comment it
 
   // build_Images(NUM_IMAGES);
- load_and_train(n);
+  load_and_train(n);
 
-//   export_network(n, "testnetwork");
-  //test_from_load(1000);
+  //   export_network(n, "testnetwork");
+  // test_from_load(1000);
 
   free_network(n);
   return 0;
