@@ -2,11 +2,11 @@
 
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -fsanitize=address -lm -g
-LDFLAGS = -fsanitize=address -lm
-LDLIBS =
+CFLAGS = -Wall -Wextra -fsanitize=address -lm -g `pkg-config --cflags sdl2 SDL2_image` -lpng
+LDFLAGS = -fsanitize=address -lm -lpng
+LDLIBS =`pkg-config --libs sdl2 SDL2_image`
 
-SRC = xor.c helper.c network.c ocr.c main.c
+SRC = helper.c network.c ocr.c main.c
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=.d}
 
@@ -20,3 +20,4 @@ clean:
 	${RM} main
 
 # END
+
