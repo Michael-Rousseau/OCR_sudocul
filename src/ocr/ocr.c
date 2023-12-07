@@ -110,7 +110,47 @@ void feed_forward(network *n, double *inputs) {
 
   softmax(n->layers[last], output_layer_output);
 }
+
 /*
+void feed_forward(network *n, double *inputs) {
+  for (size_t i = 0; i < n->layers[0]; i++)
+    n->values[0][i] = inputs[i];
+  for (size_t layer = 1; layer < n->len - 1; layer++) {
+    double **wmat = n->weights[layer - 1];
+    double *v_inp = n->values[layer - 1];
+    double *v_out = n->values[layer];
+    double *b_row = n->biases[layer - 1];
+
+    for (size_t i = 0; i < n->layers[layer]; i++) {
+      double *wrow = wmat[i];
+      double sum = 0;
+
+      for (size_t j = 0; j < n->layers[layer - 1]; j++) {
+        sum += v_inp[j] * wrow[j];
+      }
+
+      v_out[i] = sigmoid(sum + b_row[i]);
+    }
+  }
+  size_t last = n->len - 1;
+  double *output_layer_input = n->values[last - 1];
+  double *output_layer_output = n->values[last];
+  double *output_layer_biases = n->biases[last - 1];
+
+  for (size_t i = 0; i < n->layers[last]; i++) {
+    double sum = output_layer_biases[i];
+
+    for (size_t j = 0; j < n->layers[last - 1]; j++) {
+      sum += n->weights[last - 1][i][j] * output_layer_input[j];
+    }
+
+    output_layer_output[i] = sum;
+  }
+
+  softmax(n->layers[last], output_layer_output);
+}
+
+
 void* feed_forward_task(void *arg) {
     FeedForwardTask *task = (FeedForwardTask*)arg;
     network *n = task->n;
