@@ -56,4 +56,10 @@ void drawl(struct Line* line, int len,SDL_Renderer* renderer,
 struct DetectedLines performHoughTransform(SDL_Surface *surface);
 void extract_and_save_squares(SDL_Surface* original_image, struct Squares* squares, int num_squares);
 
+//rot
+struct DetectedLines auto_performHoughTransform(SDL_Surface *surface);
+SDL_Surface* RotateImage(SDL_Surface* image, double angledegree);
+double calculate_angle(	struct DetectedLines result );
+
+
 #endif

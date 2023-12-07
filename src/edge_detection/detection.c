@@ -5,6 +5,7 @@
 #include "image.h"
 #include "hough.h"
 
+
 int original_image_width = 0;
 int original_image_height = 0;
 
@@ -348,77 +349,12 @@ int main(int argc, char **argv){
 	//	free(detected);
 		SDL_DestroyTexture(texture);
 	}
-	/*else 	if (strcmp(argv[1],"hv") ==0)
-	{
-		//struct Line* lines= performHoughTransform(surface);
-		//
-		struct DetectedLines detected = performHoughTransform(surface);
-		struct Line* lines = detected.lines;
-		int len = detected.count;
-*/
-	/*struct DetectedLines d2 = averagearray(lin, num);
-		struct Line* lines = d2.lines;
-		int len = d2.count;*/
 	
-    /*int topCount = 10; // Number of lines to select for each direction
-
-    struct Line topLines[2 * topCount]; // To store selected lines
-
-    get_sudoku_lines(lines, len, topLines, topCount);
-
-
-		SDL_Texture* texture = SDL_CreateTextureFromSurface(
-                        renderer, surface);
-		if (texture == NULL)
-			errx(EXIT_FAILURE, "%s", SDL_GetError());
-		event_loop_image_l(renderer, texture,topLines, 20);
-
-		// Cleanup
-		free(lines);
-		free(topLines);
-	//	free(detected);
-		SDL_DestroyTexture(texture);*/
-	/*
-	else 	if (strcmp(argv[1],"handv") ==0)
-	{
-		//struct Line* lines= performHoughTransform(surface);
-		//
-		struct DetectedLines detected = performHoughTransform(surface);
-		struct Line* lines = detected.lines;
-		int len = detected.count;
-*/
-	/*struct DetectedLines d2 = averagearray(lin, num);
-		struct Line* lines = d2.lines;
-		int len = d2.count;*/
-	
-
-		/*struct Line* horizon = calloc( len/2, sizeof(struct Line));
-		struct Line* vertical = calloc( len/2, sizeof(struct Line));
-
-		struct Line* topLinesh = calloc( 10, sizeof(struct Line));
-		struct Line* topLinesv = calloc( 10, sizeof(struct Line));
-
-		print_h_v(lines,  len,  horizon,  vertical, topLinesh,topLinesv);
-
-
-		SDL_Texture* texture = SDL_CreateTextureFromSurface(
-                        renderer, surface);
-		if (texture == NULL)
-			errx(EXIT_FAILURE, "%s", SDL_GetError());
-		event_loop_image_hv(renderer, texture, topLinesh,10, topLinesv);
-
-		// Cleanup
-		free(lines);
-		free(topLinesh);
-		free(topLinesv);
-	//	free(detected);
-		SDL_DestroyTexture(texture);
-	}*/
 	else if (strcmp(argv[1],"houghaverage") ==0)
 	{
 		//struct Line* lines= performHoughTransform(surface);
 		//
-		struct DetectedLines detected = performHoughTransform(surface);
+		struct DetectedLines detected = auto_performHoughTransform(surface);// performHoughTransform(surface);
 		struct Line* lin = detected.lines;
 		int num = detected.count;
 
@@ -548,6 +484,33 @@ int main(int argc, char **argv){
 		free(lines);
 		free(sq);
 		SDL_FreeSurface(extraction_surface); 
+	}
+	else if (strcmp(argv[1], "autorot") == 0)
+	{
+		struct DetectedLines detected = auto_performHoughTransform(surface);
+
+		/*struct Line* lin = detectedd.lines;
+		int num = detectedd.count;
+
+		struct DetectedLines detected = averagearray(lin, num);*/
+		
+
+		double angle = calculate_angle(	detected );
+
+		SDL_Surface* im = RotateImage(surface, angle);
+		IMG_SaveJPG(im,"autorot.jpg",100);
+
+
+		SDL_Texture* im_txt = SDL_CreateTextureFromSurface(renderer, im);
+		if (im_txt == NULL) {
+			errx(EXIT_FAILURE, "%s", SDL_GetError());
+		}
+
+		SDL_FreeSurface(surface);
+		SDL_FreeSurface(im);
+
+		SDL_DestroyTexture(im_txt);
+	    
 	}
 
 
