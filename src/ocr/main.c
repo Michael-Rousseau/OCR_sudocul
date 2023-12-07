@@ -1,10 +1,11 @@
-#include "helper.h"
+#define _GNU_SOURCE
 #include "mnist.h"
+#include "helper.h"
 #include "network.h"
 #include "ocr.h"
-#include "png.h"
 #include "png_lib.h"
 
+#include <emmintrin.h>
 #include <err.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -178,3 +179,5 @@ int main() {
   free_network(n);
   return 0;
 }
+
+
