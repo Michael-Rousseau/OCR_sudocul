@@ -87,10 +87,95 @@ void draw_squares(SDL_Renderer* renderer, SDL_Texture* texture,
 	}
 	 //SDL_RenderPresent(renderer);
 
+SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Set the color to blue
+/*
+// Draw the top line
+SDL_RenderDrawLine(renderer, 0, 0, 992, 0);
+
+// Draw the right line
+SDL_RenderDrawLine(renderer, 992, 0, 992, 992);
+
+// Draw the bottom line
+SDL_RenderDrawLine(renderer, 992, 992, 0, 992);
+
+// Draw the left line
+SDL_RenderDrawLine(renderer, 0, 992, 0, 0);*/
+
+
+// Draw the top line
+
+// Draw the top line
+SDL_RenderDrawLine(renderer, 0, 0, 2, 1107);
+
+// Draw the right line
+SDL_RenderDrawLine(renderer, 2, 1107, 2, 1118);
+
+// Draw the bottom line
+SDL_RenderDrawLine(renderer, 2, 1118, 0, 1118);
+
+// Draw the left line
+SDL_RenderDrawLine(renderer, 0, 1118, 0, 0);
+
+
+
+
 	SDL_RenderPresent(renderer);
 }
 
+void draw_h_v(SDL_Renderer* renderer, SDL_Texture* texture,
+        struct Line* horizon,int num_lines, struct Line* vertical)
+{
+	int render = SDL_RenderCopy(renderer, texture, NULL, NULL);
+	if (render != 0)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
+//	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+//	SDL_RenderClear(renderer);
+
+
+	// Draw detected lines
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        // Red color for lines
+	for (int i = 0; i < num_lines; i++) {
+		SDL_RenderDrawLine(renderer, vertical[i].start.x,
+                        vertical[i].start.y, vertical[i].end.x, vertical[i].end.y);
+		SDL_RenderDrawLine(renderer, horizon[i].start.x,
+                        horizon[i].start.y, horizon[i].end.x, horizon[i].end.y);
+	}
+	// SDL_RenderPresent(renderer);
+
+	SDL_RenderPresent(renderer);
+}
+/*
+void event_loop_image_hv(SDL_Renderer* renderer, SDL_Texture* t_image,
+         struct Line* horizon,int num_lines, struct Line* vertical)
+{
+	SDL_Event event;
+
+	draw(renderer, t_image);
+	while (1)
+	{
+		SDL_WaitEvent(&event);
+
+		switch (event.type)
+		{
+			case SDL_QUIT:
+				return;
+			case SDL_WINDOWEVENT:
+				if (event.window.event ==
+                                        SDL_WINDOWEVENT_RESIZED)
+				{
+					update_render_scale(renderer,
+                                                event.window.data1,
+                                                event.window.data2);
+
+					draw_h_v( renderer, t_image, horizon,num_lines, vertical);
+					break;
+				}
+		}
+	}
+}
+*/
 
 void event_loop_image(SDL_Renderer* renderer, SDL_Texture* t_image)
 {
@@ -172,6 +257,8 @@ void event_loop_image_test_averagelines(SDL_Renderer* renderer, SDL_Texture*
     }
 }
 
+
+
 void event_loop_image_test_sq(SDL_Renderer* renderer, SDL_Texture* t_image,
         struct Squares* squares,int num) {
     SDL_Event event;
@@ -203,8 +290,12 @@ void event_loop_image_test_sq(SDL_Renderer* renderer, SDL_Texture* t_image,
 
 int main(int argc, char **argv){
 
-	if (argc != 3)
+	if (argc < 3)
 		errx(EXIT_FAILURE, "Usage: image-file");
+
+	if (strcmp(argv[1], "extractsquare") == 0 && argc != 4) {
+    errx(EXIT_FAILURE, "Usage: %s extractsquare <input_image> <extraction_image>", argv[0]);
+	}
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 		errx(EXIT_FAILURE, "%s", SDL_GetError());
@@ -257,6 +348,96 @@ int main(int argc, char **argv){
 	//	free(detected);
 		SDL_DestroyTexture(texture);
 	}
+	/*else 	if (strcmp(argv[1],"hv") ==0)
+	{
+		//struct Line* lines= performHoughTransform(surface);
+		//
+		struct DetectedLines detected = performHoughTransform(surface);
+		struct Line* lines = detected.lines;
+		int len = detected.count;
+*/
+	/*struct DetectedLines d2 = averagearray(lin, num);
+		struct Line* lines = d2.lines;
+		int len = d2.count;*/
+	
+    /*int topCount = 10; // Number of lines to select for each direction
+
+    struct Line topLines[2 * topCount]; // To store selected lines
+
+    get_sudoku_lines(lines, len, topLines, topCount);
+
+
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(
+                        renderer, surface);
+		if (texture == NULL)
+			errx(EXIT_FAILURE, "%s", SDL_GetError());
+		event_loop_image_l(renderer, texture,topLines, 20);
+
+		// Cleanup
+		free(lines);
+		free(topLines);
+	//	free(detected);
+		SDL_DestroyTexture(texture);*/
+	/*
+	else 	if (strcmp(argv[1],"handv") ==0)
+	{
+		//struct Line* lines= performHoughTransform(surface);
+		//
+		struct DetectedLines detected = performHoughTransform(surface);
+		struct Line* lines = detected.lines;
+		int len = detected.count;
+*/
+	/*struct DetectedLines d2 = averagearray(lin, num);
+		struct Line* lines = d2.lines;
+		int len = d2.count;*/
+	
+
+		/*struct Line* horizon = calloc( len/2, sizeof(struct Line));
+		struct Line* vertical = calloc( len/2, sizeof(struct Line));
+
+		struct Line* topLinesh = calloc( 10, sizeof(struct Line));
+		struct Line* topLinesv = calloc( 10, sizeof(struct Line));
+
+		print_h_v(lines,  len,  horizon,  vertical, topLinesh,topLinesv);
+
+
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(
+                        renderer, surface);
+		if (texture == NULL)
+			errx(EXIT_FAILURE, "%s", SDL_GetError());
+		event_loop_image_hv(renderer, texture, topLinesh,10, topLinesv);
+
+		// Cleanup
+		free(lines);
+		free(topLinesh);
+		free(topLinesv);
+	//	free(detected);
+		SDL_DestroyTexture(texture);
+	}*/
+	else if (strcmp(argv[1],"houghaverage") ==0)
+	{
+		//struct Line* lines= performHoughTransform(surface);
+		//
+		struct DetectedLines detected = performHoughTransform(surface);
+		struct Line* lin = detected.lines;
+		int num = detected.count;
+
+		struct DetectedLines d2 = averagearray(lin, num);
+		struct Line* lines = d2.lines;
+		int num_lines = d2.count;
+
+
+		SDL_Texture* texture = SDL_CreateTextureFromSurface(
+                        renderer, surface);
+		if (texture == NULL)
+			errx(EXIT_FAILURE, "%s", SDL_GetError());
+		event_loop_image_l(renderer, texture,lines, num_lines);
+
+		// Cleanup
+		free(lines);
+	//	free(detected);
+		SDL_DestroyTexture(texture);
+	}
 
 	else if  (strcmp(argv[1], "detection") == 0)
 	{
@@ -283,10 +464,13 @@ int main(int argc, char **argv){
 	else if (strcmp(argv[1], "square") == 0) {
 			struct DetectedLines detected =
                             performHoughTransform(surface);
-			struct Line* lines = detected.lines;
-			int num_lines = detected.count;
+			struct Line* lin = detected.lines;
+			int num = detected.count;
 
-			printvalues(lines,num_lines);
+		struct DetectedLines d2 = averagearray(lin, num);
+		struct Line* lines = d2.lines;
+		int num_lines = d2.count;
+		 printvalues(lines,  num_lines,surface);
 
 
 
@@ -301,16 +485,16 @@ int main(int argc, char **argv){
 		struct DetectedLines d2 = averagearray(lin, num);
 		struct Line* lines = d2.lines;
 		int num_lines = d2.count;
-		printf("num line main %i \n", num_lines);
+		//printf("num line main %i \n", num_lines);
 
-		for (int i = 0; i < num_lines; i++)
+		/*for (int i = 0; i < num_lines; i++)
 		{
 			printf(" i = %i",i);
 			printf("%f",lines[i].start.x);
 			printf("%f",lines[i].start.y);
 			printf("%f",lines[i].end.x);
 			printf("%f \n",lines[i].end.y);
-		}
+		}*/
 
 
 		struct Squares* sq = drawsquares( lines, num_lines );
@@ -330,8 +514,42 @@ int main(int argc, char **argv){
 		free(lines);
 		free(sq);
 
-
 	}
+
+	else if (strcmp(argv[1], "extractsquare") == 0)
+	{
+		SDL_Surface* extraction_surface = IMG_Load(argv[3]);
+    	if (!extraction_surface) {
+			errx(EXIT_FAILURE, "Unable to load image: %s", IMG_GetError());
+			}
+		struct DetectedLines detected = performHoughTransform(surface);
+		struct Line* lin = detected.lines;
+		int num = detected.count;
+
+		struct DetectedLines d2 = averagearray(lin, num);
+		struct Line* lines = d2.lines;
+		int num_lines = d2.count;
+
+		struct Squares* sq = drawsquares(lines, num_lines);
+
+		SDL_Texture* grayscale_texture = SDL_CreateTextureFromSurface(renderer, surface);
+		if (grayscale_texture == NULL)
+			errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+		// Moved SDL_FreeSurface(surface); to after the squares are extracted
+
+		event_loop_image_test_sq(renderer, grayscale_texture, sq, (num_lines/2 -1) * (num_lines/2 -1));
+		SDL_DestroyTexture(grayscale_texture);
+
+		extract_and_save_squares(extraction_surface, sq, (num_lines/2 -1) * (num_lines/2 -1));
+
+		SDL_FreeSurface(surface); // Now freeing the surface after extraction
+
+		free(lines);
+		free(sq);
+		SDL_FreeSurface(extraction_surface); 
+	}
+
 
 		else {
 			errx(EXIT_FAILURE, "Unsupported filter: %s", argv[1]);

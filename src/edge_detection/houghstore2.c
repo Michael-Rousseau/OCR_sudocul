@@ -448,11 +448,6 @@ void sort_horizontal_lines(struct Line* horizon, int len)
 		}
 		horizon[j + 1] = compare;
 	}
-	for(int k = 0; k <len; k++)
-	{
-		printf("hori (%f,%f)",horizon[k].start.x,horizon[k].start.y);
-		printf("\n");
-	}
 
 /*	for(int k = 0; k <len; k++)
 		printf("(%f,%f) \n",horizon[k].start.x,horizon[k].start.y);
@@ -480,11 +475,9 @@ void sort_vertical_lines(struct Line* vertical, int len)
 		vertical[j + 1] = compare;
 	}
 
-	for(int k = 0; k <len; k++)
-	{
-		printf("vertical (%f,%f)",vertical[k].start.x,vertical[k].start.y);
-		printf("\n");
-	}
+/*	for(int k = 0; k <len; k++)
+		printf("(%f,%f)",vertical[k].start.x,vertical[k].start.y);
+	printf("\n");*/
 }
 
 /*
@@ -513,8 +506,8 @@ void fillsquares(struct Line* vertical, struct Line* horizon,
     }
 }*/
 
-
-void fillsquares(struct Line* vertical, struct Line* horizon, struct Squares* squares, int len) {
+void fillsquares(struct Line* vertical, struct Line* horizon, struct Squares* squares, int len) 
+{
     int nx = 0;
 
     // Iterate over each horizontal line
@@ -536,178 +529,176 @@ void fillsquares(struct Line* vertical, struct Line* horizon, struct Squares* sq
         }
     }
 }
-int has_white_neighbors(SDL_Surface *surface, int x, int y) {
-    Uint32 white_pixel = SDL_MapRGB(surface->format, 255, 255, 255);
-    for (int dx = -20; dx <= 20; dx++) {
-        for (int dy = -20; dy <= 20; dy++) {
-            if (dx == 0 && dy == 0) continue; // Skip the pixel itself
-            if (x + dx < 0 || x + dx >= surface->w || y + dy < 0 || y + dy >= surface->h) continue; // Check bounds
-            Uint32 neighbor_pixel = get_pixel(surface, x + dx, y + dy);
-            if (neighbor_pixel == white_pixel) {
-                return 1; // White neighbor found
+
+// A helper function to compare lines for sorting
+int compare_Vertical_Lines(const void *a, const void *b) {
+    struct Line *line1 = (struct Line *)a;
+    struct Line *line2 = (struct Line *)b;
+
+    // Compare based on x-coordinate for vertical lines 
+    return (line1->start.x - line2->start.x); 
+}
+
+// A helper function to compare lines for sorting
+int compare_Horizon_Lines(const void *a, const void *b) {
+    struct Line *line1 = (struct Line *)a;
+    struct Line *line2 = (struct Line *)b;
+
+    // y-coordinate for horizontal lines
+    return (line1->start.y - line2->start.y);
+}
+
+// Function to check if a sequence of lines are evenly spaced
+int isEvenlySpacedSequence_vertical(struct Line* lines, int start, int sequenceLength, float averageDistance, float tolerance) {
+    for (int i = start; i < start + sequenceLength - 1; i++) {
+
+        float distance = fabs(lines[i + 1].start.x - lines[i].start.x); 
+		float minDistance = 0.000001 * averageDistance;
+		
+ 		if (fabs(distance - averageDistance) > tolerance) {
+            return 0; // Not evenly spaced
+        }
+    }
+    return 1; // Evenly spaced
+}
+
+
+// Function to check if a sequence of lines are evenly spaced
+int isEvenlySpacedSequence_horizon(struct Line* lines, int start, int sequenceLength, float averageDistance, float tolerance) 
+{
+    for (int i = start; i < start + sequenceLength - 1; i++)
+	 {
+        float distance = fabs(lines[i + 1].start.y - lines[i].start.y); 
+		float minDistance = 0.00000001 * averageDistance;
+        if (fabs(distance - averageDistance) > tolerance ) {
+            return 0; // Not evenly spaced
+        }
+    }
+    return 1; // Evenly spaced
+}
+
+void get_sudoku_lines (struct Line* vertical, struct Line* horizon, struct Line *topLinesv,
+struct Line *topLinesh, int len) 
+{
+	//printf("%f",horizon[1].end.x);
+	int topCount = 10;
+	int lineCount = len/2;
+	//vertical
+	// Sort the lines
+
+    qsort(vertical, len/2, sizeof(struct Line), compare_Vertical_Lines);
+	
+	// We assume the lines are sorted by their x-coordinate (for vertical lines)
+    float averageDistance = 0;
+    int count = 0;
+
+    // Calculate average distance between lines
+    for (int i = 0; i < lineCount - 1; ++i) {
+        averageDistance += fabs(vertical[i + 1].start.x - vertical[i].start.x);
+        count++;
+    }
+    if (count > 0) averageDistance /= count;
+	printf("averageDistance %f \n",averageDistance);
+
+    float tolerance = averageDistance * 0.2; // 20% tolerance
+    int foundCount = 0, i = 0;
+
+    // Look for a sequence of 10 lines with consistent spacing
+    while (foundCount < topCount && i <= lineCount - 10) {
+        if (isEvenlySpacedSequence_vertical(vertical, i, 10, averageDistance, tolerance)) {
+            for (int j = i; j < i + 10 && foundCount < topCount; j++) {
+				
+                topLinesv[foundCount].start.x = vertical[j].start.x;
+				topLinesv[foundCount].start.y = vertical[j].start.y;
+				topLinesv[foundCount].end.x = vertical[j].end.x;
+				topLinesv[foundCount].end.y = vertical[j].end.y;
+
+				foundCount++;
+			printf("vertical1 %d: Start (%f, %f) - End (%f, %f)\n", j,
+                                topLinesv[foundCount].start.x, topLinesv[foundCount].start.y,
+                                topLinesv[foundCount].end.x, topLinesv[foundCount].end.y);
+
+
             }
+            break; // Found a sequence, exit loop
+        } else {
+            i++;
         }
     }
-    return 0; // No white neighbors
+	/*for (int i = 0; i < 10; ++i) {
+			printf("topLinesv %d: Start (%f, %f) - End (%f, %f)\n", i,
+                                topLinesv[i].start.x, topLinesv[i].start.y,
+                                topLinesv[i].end.x, topLinesv[i].end.y);
+
+		}*/
+
+	//horizon
+	//vertical
+	// Sort the lines
+    qsort(horizon, len/2, sizeof(struct Line), compare_Horizon_Lines);
+
+	// We assume the lines are sorted by their x-coordinate (for vertical lines)
+    float averageDistancey = 0;
+    int county = 0;
+
+    // Calculate average distance between lines
+    for (int i = 0; i < lineCount - 1; ++i) {
+        averageDistancey += fabs(horizon[i + 1].start.y - horizon[i].start.y);
+        county++;
+    }
+    if (county > 0) averageDistancey /= county;
+
+    float tolerancey = averageDistance * 0.2; // 20% tolerance
+    int foundCounty = 0, iy = 0;
+	
+
+    // Look for a sequence of 10 lines with consistent spacing
+    while (foundCounty < topCount && iy <= lineCount - 10) {
+        if (isEvenlySpacedSequence_horizon(horizon, iy, 10, averageDistancey, tolerancey)) {
+            for (int j = iy; j < iy + 10 && foundCounty < topCount; j++) {
+                topLinesh[foundCounty].start.x = horizon[j].start.x;
+				topLinesh[foundCounty].start.y = horizon[j].start.y;
+				topLinesh[foundCounty].end.x = horizon[j].end.x;
+				topLinesh[foundCounty].end.y = horizon[j].end.y;
+				foundCounty++;
+            }
+            break; // Found a sequence, exit loop
+        } else {
+            iy++;
+        }
+    }
 }
-int check_square_edges(SDL_Surface *surface, struct Squares sq) {
-    // Check top and bottom edges
-    for (int x = sq.topleft.x; x <= sq.topright.x; x++) {
-        if (has_white_neighbors(surface, x, sq.topleft.y) == 0) {
-            return 0;
-        }
-		if (has_white_neighbors(surface, x, sq.topright.y) == 0) {
-            return 0;
-        }
-    }
-    for (int x = sq.bottomleft.x; x <= sq.bottomright.x; x++) {
-        if (has_white_neighbors(surface, x, sq.bottomleft.y) == 0) {
-            return 0;
-        }
-		if (has_white_neighbors(surface, x, sq.bottomright.y) == 0) {
-            return 0;
-        }
-    }
 
-    // Check left and right edges
-    for (int y = sq.topleft.y; y <= sq.bottomleft.y; y++) {
-        if (has_white_neighbors(surface, sq.topleft.x, y)==0) {
-            return 0;
-        }
-		if (has_white_neighbors(surface, sq.bottomleft.x, y)==0) {
-            return 0;
-        }
-    }
-    for (int y = sq.topright.y; y <= sq.bottomright.y; y++) {
-        if (has_white_neighbors(surface, sq.topright.x, y)==0) {
-            return 0;
-        }
-		if (has_white_neighbors(surface, sq.bottomright.x, y)==0) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-struct Squares findbestsquare(SDL_Surface* original_image, struct Line* vertical, struct Line* horizon, 
-struct Squares *squares, int len)
-{    
-	struct Squares max_square;
-    int max_size = -1;
-
-    // Pre-calculate differences for vertical and horizontal lines
-    float vertical_diffs[len - 1];
-    float horizon_diffs[len - 1];
-    for (int i = 0; i < len - 1; ++i) {
-        vertical_diffs[i] = vertical[i + 1].start.x - vertical[i].start.x;
-        horizon_diffs[i] = horizon[i + 1].start.y - horizon[i].start.y;
-    }
-
-    for (int h = 0; h < len - 1; ++h) 
+void print_h_v(struct Line* lines, int len, struct Line* horizon, struct Line* vertical,
+struct Line* topLinesh,struct Line* topLinesv)
+{
+	
+	if (!horizon || !vertical)
 	{
-        for (int v = 0; v < len - 1; ++v) 
-		{
-            float width = vertical_diffs[v];
-            if (width > 25) break; // Width larger than threshold, break early
+		fprintf(stderr, "Memory allocation failed.\n");
+		free(horizon);
+		free(vertical);
+		return;
+	}
 
-            for (int end = h + 1; end < len; ++end) {
-                float height = horizon_diffs[end - 1];
-                if (height > 25) break; // Height larger than threshold, break early
+	horizontal_vertical_lines(lines, len, horizon, vertical);
 
-                if (fabs(height - width) < 25) {
-                    int size = width * height;
-                    if (size > max_size) {
-                        // Check the square edges only if it's a potential max
-                        struct Squares s = {vertical[v].start, {vertical[v + 1].start.x, horizon[h].start.y},
-                                            {vertical[v].start.x, horizon[end].start.y}, vertical[v + 1].start};
-                        if (check_square_edges(original_image, s)) {
-                            max_size = size;
-                            max_square = s;
-                        }
-                    }
-                }
-            }
-        }
-    }
 
-    return max_square;
+
+	sort_horizontal_lines(horizon, len /2 );
+	
+
+	sort_vertical_lines(vertical, len/2);
+
+	get_sudoku_lines (vertical, horizon, topLinesv, topLinesh, len) ;
+
+	free(horizon);
+	free(vertical);
+
 }
 
-/*
-struct Squares findbestsquare(SDL_Surface* original_image, struct Line* vertical, struct Line* horizon, struct Squares *squares, int len)
-{   struct Squares max_square;
-    int max_size = -1;
 
-    for (int h = 0; h < len - 1; ++h) {
-        for (int v = 0; v < len; ++v) {
-            for (int end = v + 1; end < len; ++end) {
-                struct Squares s;
-                s.topleft.x = vertical[v].start.x;
-                s.topleft.y = horizon[h].start.y;
-                s.topright.x = vertical[end].start.x;
-                s.topright.y = horizon[h].start.y;
-                s.bottomleft.x = vertical[v].start.x;
-                s.bottomleft.y = horizon[h + 1].start.y;
-                s.bottomright.x = vertical[end].start.x;
-                s.bottomright.y = horizon[h + 1].start.y;
-
-                float width = s.topright.x - s.topleft.x;
-				float width2 = s.bottomright.x - s.bottomleft.x;
-                float height = s.bottomleft.y - s.topleft.y;
-				float height2 = s.bottomright.y - s.topright.y;
-                int size = width * height;
-
-                if ((size > max_size) && fabs(width2 - width) < 10 && fabs(height2 - height) < 10 
-				&& fabs(height - width) < 25 && check_square_edges(original_image, s)) {
-                    max_size = size;
-                    max_square = s;
-                }
-            }
-        }
-    }
-
-    return max_square;
-}*/
-/*
-struct Squares findbestsquare(SDL_Surface* original_image, struct Line* vertical, struct Line* horizon, struct Squares* squares, int len) {
-    struct Squares max_square;
-    int max_size = 0;
-
-    for (int h = 0; h < len - 1; ++h) {  // Ensure h + 1 is within bounds
-        for (int v = 0; v < len; ++v) {
-            for (int end = v + 1; end < len; ++end) {
-                struct Squares s;
-
-                s.topleft.x = vertical[v].start.x;
-                s.topleft.y = horizon[h].start.y;
-                s.topright.x = vertical[end].start.x;
-                s.topright.y = horizon[h].start.y;
-                s.bottomleft.x = vertical[v].start.x;
-                s.bottomleft.y = horizon[h + 1].start.y;
-                s.bottomright.x = vertical[end].start.x;
-                s.bottomright.y = horizon[h + 1].start.y;
-
-                int size = (s.topright.x - s.topleft.x) * (s.bottomleft.y - s.topleft.y);
-                float width = s.topright.x - s.topleft.x;
-                float height = s.bottomleft.y - s.topleft.y;
-
-                if ((size > max_size )&& fabs(width - height) < 20 && check_square_edges(original_image, s)) {
-                    max_size = size;
-                    max_square = s;
-                }
-            }
-        }
-    }
-
-    if (max_size > 0) {
-        return max_square;
-    } else {
-        return squares[0];
-    }
-}
-*/
-
-void printvalues(struct Line* lines, int len,SDL_Surface* original_image)
+void printvalues(struct Line* lines, int len)
 {
 	struct Line* horizon = calloc( len/2, sizeof(struct Line));
 	struct Line* vertical = calloc( len/2, sizeof(struct Line));
@@ -726,6 +717,14 @@ void printvalues(struct Line* lines, int len,SDL_Surface* original_image)
 
 	sort_vertical_lines(vertical, len/2);
 
+	struct Line* topLinesh = calloc( 10, sizeof(struct Line));
+	struct Line* topLinesv = calloc( 10, sizeof(struct Line));
+
+	get_sudoku_lines (vertical, horizon, topLinesv, topLinesh, len) ;
+
+
+	len = 20;
+
 	int num_squares = (len/2 -1) * (len/2 -1);
 
 	struct Squares* squares = calloc(num_squares, sizeof(struct Squares));
@@ -733,7 +732,7 @@ void printvalues(struct Line* lines, int len,SDL_Surface* original_image)
 /*	if (!squares) {
 		fprintf(stderr, "Memory allocation failed.\n");*/
 
-	fillsquares(vertical, horizon, squares, len/2);
+	fillsquares(topLinesv, topLinesh, squares, 10);
 
 
 	for (int i = 0; i < num_squares; i++)
@@ -750,23 +749,6 @@ void printvalues(struct Line* lines, int len,SDL_Surface* original_image)
 		printf("\n");
 
 	}
-	struct Squares ss = findbestsquare(original_image, vertical,  horizon,   squares, len);
-	printf("last big  \n");
-		printf("Top Left: (%f, %f)\n",
-                        ss.topleft.x, ss.topleft.y);
-		printf("Top Right: (%f, %f)\n",
-                        ss.topright.x, ss.topright.y);
-		printf("Bottom Right: (%f, %f)\n",
-                        ss.bottomright.x, ss.bottomright.y);
-		printf("Bottom Left: (%f, %f)\n",
-                        ss.bottomleft.x, ss.bottomleft.y);
-		printf("\n");
-		printf("t lf         %f,%f\n", ss.topleft.x, ss.topleft.y);
-		printf("%f,%f\n", ss.bottomleft.x, ss.bottomleft.y);
-
-printf("t r          %f,%f\n", ss.bottomright.x, ss.bottomright.y);
-		printf("%f,%f\n", ss.bottomleft.x, ss.bottomleft.y);
-
 	free(horizon);
 	free(vertical);
 	free(squares);
@@ -820,6 +802,7 @@ void sort_squares_horizontal(struct Squares* squares, int num_squares) {
 }
 
 
+
 struct Squares* drawsquares(struct Line* lines, int len)
 {
 	struct Line* horizon = calloc( len/2, sizeof(struct Line));
@@ -840,8 +823,6 @@ struct Squares* drawsquares(struct Line* lines, int len)
 
 	int num_squares = (len/2 -1) * (len/2 -1);
 
-	
-
 //	struct Squares* sq = calloc(num_squares, sizeof(struct Squares));
 
 	struct Squares* sq = calloc(num_squares, sizeof(struct Squares));
@@ -850,7 +831,9 @@ struct Squares* drawsquares(struct Line* lines, int len)
 		fprintf(stderr, "Memory allocation failed.\n");*/
 	fillsquares(vertical, horizon, sq, len/2);
 
-    sort_squares_horizontal(sq, num_squares);
+
+    //sort_squares_horizontal(sq, num_squares);
+
 
 	return sq;
 /*	free(horizon);
@@ -861,7 +844,7 @@ struct Squares* drawsquares(struct Line* lines, int len)
 
 
 
-/*
+
 
 // Function to check if the squares are part of a consistent sequence
 int isPartOfSequence(struct Squares* squares, int index, int num_squares, float average_dimension, float tolerance) {
@@ -906,67 +889,8 @@ int findSudokuEdges(struct Squares* squares, int num_squares, float average_dime
  	//horizontalEdges[1] = squares[i+ 72];
 }
 
-*/
-
-//BIGGEST SQUARE
-/*
-Uint32 get_pixel(SDL_Surface *surface, int x, int y) {
-    if (x < 0 || y < 0 || x >= surface->w || y >= surface->h) {
-        return 0; // Out of bounds, return a default value
-    }
-    Uint32 *pixels = (Uint32 *)surface->pixels;
-    return pixels[(y * surface->w) + x];
-}*/
 
 
-
-// Define a comparison function for qsort to sort squares based on area (largest first)
-int compare_square_area_descending(const void *a, const void *b) {
-     const struct Squares *sq1 = (const struct Squares *)a;
-    const struct Squares *sq2 = (const struct Squares *)b;
-    int area1 = (sq1->topright.x - sq1->topleft.x);
-    int area2 = (sq2->topright.x - sq2->topleft.x) ;
-    return area2 - area1; // Sort in descending order
-}
-
-struct Squares find_sudoku_square(SDL_Surface *surface, struct Squares *squares, int num_squares) {
-    // Sort squares from largest to smallest
-   //qsort(squares, num_squares, sizeof(struct Squares), compare_square_area_descending);
-	for (int i = 0; i < num_squares; i++)
-	{
-		printf("square sort %i \n",i);
-		printf("Top Left: (%f, %f)\n",
-                        squares[i].topleft.x, squares[i].topleft.y);
-		printf("Top Right: (%f, %f)\n",
-                        squares[i].topright.x, squares[i].topright.y);
-		printf("Bottom Right: (%f, %f)\n",
-                        squares[i].bottomright.x, squares[i].bottomright.y);
-		printf("Bottom Left: (%f, %f)\n",
-                        squares[i].bottomleft.x, squares[i].bottomleft.y);
-		int area1 = (squares[i].topright.x - squares[i].topleft.x) * (squares[i].bottomleft.y - squares[i].topleft.y);
-
-		printf("area %i\n",area1);
-		printf("\n");
-
-	}
-
-    for (int i = 0; i < num_squares; i++) {
-		float width = squares[i].topright.x - squares[i].topleft.x;
-        float height = squares[i].bottomleft.y - squares[i].topleft.y;
-		if (fabs(width - height) < 10) {
-        if (check_square_edges(surface, squares[i])) {
-            return squares[i]; // Found the largest square with white edge neighbors
-        }
-	}
-    }
-
-    // Return an invalid square if none found
-    return squares[1];
-}
-/////
-
-
-////////
 
 
 // Function to extract and save squares as images
@@ -979,51 +903,16 @@ void extract_and_save_squares(SDL_Surface* original_image, struct Squares* squar
 	float average_width, average_height;
     calculate_average_dimensions(squares, num_squares, &average_width, &average_height);
 	
-	//int k = findSudokuEdges(squares, num_squares, average_width);
-
-	// = findbestsquare(original_image, vertical,  horizon,   squares, len);
-
-	//struct Squares s =  find_sudoku_square(original_image, squares,  num_squares) ;
-	/*struct Squares s;
-    float max_area = 0;
-    
-    // Find the biggest square
-    for (int i = 0; i < num_squares; i++) {
-        float width = squares[i].topright.x - squares[i].topleft.x;
-        float height = squares[i].bottomleft.y - squares[i].topleft.y;
-        float area = width * height;
-
-        if (area > max_area) {
-            max_area = area;
-            s = squares[i];
-        }
-    }
-
-printf("biggest \n");	
-		printf("Top Left: (%f, %f)\n",
-                        s.topleft.x, s.topleft.y);
-		printf("Top Right: (%f, %f)\n",
-                        s.topright.x, s.topright.y);
-		printf("Bottom Right: (%f, %f)\n",
-                        s.bottomright.x, s.bottomright.y);
-		printf("Bottom Left: (%f, %f)\n",
-                        s.bottomleft.x, s.bottomleft.y);
-			int area1 = (s.topright.x - s.topleft.x) * (s.bottomleft.y - s.topleft.y);
-
-		printf("area %i\n",area1);*/
+	int k = findSudokuEdges(squares, num_squares, average_width);
 
 
-    for (int i = 0; i < num_squares; i++) {
-		//if (s.topleft.x <= squares[i].topleft.x && s.topright.x >= squares[i].topright.x &&
-         //   s.topleft.y <= squares[i].topleft.y && s.bottomleft.y >= squares[i].bottomleft.y) 
-			//{
-
-
+    for (int i = k; i < k+ 89; i++) 
+    {
         float width = squares[i].topright.x - squares[i].topleft.x;
         float height = squares[i].bottomleft.y - squares[i].topleft.y;
 
 		 // Check if the square's dimensions are close to the average
-        if ((fabs(width - average_width) < 20 || fabs(height - average_height) < 20 )&& fabs(width - height) < 10) 
+        if ((fabs(width - average_width) < 100 || fabs(height - average_height) < 100 ) && fabs(width - height) < 50) 
 		{ 
         // Skip this square as its dimensions are too different
         
@@ -1046,7 +935,6 @@ printf("biggest \n");
 
         // Blit the square area from the original image to the new surface
         SDL_BlitSurface(original_image, &square_rect, square_surface, NULL);
-
 		
 		 // Create a new surface for the resized square
         SDL_Surface* resized_surface = SDL_CreateRGBSurface(0, target_width, target_height, original_image->format->BitsPerPixel,
@@ -1057,7 +945,6 @@ printf("biggest \n");
             SDL_FreeSurface(square_surface);
             continue;
         }
-
 
 		// Blit the square surface to the resized surface with scaling
         SDL_BlitScaled(square_surface, NULL, resized_surface, NULL); 
@@ -1074,7 +961,7 @@ printf("biggest \n");
         SDL_FreeSurface(square_surface);
 		       // SDL_FreeSurface(resized_surface);
 		}
-			
     }
 }
+
 

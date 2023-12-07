@@ -221,7 +221,7 @@ int main(int argc, char** argv)
       IMG_SaveJPG(surface, "contrast.jpg", 100);
 
      surface_to_reducenoise(surface);
-       IMG_SaveJPG(surface, "reducenoise.jpg", 100);
+      IMG_SaveJPG(surface, "reducenoise.jpg", 100);
 
 
 	  surface_to_blackwhite(surface);
@@ -434,5 +434,8 @@ int main(int argc, char** argv)
        SDL_Quit();
        return EXIT_SUCCESS;
 }
+
+
+//printf("i think Ali is the goat...")
 
 
