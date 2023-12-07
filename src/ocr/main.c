@@ -18,8 +18,6 @@ size_t LAYER_COUNT = 3;
 #define NUM_IMAGES 50000
 #define LEARNING_RATE 0.1
 
-#define NB_IMAGES 1000
-
 int main() {
     const char *folder = "./data/digits_im/0/";  // Replace with the actual folder path
     char **pngFiles;
@@ -30,7 +28,7 @@ int main() {
     // Length of images dimensions:
     // images[9 (label)][NB_IMAGES][784]
     double ***images;
-    load_images(&images, pngFiles, NB_IMAGES);
+    load_images(&images, pngFiles, numFiles);
 
     size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
     layers[0] = 784;
@@ -49,7 +47,7 @@ int main() {
     //test_from_file();
     free_network(n);
     free_file_names(&pngFiles, numFiles);
-    free_images(&images, NB_IMAGES);
+    free_images(&images, numFiles);
     return 0;
 }
 
