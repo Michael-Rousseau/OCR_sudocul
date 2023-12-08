@@ -221,7 +221,7 @@ int main(int argc, char** argv)
       IMG_SaveJPG(surface, "contrast.jpg", 100);
 
      surface_to_reducenoise(surface);
-       IMG_SaveJPG(surface, "reducenoise.jpg", 100);
+      IMG_SaveJPG(surface, "reducenoise.jpg", 100);
 
 
 	  surface_to_blackwhite(surface);
@@ -255,34 +255,7 @@ int main(int argc, char** argv)
         SDL_DestroyTexture(process_texture);
 
 
-    } /*else if (strcmp(argv[1], "hough") == 0) {
-
-        int image_height = 10;
-        int image_width = 10;
-        int** edge_image = malloc(image_height * sizeof(int*));
-        for (int i = 0; i < image_height; i++) {
-            edge_image[i] = malloc(image_width * sizeof(int));
-            for (int j = 0; j < image_width; j++) {
-                edge_image[i][j] = (i == j) ? 1 : 0;
-            }
-        }
-
-        int accumulator_height;
-        int accumulator_width;
-
-        int** accumulator = hough_transform(edge_image, image_height,
-        image_width, &accumulator_height, &accumulator_width);
-
-        printf("Accumulator:\n");
-        print_accumulator(accumulator, accumulator_height, accumulator_width);
-
-        for (int i = 0; i < image_height; i++) {
-            free(edge_image[i]);
-        }
-        free(edge_image);
-	free_accumulator(accumulator, accumulator_height);
-
-    }*/
+    } 
  else if (strcmp(argv[1], "rotation") == 0)
     {
 
@@ -303,34 +276,7 @@ int main(int argc, char** argv)
 
 		    SDL_DestroyTexture(im_txt);
 	    }
-    }   else if (strcmp(argv[1], "square") == 0) {
-
-	    struct Line lines[16];  // There are 8 horizontal and
-                                    // 8 vertical lines
-	    int L = 500;
-	    // Vertical lines
-	    lines[0] = (struct Line){L/9, 0.0, {L/9, 0}, {L/9, L}};
-	    lines[1] = (struct Line){2*L/9, 0.0, {2*L/9, 0}, {2*L/9, L}};
-	    lines[2] = (struct Line){3*L/9, 0.0, {3*L/9, 0}, {3*L/9, L}};
-	    lines[3] = (struct Line){4*L/9, 0.0, {4*L/9, 0}, {4*L/9, L}};
-	    lines[4] = (struct Line){5*L/9, 0.0, {5*L/9, 0}, {5*L/9, L}};
-	    lines[5] = (struct Line){6*L/9, 0.0, {6*L/9, 0}, {6*L/9, L}};
-	    lines[6] = (struct Line){7*L/9, 0.0, {7*L/9, 0}, {7*L/9, L}};
-	    lines[7] = (struct Line){8*L/9, 0.0, {8*L/9, 0}, {8*L/9, L}};
-
-	    // Horizontal lines
-	    lines[8] = (struct Line){0.0, 5, {0, L/9}, {L, L/9}};
-	    lines[9] = (struct Line){0.0, 15, {0, 2*L/9}, {L, 2*L/9}};
-	    lines[10] = (struct Line){0.0, 25, {0, 3*L/9}, {L, 3*L/9}};
-	    lines[11] = (struct Line){0.0,35, {0, 4*L/9}, {L, 4*L/9}};
-	    lines[12] = (struct Line){0.0, 45, {0, 5*L/9}, {L, 5*L/9}};
-	    lines[13] = (struct Line){0.0, 55, {0, 6*L/9}, {L, 6*L/9}};
-	    lines[14] = (struct Line){0.0, 65, {0, 7*L/9}, {L, 7*L/9}};
-	    lines[15] = (struct Line){0.0, 75, {0, 8*L/9}, {L, 8*L/9}};
-
-	    printvalues(lines,16);
-
-    }
+    }   
 
 
 
@@ -434,5 +380,8 @@ int main(int argc, char** argv)
        SDL_Quit();
        return EXIT_SUCCESS;
 }
+
+
+//printf("i think Ali is the goat...")
 
 

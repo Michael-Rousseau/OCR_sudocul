@@ -265,7 +265,7 @@ float** generate_Kernel(int ksize, float sigma)
     float** kernel = (float**)malloc(ksize * sizeof(float*));
 
     for (int i = 0; i < ksize; i++) {
-        kernel[i] = (float*)malloc(ksize * sizeof(float));}
+        kernel[i] = (float*)calloc(ksize, sizeof(float));} //malloc
 
     for (int y = 0; y < ksize; y++) {
         for (int x = 0; x < ksize; x++) {
@@ -274,10 +274,12 @@ float** generate_Kernel(int ksize, float sigma)
             //is in the center of the kernel
             int mx = x - center;
             int my = y - center;
+	    if (mx >=0 && my >=0){
             double tmp = -(mx * mx + my * my) / (2 * sigma * sigma);
 
             kernel[y][x] =  1. / (2 * M_PI * sigma * sigma) * exp(tmp);
             sum += kernel[y][x];
+	    }
         }
     }
 
@@ -326,7 +328,7 @@ void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface
 
                     //check if we are outside of the array
                     if (Xf >= 0 && Xf < imageWidth && Yf < imageHeight &&
-                            Xf >=0) {
+                            Yf >=0) {
                         Uint32* pixelinitial = (Uint32*)image->pixels;
 
 
@@ -361,7 +363,7 @@ void surface_to_reducenoise(SDL_Surface* surface)
 {
     // Define the kernel size and sigma for Gaussian blur
     int kernelSize = 5;
-    float sigma = 10.0;
+    float sigma = 15.0; //photo 2 = 10
 
     // Generate the Gaussian kernel
     float** kernel = generate_Kernel(kernelSize, sigma);

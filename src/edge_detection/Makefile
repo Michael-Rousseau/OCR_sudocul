@@ -15,7 +15,7 @@ EXE = ${SRC:.c=}
 
 .PHONY: clean
 
-detection: image.o detection.o hough.o
+detection: image.o detection.o hough.o 
 
 clean:
 	${RM} ${DEPS}
