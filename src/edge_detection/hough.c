@@ -977,7 +977,268 @@ printf("t r          %f,%f\n", s.bottomright.x, s.bottomright.y);
     }
 }
 
+///AUTOMATIC ROTATION
 
+//HOUGH
+struct DetectedLines auto_performHoughTransform(SDL_Surface *surface)
+{
+    const double DIAGONAL = sqrt(surface->w * surface->w+
+                surface->h * surface->h);
+
+    const int RHO_MAX = (int)(2 * DIAGONAL ) +1;
+
+    const int RHO_OFFSET = RHO_MAX / 2;
+
+
+    int w = surface->w;
+    int h = surface->h;
+    int n = 50;
+    //create pointer of lines
+    struct Line* lines = calloc(n ,sizeof(struct Line));
+
+
+    //create accumulator
+    int ** accumulator = malloc(RHO_MAX * sizeof(int*));
+    for (int i = 0; i < RHO_MAX; i++)
+        accumulator[i] = calloc(theta_s, sizeof(int));
+
+
+    if (SDL_MUSTLOCK(surface) && SDL_LockSurface(surface) != 0) {
+        // Handle the error, perhaps log it or exit
+        fprintf(stderr, "Could not lock surface: %s\n", SDL_GetError());
+        exit(EXIT_FAILURE);
+    }
+    // Iterate over the pixels to collect votes
+    for (int x = 0; x < w; x++)
+    {
+        for (int y = 0; y < h; y++)
+        {
+            Uint8 r,g,b;
+            Uint32 pixelvalue = get_pixel(surface, x, y);
+            SDL_GetRGB(pixelvalue, surface->format, &r, &g, &b);
+
+
+            if (r == 255 && g == 255 && b == 255) { //or r>128
+                for (int t = 0; t < theta_s; t++)
+                {
+                    double currentTheta = t * theta;
+                    double rho = (x * cos(currentTheta ))
+                                            + (y * sin(currentTheta));
+
+                    int rhoIndex = (int)(rho + RHO_OFFSET);
+
+                    if (rhoIndex >= 0 && rhoIndex < RHO_MAX)
+                    {
+                        accumulator[rhoIndex][t]++;
+                    }
+
+                }
+                }
+
+            }
+        }
+
+
+        if (SDL_MUSTLOCK(surface)) {
+            SDL_UnlockSurface(surface);
+        }
+
+        int maxval = accu_maxvalue(accumulator, RHO_MAX, theta_s);
+
+
+        // The threshold will depend on your specific
+                // application and image characteristics
+        int lineindex= 0;
+        const int THRESHOLD = maxval * 0.2;
+
+
+        for (int r = 0; r < RHO_MAX; r++)
+        {
+            for (int t = 0; t < theta_s; t++)
+            {
+                //printf("%i",accumulator[r][t]);
+                if (accumulator[r][t] > THRESHOLD)
+                {
+                    double foundRho = (r - RHO_OFFSET);
+                    double foundTheta = t * theta;
+                //  float epsilon = 0.01;
+
+                    int x1, y1, x2, y2;
+                    if ( foundTheta< 0.01 ||fabs(foundTheta - M_PI)
+                        < 0.01){ //works perfectly //near 0 or pi
+
+                // Line is approximately vertical
+                        x1 = x2 = foundRho / cos(foundTheta);
+                        y1 = 0;
+                        y2 = h;
+
+                        if (x1 < 0) x1=x2=0;
+                        if (x1 >= w) x1 = x2 = w-1;
+
+
+                    } else if  ( fabs(foundTheta - M_PI/2 ) < 0.01) {
+                    // Line is approximately horizontal
+
+                        y1 = y2 = (foundRho/ sin (foundTheta ));
+                        x1 = 0;
+                        x2 = w;
+
+                        if (y1 < 0) y1 = y2 = 0;
+                        if (y1 >= h) y1 = y2 = h - 1;
+
+                        //x1=x2=y1=y2=0;
+
+
+                    } else {
+                        // diagonal
+                        x1 = 0;
+                        y1 = foundRho / sin(foundTheta) ;
+                        x2 = w;
+                        y2 = ((foundRho - x2 * cos(foundTheta)) / sin(foundTheta) );
+
+                                            //  x1=x2=y1=y2=0;
+
+                   
+
+                    if (lineindex == n) {
+                        n *= 2;
+                        lines = (struct Line*) realloc(lines,
+                                    n * sizeof(struct Line));
+                    }
+                   
+                    lines[lineindex].start.x = x1;
+                    lines[lineindex].end.x = x2;
+                    lines[lineindex].start.y = y1;
+                    lines[lineindex].end.y = y2;
+                    lines[lineindex].theta = t;
+                    lines[lineindex].rho = foundRho;
+                    lineindex++;
+                    }
+
+                }
+            }
+        }
+        for (int i = 0; i < RHO_MAX; i++) {
+            free(accumulator[i]);
+        }
+        free(accumulator);
+
+
+        struct Line* temp = (struct Line*) realloc(lines,
+                        lineindex * sizeof(struct Line));
+        if (temp == NULL) {
+            // Handle memory allocation failure
+        }
+        lines = temp;
+
+        //printf("%i",lineindex);
+        struct DetectedLines result;
+        result.lines = lines;
+        result.count = lineindex;
+
+        return result;
+
+        //return lines;
+
+    }
+
+double calculate_angle( struct DetectedLines result )
+{
+    struct Line* lines = result.lines;
+    int count = result.count;
+
+    int theta_bins[360] = {0};
+
+    // Count occurrences of each theta in bins
+    for (int i = 0; i < count; ++i) {
+        int bin_index = (int)(lines[i].theta ) % 360;
+
+        theta_bins[bin_index]++;
+    }
+
+    // Find the theta bin with the highest count
+    int most_common_theta = 0, max_count = 0;
+    for (int i = 0; i < 360; ++i) {
+        if (theta_bins[i] > max_count) {
+            max_count = theta_bins[i];
+            most_common_theta = i;
+        }
+    }
+
+    //if (most_common_theta < 90) most_common_theta +=90;
+    return (double) (most_common_theta -90);
+}
+
+
+//rotate the image with corrersponding angle
+SDL_Surface* RotateImage(SDL_Surface* image, double angledegree)
+{
+    //angledegree = fmod(angledegree, 360.0);
+
+    int w1 = image->w;
+    int h1 = image->h;
+    if (angledegree == 0) {
+        return SDL_ConvertSurface(image, image->format, 0);  // Create a copy
+    }
+   
+    float rad = angledegree * M_PI /180.0;
+
+    double coco = cos(rad);
+    double sisi = sin(rad);
+
+
+
+    int w2 = fabs(coco * w1) + fabs(sisi *h1); //x' = xcos + ysin
+    int h2 = fabs(sisi*w1) + fabs(coco*h1);
+
+    SDL_Surface* rot = SDL_CreateRGBSurface(0,w2,h2,32,0,0,0,0);
+
+    SDL_UnlockSurface(image);
+    SDL_UnlockSurface(rot);
+
+    for(int y = 0; y < h2; y++)
+    {
+        for(int x = 0; x < w2; x++)
+        {
+            int middlex = w1 / 2; //center coordinates of
+                                              //the source image
+            int middley = h1 / 2;
+
+
+            //with the distance to the center for each pixe
+            //-> trigonometric calculations can be used
+            //(the rotation matrix)
+
+            int distancex = x - w2 / 2;  // distance of
+                                             // current pixel
+                // from the center of the destination image in the x direction.
+            int distancey = y - w2 / 2;
+
+            //the corresponding pixel in the source image
+            int truex = middlex + distancex *coco - distancey *sisi;
+            int truey = middley+ distancey *coco+ distancex *sisi;
+
+            if (truex >= 0 && truey >=0 && truex <w1 && truey <h1)
+                ((Uint32*)rot->pixels)[y * w2 + x]= ((Uint32*)
+                                    image->pixels)[truey * w1 + truex];
+            else
+                ((Uint32*)rot->pixels)[y * w2 + x] = 0x000000;
+                        //transparent sdl rgb
+            }
+    }
+
+    SDL_UnlockSurface(image);
+    SDL_UnlockSurface(rot);
+
+    //memcpy(image->pixels, rot->pixels, w * h * sizeof(Uint32))
+
+    return rot;
+
+}
+
+
+
+/*
 ///AUTOMATIC ROTATION
 
 //HOUGH
