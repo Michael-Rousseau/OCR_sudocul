@@ -153,7 +153,7 @@ void load_and_train(network *n) {
 }
 
 void test_from_file() {
-  network *n = import_network("networkOwnData4.nw");
+  network *n = import_network("NetworkFinal.save");
 
   unsigned int a[81];
 
@@ -166,12 +166,27 @@ void test_from_file() {
     a[i] = read_output(n);
     free(pixels);
   }
-    free_network(n);
   for (int i = 0; i < 81; ++i) {
     if (i % 9 == 0 && i != 0)
       printf("\n");
     printf(" %d ", a[i]);
   }
+  printf("\n--------------------------\n");
+  for (int i = 0; i < 81; ++i) {
+    char path[100];
+    snprintf(path, sizeof(path), "./data/tst/firstimg/square_%d.bmp", i);
+    double *pixels = malloc(784 * sizeof(double));
+    get_tab(path, pixels);
+    feed_forward(n, pixels);
+    a[i] = read_output(n);
+    free(pixels);
+  }
+  for (int i = 0; i < 81; ++i) {
+    if (i % 9 == 0 && i != 0)
+      printf("\n");
+    printf(" %d ", a[i]);
+  }
+    free_network(n);
 }
 
 /*
