@@ -2,8 +2,8 @@
 
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -fsanitize=address -lm -g `pkg-config --cflags sdl2 SDL2_image` -lpng
-LDFLAGS = -fsanitize=address -lm -lpng
+CFLAGS = -Wall -Wextra -fsanitize=address -lm -g `pkg-config --cflags sdl2 SDL2_image`
+LDFLAGS = -fsanitize=address -lm 
 LDLIBS =`pkg-config --libs sdl2 SDL2_image`
 
 SRC = helper.c network.c ocr.c main.c read_file.c
