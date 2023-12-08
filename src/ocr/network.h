@@ -25,7 +25,9 @@ network *rand_init_network(size_t *layers, size_t len,
 network *import_network(char *path);
 void export_network(network *n, char *path);
 
+network *xavier_init_network(size_t *layers, size_t len);
 void free_network(network *network);
 
 void print_network(network *n);
 void network_to_graph(network *n, char *path);
+network *he_init_network(size_t *layers, size_t len);
