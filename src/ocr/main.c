@@ -46,7 +46,7 @@ void train(network *n, double speed, double **inputs, int **targets,
         feed_forward(n, batch_inputs[i]);
         if ((int)read_output(n) == train_label[index++])
           correct_predictions++;
-        if ((start + i + 1) % 1000 == 0) {
+        if ((start + i + 1) % 10 == 0) {
           double accuracy_so_far = (double)correct_predictions / (10.0);
           printf("Epoch %zu - Tests: %zu - Accuracy: %.2f%%\n Correct: %zu\n",
                  epoch + 1, start + i + 1, accuracy_so_far,
@@ -127,13 +127,14 @@ void load_and_train(network *n) {
   size_t num_epochs = 10;
   size_t batch_size = 1;
 
-  double* pixels = malloc(81 * sizeof(double));
+  double* pixels = malloc(28*28 * sizeof(double));
   char path[100];
   int* label = calloc(81,sizeof(int));
 
   for(int i =0; i < 81; ++i)
   {
       snprintf(path, sizeof(path), "./data/tst/firstimg/square_%d.bmp", i);
+      printf("%s", path);
       get_tab(path, pixels);
       label[i] = 1;
       targets[i] = label;
