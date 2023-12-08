@@ -4,7 +4,7 @@
 #include "network.h"
 #include "ocr.h"
 
-#include "read_file.h"
+#include "readSDL.h"
 #include <emmintrin.h>
 #include <err.h>
 #include <stddef.h>
@@ -106,50 +106,63 @@ void load_and_train(network *n) {
   double ***images;
   load_images(&images, pngFiles, NUM_IMAGES);
 */
-  int label_first[] = {5,3,0,0,7,0,0,0,6,0,0,1,9,5,0,0,0,0,9,8,0,0,0,0,6,0,8,0,0,0,6,0,0,0,3,4,0,0,8,0,3,0,0,1,7,0,0,0,2,0,0,0,6,0,6,0,0,0,0,2,8,0,0,0,0,4,1,9,0,0,5,0,0,0,0,8,0,0,7,9};
-  int label_second[] = {0,2,0,0,0,0,6,0,9,8,5,7,0,6,4,2,0,0,0,9,0,0,0,1,0,0,0,0,1,0,6,5,0,3,0,0,0,0,8,1,0,3,5,0,0,0,0,3,0,2,9,0,8,0,0,0,0,4,0,0,0,6,0,0,0,2,8,7,0,1,3,5,1,0,6,0,0,0,0,2,0};
-  int label_third[] = {0,0,0,0,0,4,5,8,0,0,0,0,7,2,1,0,0,3,4,0,3,0,0,0,0,0,0,2,1,0,0,6,7,0,0,4,0,7,0,0,0,0,2,0,0,6,3,0,0,4,9,0,0,1,0,0,0,0,0,6,9,5,0,};
+  int label_first[] = {5, 3, 0, 0, 7, 0, 0, 0, 6, 0, 0, 1, 9, 5, 0, 0,
+                       0, 0, 9, 8, 0, 0, 0, 0, 6, 0, 8, 0, 0, 0, 6, 0,
+                       0, 0, 3, 4, 0, 0, 8, 0, 3, 0, 0, 1, 7, 0, 0, 0,
+                       2, 0, 0, 0, 6, 0, 6, 0, 0, 0, 0, 2, 8, 0, 0, 0,
+                       0, 4, 1, 9, 0, 0, 5, 0, 0, 0, 0, 8, 0, 0, 7, 9};
+
+  int label_second[] = {0, 2, 0, 0, 0, 0, 6, 0, 9, 8, 5, 7, 0, 6, 4, 2, 0,
+                        0, 0, 9, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 6, 5, 0, 3,
+                        0, 0, 0, 0, 8, 1, 0, 3, 5, 0, 0, 0, 0, 3, 0, 2, 9,
+                        0, 8, 0, 0, 0, 0, 4, 0, 0, 0, 6, 0, 0, 0, 2, 8, 7,
+                        0, 1, 3, 5, 1, 0, 6, 0, 0, 0, 0, 2, 0};
+  int label_third[] = {
+      0, 0, 0, 0, 0, 4, 5, 8, 0, 0, 0, 0, 7, 2, 1, 0, 0, 3, 4, 0, 3,
+      0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 6, 7, 0, 0, 4, 0, 7, 0, 0, 0, 0,
+      2, 0, 0, 6, 3, 0, 0, 4, 9, 0, 0, 1, 0, 0, 0, 0, 0, 6, 9, 5, 0,
+  };
   int i = 0;
 
-//  for (int label = 0; label < 9; ++label) {
+  //  for (int label = 0; label < 9; ++label) {
   //  for (int num = 0; num < 30; num++) {
- //     double *current_image = images[label][i];
-    //int *target_output = calloc(10, sizeof(int));
-      //target_output[label] = 1;
+  //     double *current_image = images[label][i];
+  // int *target_output = calloc(10, sizeof(int));
+  // target_output[label] = 1;
 
-   //   inputs[i] = current_image;
-      //targets[i++] = target_output;
+  //   inputs[i] = current_image;
+  // targets[i++] = target_output;
 
-      //free(target_output);
-    //}
+  // free(target_output);
+  //}
   //}
   size_t num_samples = 81;
-  size_t num_epochs = 10;
+  size_t num_epochs = 1;
   size_t batch_size = 1;
 
-  double* pixels = malloc(28*28 * sizeof(double));
+  double *pixels = malloc(28 * 28 * sizeof(double));
   char path[100];
-  int* label = calloc(81,sizeof(int));
+  int *label = calloc(81, sizeof(int));
 
-  for(int i =0; i < 81; ++i)
-  {
-      snprintf(path, sizeof(path), "./data/tst/firstimg/square_%d.bmp", i);
-      printf("%s", path);
-      get_tab(path, pixels);
-      label[i] = 1;
-      targets[i] = label;
-      inputs[i] = pixels;
-        train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size);
-        label[i] = 0;
+  for (int i = 0; i < 81; ++i) {
+    snprintf(path, sizeof(path), "data/tst/firstimg/square_%d.bmp", i);
+    printf("%s", path);
+    get_tab(path, pixels);
+    label[label_first[i]] = 1;
+    targets[i] = label;
+    inputs[i] = pixels;
+    train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs,
+          batch_size);
+    label[label_first[i]] = 0;
   }
 
-  for (int i = 0; i < 9*30; ++i) {
+  for (int i = 0; i < num_samples; ++i) {
     free(targets[i]);
   }
   free(inputs);
   free(targets);
-  //free_file_names(&pngFiles, numFiles);
-  //free_images(&images, numFiles);
+  // free_file_names(&pngFiles, numFiles);
+  // free_images(&images, numFiles);
 }
 
 void build_Images(int i) {
@@ -182,6 +195,18 @@ void test_from_load(int nb_test) {
   double final = (double)accuracy / (double)nb_test;
   printf("final : %f\n", final * 100);
 }
+void test_from_file()
+{
+    network *n = import_network("97network.nw");
+    const char* filename = "uncinq.bmp";
+    double* pixels = malloc(784 * sizeof(double));
+    get_tab(filename,pixels);
+    feed_forward(n,pixels);
+    printf("expected:5\ngot:%zu\n", read_output(n));
+
+    free(pixels);
+
+}
 int main() {
   size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
   layers[0] = 784;
@@ -191,10 +216,11 @@ int main() {
 
   // first: call build_images and then comment it
 
+  //test_from_file();
   // build_Images(NUM_IMAGES);
   load_and_train(n);
 
-     export_network(n, "networkOwnData.nw");
+  export_network(n, "networkOwnData.nw");
   // test_from_load(1000);
 
   free_network(n);
