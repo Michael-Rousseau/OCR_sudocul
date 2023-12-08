@@ -182,8 +182,9 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 
 					if (lineindex == n) {
 						n *= 2;
-						lines = (struct Line*) realloc(lines,
-                                    n * sizeof(struct Line));
+						lines = (struct Line*) realloc
+							(lines, n *
+							 sizeof(struct Line));
 					}
 
 					lines[lineindex].start.x = x1;
@@ -289,7 +290,8 @@ int averagelines(struct Line* line, int len,  struct Linegroup** group) {
 
 				if (!group)
 				{
-					fprintf(stderr, "Memory allocation failed.\n");
+					fprintf(stderr, 
+					"Memory allocation failed.\n");
 					exit(EXIT_FAILURE);
 				}
 
@@ -495,13 +497,15 @@ void sort_vertical_lines(struct Line* vertical, int len)
 
 
 
-void fillsquares(struct Line* vertical, struct Line* horizon, struct Squares* squares, int len) {
+void fillsquares(struct Line* vertical, struct Line* horizon, 
+		struct Squares* squares, int len) {
     int nx = 0;
 
     // Iterate over each horizontal line
     for (int i = 0; i < len - 1; i++) {
         // For each horizontal line, iterate over each vertical line
         for (int j = 0; j < len - 1; j++) {
+
             squares[nx].topleft.y = horizon[i].start.y;
             squares[nx].topleft.x = vertical[j].start.x;
 
@@ -522,7 +526,8 @@ int has_white_neighbors(SDL_Surface *surface, int x, int y) {
     for (int dx = -15; dx <= 15; dx++) {
         for (int dy = -15; dy <= 15; dy++) {
             if (dx == 0 && dy == 0) continue; // Skip the pixel itself
-            if (x + dx < 0 || x + dx >= surface->w || y + dy < 0 || y + dy >= surface->h) continue; // Check bounds
+            if (x + dx < 0 || x + dx >= surface->w || y + dy < 0 ||
+			    y + dy >= surface->h) continue; // Check bounds
             Uint32 neighbor_pixel = get_pixel(surface, x + dx, y + dy);
             if (neighbor_pixel == white_pixel) {
                 return 1; // White neighbor found
@@ -569,8 +574,10 @@ int check_square_edges(SDL_Surface *surface, struct Squares sq) {
     }
     return 1;
 }
-struct Squares findbestsquare(SDL_Surface* original_image, struct Line* vertical, struct Line* horizon, struct Squares *squares, int len)
-{    struct Squares max_square;
+struct Squares findbestsquare(SDL_Surface* original_image,
+struct Line* vertical, struct Line* horizon, struct Squares *squares, int len)
+{   
+	struct Squares max_square;
     int max_size = -1;
 
     for (int h = 0; h < len - 1; ++h) {
@@ -593,7 +600,8 @@ struct Squares findbestsquare(SDL_Surface* original_image, struct Line* vertical
                     float height = fabs(s.bottomleft.y - s.topleft.y);
                     int size = width * height;
 
-                    if ((size > max_size) && fabs(height - width) < 10 && check_square_edges(original_image, s)) {
+                    if ((size > max_size) && fabs(height - width) < 10 &&
+				    check_square_edges(original_image, s)) {
                         max_size = size;
                         max_square = s;
                     }
@@ -650,7 +658,8 @@ void printvalues(struct Line* lines, int len,SDL_Surface* original_image)
 		printf("\n");
 
 	}
-	struct Squares ss = findbestsquare(original_image, vertical,  horizon,   squares, len);
+	struct Squares ss = findbestsquare(original_image, vertical, 
+			horizon,   squares, len);
 	printf("last big  \n");
 		printf("Top Left: (%f, %f)\n",
                         ss.topleft.x, ss.topleft.y);
@@ -720,7 +729,8 @@ void sort_squares_horizontal(struct Squares* squares, int num_squares) {
 }
 
 
-struct Squares* drawsquares(struct Line* lines, int len,struct Line* horizon, struct Line* vertical )
+struct Squares* drawsquares(struct Line* lines, int len,struct Line* horizon,
+		struct Line* vertical )
 {
 	horizontal_vertical_lines(lines, len, horizon, vertical);
 
@@ -757,7 +767,7 @@ struct Squares* drawsquares(struct Line* lines, int len,struct Line* horizon, st
 
 
 
-
+/*
 
 // Function to extract and save squares as images
 void extract_and_save_squares(SDL_Surface* original_image, struct Squares* 
@@ -866,6 +876,103 @@ void extract_and_save_squares(SDL_Surface* original_image, struct Squares*
 				SDL_FreeSurface(square_surface);
 				// SDL_FreeSurface(resized_surface);
 			}
+		}
+    }
+}*/
+
+// Function to extract and save squares as images
+void extract_and_save_squares(SDL_Surface* original_image, struct Squares* squares, 
+int num_squares,struct Squares s){
+    const int target_width = 28;
+    const int target_height = 28;
+	int j = 0;
+
+	float average_width, average_height;
+    calculate_average_dimensions(squares, num_squares, &average_width, &average_height);
+
+	printf("last big  \n");
+
+		printf("Top Left: (%f, %f)\n",
+                        s.topleft.x, s.topleft.y);
+		printf("Top Right: (%f, %f)\n",
+                        s.topright.x, s.topright.y);
+		printf("Bottom Right: (%f, %f)\n",
+                        s.bottomright.x, s.bottomright.y);
+		printf("Bottom Left: (%f, %f)\n",
+                        s.bottomleft.x, s.bottomleft.y);
+		printf("\n");
+		printf("t lf         %f,%f\n", s.topleft.x, s.topleft.y);
+		printf("%f,%f\n",s.bottomleft.x, s.bottomleft.y);
+
+printf("t r          %f,%f\n", s.bottomright.x, s.bottomright.y);
+		printf("%f,%f\n", s.bottomleft.x, s.bottomleft.y);
+
+		float big_square_width = fabs(s.topright.x - s.topleft.x);
+    	float big_square_height = fabs(s.bottomleft.y - s.topleft.y);
+
+		float small_square_width = big_square_width / 9;
+    	float small_square_height = big_square_height / 9;
+
+	    int counter = 0;
+
+		for (int row = 0; row < 9; row++) {
+        for (int col = 0; col < 9; col++) {
+            struct Squares small_square;
+
+            small_square.topleft.x = s.topleft.x + col * small_square_width;
+            small_square.topleft.y = s.topleft.y + row * small_square_height;
+
+            small_square.bottomright.x = small_square.topleft.x + small_square_width;
+            small_square.bottomright.y = small_square.topleft.y + small_square_height;
+
+        
+        // Create a new surface for each square
+        SDL_Surface* square_surface = SDL_CreateRGBSurface(0, small_square_width, small_square_height, original_image->format->BitsPerPixel,
+                                                           original_image->format->Rmask, original_image->format->Gmask,
+                                                           original_image->format->Bmask, original_image->format->Amask);
+        
+        if (square_surface == NULL) {
+            fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
+            continue;  // Skip this square and move to the next
+        }
+
+        // Define the rectangle to be copied
+        SDL_Rect square_rect;
+        square_rect.x = small_square.topleft.x;
+        square_rect.y = small_square.topleft.y;
+        square_rect.w = small_square_width;
+        square_rect.h = small_square_height;
+
+        // Blit the square area from the original image to the new surface
+        SDL_BlitSurface(original_image, &square_rect, square_surface, NULL);
+
+		
+		 // Create a new surface for the resized square
+        SDL_Surface* resized_surface = SDL_CreateRGBSurface(0, target_width, target_height, original_image->format->BitsPerPixel,
+                                                            original_image->format->Rmask, original_image->format->Gmask,
+                                                            original_image->format->Bmask, original_image->format->Amask);
+        if (resized_surface == NULL) {
+            fprintf(stderr, "SDL_CreateRGBSurface failed for resized surface: %s\n", SDL_GetError());
+            SDL_FreeSurface(square_surface);
+            continue;
+        }
+
+
+		// Blit the square surface to the resized surface with scaling
+        SDL_BlitScaled(square_surface, NULL, resized_surface, NULL); 
+
+        // Save each square as an image
+        char filename[64];
+        sprintf(filename, "square_%d.bmp", counter);
+		j++;
+        if (SDL_SaveBMP(resized_surface, filename) != 0) {
+            fprintf(stderr, "SDL_SaveBMP failed: %s\n", SDL_GetError());
+        }
+		counter++;
+
+        // Free the square surface after saving
+        SDL_FreeSurface(square_surface);
+		       // SDL_FreeSurface(resized_surface);
 		}
     }
 }

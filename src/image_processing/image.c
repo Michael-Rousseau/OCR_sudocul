@@ -363,7 +363,7 @@ void surface_to_reducenoise(SDL_Surface* surface)
 {
     // Define the kernel size and sigma for Gaussian blur
     int kernelSize = 5;
-    float sigma = 15.0;
+    float sigma = 15.0; //photo 2 = 10
 
     // Generate the Gaussian kernel
     float** kernel = generate_Kernel(kernelSize, sigma);
