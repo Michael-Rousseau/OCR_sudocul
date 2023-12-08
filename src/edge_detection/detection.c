@@ -71,54 +71,22 @@ void draw_squares(SDL_Renderer* renderer, SDL_Texture* texture,
                         squares[i].topleft.x, squares[i].topleft.y);
 
 		SDL_RenderDrawLine(renderer, squares[i].topleft.x,
-                        squares[i].topleft.y, squares[i].topleft.x +1,
-                        squares[i].topleft.y+1 );
+                        squares[i].topleft.y, squares[i].topleft.x +4,
+                        squares[i].topleft.y+4 );
 		SDL_RenderDrawLine(renderer, squares[i].topright.x,
-                        squares[i].topright.y,squares[i].topright.x +1,
-                        squares[i].topright.y+1);
+                        squares[i].topright.y,squares[i].topright.x +4,
+                        squares[i].topright.y+4);
 		SDL_RenderDrawLine(renderer, squares[i].bottomright.x,
-                        squares[i].bottomright.y, squares[i].bottomright.x+1,
-                        squares[i].bottomright.y+1);
+                        squares[i].bottomright.y, squares[i].bottomright.x+4,
+                        squares[i].bottomright.y+4);
 
 		SDL_RenderDrawLine(renderer,squares[i].bottomleft.x,
-                        squares[i].bottomleft.y,squares[i].bottomleft.x+1,
-                        squares[i].bottomleft.y +1);
+                        squares[i].bottomleft.y,squares[i].bottomleft.x+4,
+                        squares[i].bottomleft.y +4);
 
 
 	}
 	 //SDL_RenderPresent(renderer);
-
-SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255); // Set the color to blue
-/*
-// Draw the top line
-SDL_RenderDrawLine(renderer, 0, 0, 992, 0);
-
-// Draw the right line
-SDL_RenderDrawLine(renderer, 992, 0, 992, 992);
-
-// Draw the bottom line
-SDL_RenderDrawLine(renderer, 992, 992, 0, 992);
-
-// Draw the left line
-SDL_RenderDrawLine(renderer, 0, 992, 0, 0);*/
-
-
-// Draw the top line
-
-// Draw the top line
-SDL_RenderDrawLine(renderer, 0, 0, 2, 1107);
-
-// Draw the right line
-SDL_RenderDrawLine(renderer, 2, 1107, 2, 1118);
-
-// Draw the bottom line
-SDL_RenderDrawLine(renderer, 2, 1118, 0, 1118);
-
-// Draw the left line
-SDL_RenderDrawLine(renderer, 0, 1118, 0, 0);
-
-
-
 
 	SDL_RenderPresent(renderer);
 }
@@ -354,7 +322,7 @@ int main(int argc, char **argv){
 	{
 		//struct Line* lines= performHoughTransform(surface);
 		//
-		struct DetectedLines detected = auto_performHoughTransform(surface);// performHoughTransform(surface);
+		struct DetectedLines detected = performHoughTransform(surface);
 		struct Line* lin = detected.lines;
 		int num = detected.count;
 

@@ -1,9 +1,9 @@
 #ifndef HOUGH_H
 #define HOUGH_H
 
-#define startThreshold 10
+#define startThreshold 50
 
-#define endThreshold 10
+#define endThreshold 50
 
 struct Point {
     float x;

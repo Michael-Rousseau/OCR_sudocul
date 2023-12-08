@@ -170,7 +170,7 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 						x2 = w;
 						y2 = ((foundRho - x2 * cos(foundTheta)) / sin(foundTheta) );
 
-											//	x1=x2=y1=y2=0;
+												x1=x2=y1=y2=0;
 
 					}
 
