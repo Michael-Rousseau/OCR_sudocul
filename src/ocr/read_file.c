@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void get_tab(const char *path, double *pixels) {
+void get_tab(const char *path, double *d) {
    SDL_Surface *surface = IMG_Load(path);
   if(surface == NULL)
       errx(1, "OH");
@@ -23,9 +23,9 @@ void get_tab(const char *path, double *pixels) {
         Uint8 grayscale = (0.3 * r + 0.59 * g + 0.11 * b);
 
             if (grayscale > 128)
-                pixels[pixelIndex] = 1;
+                d[pixelIndex] = 1;
             else
-                pixels[pixelIndex] = 0;
+                d[pixelIndex] = 0;
       pixelIndex++;
     }
   }

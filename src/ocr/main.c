@@ -1,4 +1,6 @@
 #define _GNU_SOURCE
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 #include "helper.h"
 #include "mnist.h"
 #include "network.h"
@@ -93,19 +95,6 @@ void load_and_train(network *n) {
   double **inputs = malloc(NUM_IMAGES * sizeof(double *));
   int **targets = malloc(NUM_IMAGES * sizeof(int *));
 
-  /*
-  const char *folder =
-      "./data/digits_im/0/"; // Replace with the actual folder path
-  char **pngFiles;
-  int numFiles;
-
-  get_png_files(folder, &pngFiles, &numFiles);
-
-  // Length of images dimensions:
-  // images[9 (label)][NB_IMAGES][784]
-  double ***images;
-  load_images(&images, pngFiles, NUM_IMAGES);
-*/
   int label_first[] = {5, 3, 0, 0, 7, 0, 0, 0, 6, 0, 0, 1, 9, 5, 0, 0,
                        0, 0, 9, 8, 0, 0, 0, 0, 6, 0, 8, 0, 0, 0, 6, 0,
                        0, 0, 3, 4, 0, 0, 8, 0, 3, 0, 0, 1, 7, 0, 0, 0,
@@ -123,19 +112,6 @@ void load_and_train(network *n) {
       2, 0, 0, 6, 3, 0, 0, 4, 9, 0, 0, 1, 0, 0, 0, 0, 0, 6, 9, 5, 0,
   };
   int i = 0;
-
-  //  for (int label = 0; label < 9; ++label) {
-  //  for (int num = 0; num < 30; num++) {
-  //     double *current_image = images[label][i];
-  // int *target_output = calloc(10, sizeof(int));
-  // target_output[label] = 1;
-
-  //   inputs[i] = current_image;
-  // targets[i++] = target_output;
-
-  // free(target_output);
-  //}
-  //}
   size_t num_samples = 81;
   size_t num_epochs = 1;
   size_t batch_size = 1;
@@ -145,7 +121,7 @@ void load_and_train(network *n) {
   int *label = calloc(81, sizeof(int));
 
   for (int i = 0; i < 81; ++i) {
-    snprintf(path, sizeof(path), "data/tst/firstimg/square_%d.bmp", i);
+    snprintf(path, sizeof(path), "./data/tst/firstimg/square_%d.bmp", i);
     printf("%s", path);
     get_tab(path, pixels);
     label[label_first[i]] = 1;
@@ -160,6 +136,7 @@ void load_and_train(network *n) {
     free(targets[i]);
   }
   free(inputs);
+  free(label);
   free(targets);
   // free_file_names(&pngFiles, numFiles);
   // free_images(&images, numFiles);
@@ -198,7 +175,7 @@ void test_from_load(int nb_test) {
 void test_from_file()
 {
     network *n = import_network("97network.nw");
-    const char* filename = "uncinq.bmp";
+    const char* filename = "./data/uncinq.bmp";
     double* pixels = malloc(784 * sizeof(double));
     get_tab(filename,pixels);
     feed_forward(n,pixels);
