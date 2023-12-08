@@ -82,17 +82,19 @@ void load_and_train(network *n) {
   int label_third[] = {
       0, 0, 0, 0, 0, 4, 5, 8, 0, 0, 0, 0, 7, 2, 1, 0, 0, 3, 4, 0, 3,
       0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 6, 7, 0, 0, 4, 0, 7, 0, 0, 0, 0,
-      2, 0, 0, 6, 3, 0, 0, 4, 9, 0, 0, 1, 0, 0, 0, 0, 0, 6, 9, 5, 0,
+      2, 0, 0, 6, 3, 0, 0, 4, 9, 0, 0, 1, 3, 0, 6, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 1, 5, 8, 0, 0, 6, 0, 0, 0, 0, 0, 6, 9, 5, 0,
   };
+
   size_t num_samples = 81;
-  size_t num_epochs = 10;
+  size_t num_epochs = 131;
   size_t batch_size = 1;
   for (int i = 0; i < num_samples; ++i) {
     double *pixels = malloc(28 * 28 * sizeof(double));
     char path[100];
     int *label = calloc(num_samples, sizeof(int));
 
-    snprintf(path, sizeof(path), "./data/tst/firstimg/square_%d.bmp", i);
+    snprintf(path, sizeof(path), "./data/tst/thirdimg/square_%d.bmp", i);
 
     get_tab(path, pixels);
     label[label_first[i]] = 1;
@@ -102,6 +104,12 @@ void load_and_train(network *n) {
   train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size,
   label_first);
 
+  for (int i = 0; i < num_samples; ++i) { 
+      free(targets[i]);
+    free(inputs[i]);
+  }
+  free(inputs);
+  free(targets);
   /*
   for (int i = 0; i < num_samples; ++i) {
     double *pixels = malloc(28 * 28 * sizeof(double));
@@ -216,7 +224,10 @@ int main() {
     //network *n = import_network("networkOwnData3.nw");
     
   // first: call build_images and then comment it
-    test_from_file();
+    //test_from_file();
+    network* n = import_network("networkOwnData4.nw");
+    load_and_train(n);
+    export_network(n, "networkOwnData5.nw");
 
   //  build_Images(NUM_IMAGES);
 //  load_and_train(n);
