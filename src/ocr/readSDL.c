@@ -14,7 +14,6 @@ void get_tab(const char *path, double *pixels) {
         SDL_LockSurface(surface);
     }
 
-    printf("size: %d %d\n", surface->h, surface->w);
     int pixelIndex = 0;
     int bpp = surface->format->BytesPerPixel; // Bytes per pixel
 
