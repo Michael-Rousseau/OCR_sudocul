@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
-#include "mnist.h"
 #include "helper.h"
+#include "mnist.h"
 #include "network.h"
 #include "ocr.h"
 #include "png_lib.h"
@@ -13,7 +13,7 @@
 #include <string.h>
 
 size_t LAYER_COUNT = 3;
-#define NUM_IMAGES 50000
+#define NUM_IMAGES 5000
 #define LEARNING_RATE 0.1
 
 void train_batch(network *n, double speed, double **batch_inputs,
@@ -109,20 +109,22 @@ void load_and_train(network *n) {
   for (int label = 0; label < 9; ++label) {
     for (int num = 0; num < 30; num++) {
       double *current_image = images[label][i];
-      int *target_output = calloc(10, sizeof(int));
+    int *target_output = calloc(10, sizeof(int));
       target_output[label] = 1;
 
       inputs[i] = current_image;
       targets[i++] = target_output;
+
+      free(target_output);
     }
   }
-  size_t num_samples = 9*30;
+  size_t num_samples = 9 * 30;
   size_t num_epochs = 1;
   size_t batch_size = 1;
 
   train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size);
 
-  for (int i = 0; i < NUM_IMAGES; ++i) {
+  for (int i = 0; i < 9*30; ++i) {
     free(targets[i]);
   }
   free(inputs);
@@ -179,5 +181,3 @@ int main() {
   free_network(n);
   return 0;
 }
-
-
