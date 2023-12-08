@@ -71,18 +71,18 @@ void draw_squares(SDL_Renderer* renderer, SDL_Texture* texture,
                         squares[i].topleft.x, squares[i].topleft.y);
 
 		SDL_RenderDrawLine(renderer, squares[i].topleft.x,
-                        squares[i].topleft.y, squares[i].topleft.x +4,
-                        squares[i].topleft.y+4 );
+                        squares[i].topleft.y, squares[i].topleft.x +10,
+                        squares[i].topleft.y+10 );
 		SDL_RenderDrawLine(renderer, squares[i].topright.x,
-                        squares[i].topright.y,squares[i].topright.x +4,
-                        squares[i].topright.y+4);
+                        squares[i].topright.y,squares[i].topright.x +10,
+                        squares[i].topright.y+10);
 		SDL_RenderDrawLine(renderer, squares[i].bottomright.x,
-                        squares[i].bottomright.y, squares[i].bottomright.x+4,
-                        squares[i].bottomright.y+4);
+                        squares[i].bottomright.y, squares[i].bottomright.x+10,
+                        squares[i].bottomright.y+10);
 
 		SDL_RenderDrawLine(renderer,squares[i].bottomleft.x,
-                        squares[i].bottomleft.y,squares[i].bottomleft.x+4,
-                        squares[i].bottomleft.y +4);
+                        squares[i].bottomleft.y,squares[i].bottomleft.x+10,
+                        squares[i].bottomleft.y +10);
 
 
 	}

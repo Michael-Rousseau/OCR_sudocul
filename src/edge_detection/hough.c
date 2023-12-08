@@ -138,11 +138,13 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 				//	float epsilon = 0.01;
 
 					int x1, y1, x2, y2;
-					if ( foundTheta< 0.01 ||fabs(foundTheta - M_PI)
+					if ( foundTheta< 0.01 ||
+							fabs(foundTheta - M_PI)
                         < 0.01){ //works perfectly //near 0 or pi
 
 				// Line is approximately vertical
-						x1 = x2 = foundRho / cos(foundTheta);
+						x1 = x2 = foundRho
+							/ cos(foundTheta);
 						y1 = 0;
 						y2 = h;
 
@@ -150,10 +152,12 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 						if (x1 >= w) x1 = x2 = w-1;
 
 
-					} else if  ( fabs(foundTheta - M_PI/2 ) < 0.01) {
+					} else if  ( fabs(foundTheta - M_PI/2 )
+							< 0.01) {
 				    // Line is approximately horizontal
 
-						y1 = y2 = (foundRho/ sin (foundTheta ));
+						y1 = y2 = (foundRho/ 
+							sin (foundTheta ));
 						x1 = 0;
 						x2 = w;
 
@@ -166,11 +170,13 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface)
 					} else {
 						// diagonal
 						x1 = 0;
-						y1 = foundRho / sin(foundTheta) ;
+						y1 = foundRho /
+							sin(foundTheta);
 						x2 = w;
-						y2 = ((foundRho - x2 * cos(foundTheta)) / sin(foundTheta) );
+						y2 = ((foundRho - x2 * 
+					cos(foundTheta)) / sin(foundTheta) );
 
-												x1=x2=y1=y2=0;
+						x1=x2=y1=y2=0;
 
 					}
 
@@ -731,16 +737,16 @@ struct Squares* drawsquares(struct Line* lines, int len,struct Line* horizon, st
 //	struct Squares* sq = calloc(num_squares, sizeof(struct Squares));
 
 	struct Squares* sq = calloc(num_squares, sizeof(struct Squares));
-	printf("sq callo\n");
+	//printf("sq callo\n");
 
 /*	if (!squares) {
 		fprintf(stderr, "Memory allocation failed.\n");*/
 	fillsquares(vertical, horizon, sq, len/2);
-	printf("sq fill\n");
+	//printf("sq fill\n");
 
 
     sort_squares_horizontal(sq, num_squares);
-		printf("horizon");
+	//	printf("horizon");
 
 
 	return sq;
@@ -754,94 +760,113 @@ struct Squares* drawsquares(struct Line* lines, int len,struct Line* horizon, st
 
 
 // Function to extract and save squares as images
-void extract_and_save_squares(SDL_Surface* original_image, struct Squares* squares, 
-int num_squares,struct Squares s){
-    const int target_width = 28;
-    const int target_height = 28;
+void extract_and_save_squares(SDL_Surface* original_image, struct Squares* 
+		squares,int num_squares,struct Squares s){
+	const int target_width = 28;
+	const int target_height = 28;
 	int j = 0;
 
 	float average_width, average_height;
-    calculate_average_dimensions(squares, num_squares, &average_width, &average_height);
+	calculate_average_dimensions(squares, num_squares,
+			&average_width, &average_height);
 
 	printf("last big  \n");
 
-		printf("Top Left: (%f, %f)\n",
-                        s.topleft.x, s.topleft.y);
-		printf("Top Right: (%f, %f)\n",
-                        s.topright.x, s.topright.y);
-		printf("Bottom Right: (%f, %f)\n",
-                        s.bottomright.x, s.bottomright.y);
-		printf("Bottom Left: (%f, %f)\n",
-                        s.bottomleft.x, s.bottomleft.y);
-		printf("\n");
-		printf("t lf         %f,%f\n", s.topleft.x, s.topleft.y);
-		printf("%f,%f\n",s.bottomleft.x, s.bottomleft.y);
+	printf("Top Left: (%f, %f)\n",
+			s.topleft.x, s.topleft.y);
+	printf("Top Right: (%f, %f)\n",
+			s.topright.x, s.topright.y);
+	printf("Bottom Right: (%f, %f)\n",
+			s.bottomright.x, s.bottomright.y);
+	printf("Bottom Left: (%f, %f)\n",
+			s.bottomleft.x, s.bottomleft.y);
+	printf("\n");
 
-printf("t r          %f,%f\n", s.bottomright.x, s.bottomright.y);
-		printf("%f,%f\n", s.bottomleft.x, s.bottomleft.y);
 
 	for (int i = 0; i < num_squares; i++) {
-	if (s.topleft.x <= squares[i].topleft.x && s.topright.x >= squares[i].topright.x &&
-            s.topleft.y <= squares[i].topleft.y && s.bottomleft.y >= squares[i].bottomleft.y) 
-			{
+		if (s.topleft.x <= squares[i].topleft.x &&
+		s.topright.x >= squares[i].topright.x && s.topleft.y
+		<= squares[i].topleft.y && s.bottomleft.y >= 
+		squares[i].bottomleft.y) {
 
 
-        float width = squares[i].topright.x - squares[i].topleft.x;
-        float height = squares[i].bottomleft.y - squares[i].topleft.y;
+			float width = squares[i].topright.x -
+				squares[i].topleft.x;
+			float height = squares[i].bottomleft.y -
+				squares[i].topleft.y;
 
-		 // Check if the square's dimensions are close to the average
-        if ((fabs(width - average_width) < 20 || fabs(height - average_height) < 20 )&& fabs(width - height) < 10) 
-		{ 
-        // Skip this square as its dimensions are too different
-        
-        // Create a new surface for each square
-        SDL_Surface* square_surface = SDL_CreateRGBSurface(0, width, height, original_image->format->BitsPerPixel,
-                                                           original_image->format->Rmask, original_image->format->Gmask,
-                                                           original_image->format->Bmask, original_image->format->Amask);
-        
-        if (square_surface == NULL) {
-            fprintf(stderr, "SDL_CreateRGBSurface failed: %s\n", SDL_GetError());
-            continue;  // Skip this square and move to the next
-        }
+			// Check if the square's dimensions are 
+			// close to the average
+			if ((fabs(width - average_width) < 20 || 
+			fabs(height - average_height) < 20 )&& 
+					fabs(width - height) < 10) 
+			{ 
+			// Skip this square as its dimensions are too different
 
-        // Define the rectangle to be copied
-        SDL_Rect square_rect;
-        square_rect.x = squares[i].topleft.x;
-        square_rect.y = squares[i].topleft.y;
-        square_rect.w = width;
-        square_rect.h = height;
+				// Create a new surface for each square
+				SDL_Surface* square_surface = 
+				SDL_CreateRGBSurface(0, width, height, 
+				original_image->format->BitsPerPixel,
+                        	original_image->format->Rmask, 
+				original_image->format->Gmask,
+                        	original_image->format->Bmask,
+				original_image->format->Amask);
 
-        // Blit the square area from the original image to the new surface
-        SDL_BlitSurface(original_image, &square_rect, square_surface, NULL);
+				if (square_surface == NULL) {
+					fprintf(stderr, 
+					"SDL_CreateRGBSurface failed: %s\n", 
+					SDL_GetError());
+					continue;  // Skip this square 
+				}
 
-		
-		 // Create a new surface for the resized square
-        SDL_Surface* resized_surface = SDL_CreateRGBSurface(0, target_width, target_height, original_image->format->BitsPerPixel,
-                                                            original_image->format->Rmask, original_image->format->Gmask,
-                                                            original_image->format->Bmask, original_image->format->Amask);
-        if (resized_surface == NULL) {
-            fprintf(stderr, "SDL_CreateRGBSurface failed for resized surface: %s\n", SDL_GetError());
-            SDL_FreeSurface(square_surface);
-            continue;
-        }
+				// Define the rectangle to be copied
+				SDL_Rect square_rect;
+				square_rect.x = squares[i].topleft.x;
+				square_rect.y = squares[i].topleft.y;
+				square_rect.w = width;
+				square_rect.h = height;
+
+				// Blit the square area 
+				// from the original image to the new surface
+				SDL_BlitSurface(original_image,
+				&square_rect, square_surface, NULL);
 
 
-		// Blit the square surface to the resized surface with scaling
-        SDL_BlitScaled(square_surface, NULL, resized_surface, NULL); 
+				// Create a new surface for the resized square
+				SDL_Surface* resized_surface =
+				SDL_CreateRGBSurface(0, target_width,
+			target_height, original_image->format->BitsPerPixel,
+				original_image->format->Rmask, 
+				original_image->format->Gmask,
+				original_image->format->Bmask,
+				original_image->format->Amask);
 
-        // Save each square as an image
-        char filename[64];
-        sprintf(filename, "square_%d.bmp", j);
-		j++;
-        if (SDL_SaveBMP(resized_surface, filename) != 0) {
-            fprintf(stderr, "SDL_SaveBMP failed: %s\n", SDL_GetError());
-        }
+				if (resized_surface == NULL) {
+					fprintf(stderr, 
+			"SDL_CreateRGBSurface failed for resized surface: %s\n"
+			, SDL_GetError());
+					SDL_FreeSurface(square_surface);
+					continue;
+				}
 
-        // Free the square surface after saving
-        SDL_FreeSurface(square_surface);
-		       // SDL_FreeSurface(resized_surface);
-		}
+				SDL_BlitScaled(square_surface, NULL, 
+						resized_surface, NULL); 
+
+				// Save each square as an image
+				char filename[64];
+				sprintf(filename, "square_%d.bmp", j);
+				j++;
+				if (SDL_SaveBMP(resized_surface, filename) 
+						!= 0) {
+				fprintf(stderr, "SDL_SaveBMP failed: %s\n"
+						, SDL_GetError());
+				}
+
+				// Free the square surface after saving
+				SDL_FreeSurface(square_surface);
+				// SDL_FreeSurface(resized_surface);
 			}
+		}
     }
 }
 
@@ -933,11 +958,12 @@ struct DetectedLines auto_performHoughTransform(SDL_Surface *surface)
 				//	float epsilon = 0.01;
 
 					int x1, y1, x2, y2;
-					if ( foundTheta< 0.01 ||fabs(foundTheta - M_PI)
-                        < 0.01){ //works perfectly //near 0 or pi
+					if ( foundTheta< 0.01 ||
+						fabs(foundTheta - M_PI)< 0.01){
 
 				// Line is approximately vertical
-						x1 = x2 = foundRho / cos(foundTheta);
+						x1 = x2 =
+						foundRho / cos(foundTheta);
 						y1 = 0;
 						y2 = h;
 
@@ -945,10 +971,12 @@ struct DetectedLines auto_performHoughTransform(SDL_Surface *surface)
 						if (x1 >= w) x1 = x2 = w-1;
 
 
-					} else if  ( fabs(foundTheta - M_PI/2 ) < 0.01) {
+					} else if ( fabs(foundTheta - M_PI/2 )
+							< 0.01) {
 				    // Line is approximately horizontal
 
-						y1 = y2 = (foundRho/ sin (foundTheta ));
+						y1 = y2 =
+						(foundRho/ sin (foundTheta ));
 						x1 = 0;
 						x2 = w;
 
@@ -963,15 +991,17 @@ struct DetectedLines auto_performHoughTransform(SDL_Surface *surface)
 						x1 = 0;
 						y1 = foundRho / sin(foundTheta) ;
 						x2 = w;
-						y2 = ((foundRho - x2 * cos(foundTheta)) / sin(foundTheta) );
+						y2 = ((foundRho - x2 * 
+					cos(foundTheta)) / sin(foundTheta) );
 
-											//	x1=x2=y1=y2=0;
+			//	x1=x2=y1=y2=0;
 
 					
 
 					if (lineindex == n) {
 						n *= 2;
-						lines = (struct Line*) realloc(lines,
+						lines = (struct Line*) 
+							realloc(lines,
                                     n * sizeof(struct Line));
 					}
 					
@@ -1106,7 +1136,8 @@ double calculate_angle(struct DetectedLines result) {
     int count = result.count;
 	for (int i =0; i < count; i++)
 	{
-		printf ("diagonal %i:start x: %f y: %f | end x: %f y: %f \n", i, lines[i].start.x,
+		printf ("diagonal %i:start x: %f y: %f | end x: %f y: %f \n",
+		i, lines[i].start.x,
 		lines[i].start.y,lines[i].end.x,lines[i].end.y);
 	}
     double sin_sum = 0.0;
