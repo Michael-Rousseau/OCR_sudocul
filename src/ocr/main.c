@@ -3,8 +3,8 @@
 #include "mnist.h"
 #include "network.h"
 #include "ocr.h"
-#include "png_lib.h"
 
+#include "read_file.h"
 #include <emmintrin.h>
 #include <err.h>
 #include <stddef.h>
@@ -93,6 +93,7 @@ void load_and_train(network *n) {
   double **inputs = malloc(NUM_IMAGES * sizeof(double *));
   int **targets = malloc(NUM_IMAGES * sizeof(int *));
 
+  /*
   const char *folder =
       "./data/digits_im/0/"; // Replace with the actual folder path
   char **pngFiles;
@@ -104,22 +105,26 @@ void load_and_train(network *n) {
   // images[9 (label)][NB_IMAGES][784]
   double ***images;
   load_images(&images, pngFiles, NUM_IMAGES);
-
+*/
+  int label_first[] = {5,3,0,0,7,0,0,0,6,0,0,1,9,5,0,0,0,0,9,8,0,0,0,0,6,0,8,0,0,0,6,0,0,0,3,4,0,0,8,0,3,0,0,1,7,0,0,0,2,0,0,0,6,0,6,0,0,0,0,2,8,0,0,0,0,4,1,9,0,0,5,0,0,0,0,8,0,0,7,9};
+  int label_second[] = {0,2,0,0,0,0,6,0,9,8,5,7,0,6,4,2,0,0,0,9,0,0,0,1,0,0,0,0,1,0,6,5,0,3,0,0,0,0,8,1,0,3,5,0,0,0,0,3,0,2,9,0,8,0,0,0,0,4,0,0,0,6,0,0,0,2,8,7,0,1,3,5,1,0,6,0,0,0,0,2,0};
+  int label_third[] = {0,0,0,0,0,4,5,8,0,0,0,0,7,2,1,0,0,3,4,0,3,0,0,0,0,0,0,2,1,0,0,6,7,0,0,4,0,7,0,0,0,0,2,0,0,6,3,0,0,4,9,0,0,1,0,0,0,0,0,6,9,5,0,};
   int i = 0;
-  for (int label = 0; label < 9; ++label) {
-    for (int num = 0; num < 30; num++) {
-      double *current_image = images[label][i];
-    int *target_output = calloc(10, sizeof(int));
-      target_output[label] = 1;
 
-      inputs[i] = current_image;
-      targets[i++] = target_output;
+//  for (int label = 0; label < 9; ++label) {
+  //  for (int num = 0; num < 30; num++) {
+ //     double *current_image = images[label][i];
+    //int *target_output = calloc(10, sizeof(int));
+      //target_output[label] = 1;
 
-      free(target_output);
-    }
-  }
-  size_t num_samples = 9 * 30;
-  size_t num_epochs = 1;
+   //   inputs[i] = current_image;
+      //targets[i++] = target_output;
+
+      //free(target_output);
+    //}
+  //}
+  size_t num_samples = 81;
+  size_t num_epochs = 10;
   size_t batch_size = 1;
 
   train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size);
@@ -129,8 +134,8 @@ void load_and_train(network *n) {
   }
   free(inputs);
   free(targets);
-  free_file_names(&pngFiles, numFiles);
-  free_images(&images, numFiles);
+  //free_file_names(&pngFiles, numFiles);
+  //free_images(&images, numFiles);
 }
 
 void build_Images(int i) {
