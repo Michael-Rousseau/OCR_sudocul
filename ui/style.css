@@ -1,32 +1,11 @@
-
-window {
-    background-color: #17071F; /* Dark background for the window */
+.button-active {
+    /* Styles for active button */
+    background-color: #4CAF50; /* Example active color */
 }
 
-button {
-    color: #bdc3c7; /* Light gray text color */
-    background-color: #311140; /* Dark blue background for buttons */
-    border-radius: 4px; /* Rounded corners for buttons */
-    padding: 10px 20px; /* Padding inside buttons */
-    font-weight: bold; /* Bold font for text on buttons */
-    border-radius: 4px;
-    transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
-}
-
-button:hover {
-    color: #17071F; /* Dark blue text color when hovering */
-    background-color: #bdc3c7; /* Light gray background when hovering */
-}
-
-filechooserbutton {
-    color: #bdc3c7; /* Light gray text color for file chooser */
-    background-color: #311140; /* Dark green background for file chooser */
-    border-radius: 4px; /* Rounded corners for file chooser */
-    padding: 5px 10px; /* Padding inside file chooser */
-}
-
-filechooserbutton:hover {
-    background-color: #17071F; /* Slightly lighter green when hovering */
+.button-inactive {
+    /* Styles for inactive button */
+    background-color: #757575; /* Example inactive color */
 }
 
 
@@ -39,5 +18,3 @@ button.changed-number {
 button.changed-number:hover {
     background-color: violet; /* Slightly darker salmon on hover */
 }
-
-
