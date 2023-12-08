@@ -153,40 +153,6 @@ void load_and_train(network *n) {
 }
 
 void test_from_file() {
-  network *n = import_network("NetworkFinal.save");
-
-  unsigned int a[81];
-
-  for (int i = 0; i < 81; ++i) {
-    char path[100];
-    snprintf(path, sizeof(path), "./data/tst/secondimg/square_%d.bmp", i);
-    double *pixels = malloc(784 * sizeof(double));
-    get_tab(path, pixels);
-    feed_forward(n, pixels);
-    a[i] = read_output(n);
-    free(pixels);
-  }
-  for (int i = 0; i < 81; ++i) {
-    if (i % 9 == 0 && i != 0)
-      printf("\n");
-    printf(" %d ", a[i]);
-  }
-  printf("\n--------------------------\n");
-  for (int i = 0; i < 81; ++i) {
-    char path[100];
-    snprintf(path, sizeof(path), "./data/tst/firstimg/square_%d.bmp", i);
-    double *pixels = malloc(784 * sizeof(double));
-    get_tab(path, pixels);
-    feed_forward(n, pixels);
-    a[i] = read_output(n);
-    free(pixels);
-  }
-  for (int i = 0; i < 81; ++i) {
-    if (i % 9 == 0 && i != 0)
-      printf("\n");
-    printf(" %d ", a[i]);
-  }
-    free_network(n);
 }
 
 /*
@@ -258,25 +224,3 @@ train_label); for (int i = 0; i < 50000; ++i) { free(targets2[i]);
   free(targets2);
   */
 
-int main() {
-    /*
-  size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
-  layers[0] = 784;
-  layers[1] = 300;
-  layers[2] = 10;
-  network *n = xavier_init_network(layers, LAYER_COUNT);
-  */
-
-  // first: call build_images and then comment it
-
-  // build_Images(NUM_IMAGES);
-  //load_and_train(n);
-
-//  network *n = import_network("networkOwnData4.nw");
-    test_from_file();
-  //   export_network(n, "testnetwork");
-  // test_from_load(1000);
-
-//  free_network(n);
-  return 0;
-}
