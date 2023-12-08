@@ -1,9 +1,9 @@
 #define _GNU_SOURCE
-#include "mnist.h"
 #include "helper.h"
+#include "mnist.h"
 #include "network.h"
 #include "ocr.h"
-#include "png_lib.h"
+#include "readSDL.h"
 
 #include <emmintrin.h>
 #include <err.h>
@@ -13,7 +13,7 @@
 #include <string.h>
 
 size_t LAYER_COUNT = 3;
-#define NUM_IMAGES 5000
+#define NUM_IMAGES 50000
 #define LEARNING_RATE 0.1
 
 void train_batch(network *n, double speed, double **batch_inputs,
@@ -89,48 +89,6 @@ double *load_image(char *filename) {
   return image;
 }
 
-void load_and_train(network *n) {
-  double **inputs = malloc(NUM_IMAGES * sizeof(double *));
-  int **targets = malloc(NUM_IMAGES * sizeof(int *));
-
-  const char *folder =
-      "./data/digits_im/0/"; // Replace with the actual folder path
-  char **pngFiles;
-  int numFiles;
-
-  get_png_files(folder, &pngFiles, &numFiles);
-
-  // Length of images dimensions:
-  // images[9 (label)][NB_IMAGES][784]
-  double ***images;
-  load_images(&images, pngFiles, NUM_IMAGES);
-
-  int i = 0;
-  for (int label = 0; label < 9; ++label) {
-    for (int num = 0; num < 30; num++) {
-      double *current_image = images[label][i];
-      int *target_output = calloc(10, sizeof(int));
-      target_output[label] = 1;
-
-      inputs[i] = current_image;
-      targets[i++] = target_output;
-    }
-  }
-  size_t num_samples = 9*30;
-  size_t num_epochs = 1;
-  size_t batch_size = 1;
-
-  train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size);
-
-  for (int i = 0; i < NUM_IMAGES; ++i) {
-    free(targets[i]);
-  }
-  free(inputs);
-  free(targets);
-  free_file_names(&pngFiles, numFiles);
-  free_images(&images, numFiles);
-}
-
 void build_Images(int i) {
   load_mnist();
   for (int a = 0; a < i; ++a) {
@@ -161,6 +119,129 @@ void test_from_load(int nb_test) {
   double final = (double)accuracy / (double)nb_test;
   printf("final : %f\n", final * 100);
 }
+
+void load_and_train(network *n) {
+  double **inputs = malloc(NUM_IMAGES * sizeof(double *));
+  int **targets = malloc(NUM_IMAGES * sizeof(int *));
+
+  size_t num_samples = 50000;
+  size_t num_epochs = 10;
+  size_t batch_size = 1;
+  load_mnist();
+  double **inputs2 = malloc(50000 * sizeof(double *));
+  int **targets2 = malloc(50000 * sizeof(int *));
+  for (int i = 0; i < 50000; i++) {
+    int *label = calloc(10, sizeof(int));
+    double *pixels = train_image[i];
+    for (int k = 0; k < 784; ++k) {
+      if (pixels[k] > 0.5)
+        pixels[k] = 1.0;
+      else
+        pixels[k] = 0.0;
+    }
+    int labelii = train_label[i];
+    label[labelii] = 1;
+    targets[i] = label;
+    inputs[i] = pixels;
+  }
+  for (int i = 0; i < 50000; ++i) {
+    free(targets[i]);
+    free(inputs[i]);
+  }
+  free(inputs);
+  free(targets);
+}
+
+void test_from_file() {
+  network *n = import_network("networkOwnData4.nw");
+
+  unsigned int a[81];
+
+  for (int i = 0; i < 81; ++i) {
+    char path[100];
+    snprintf(path, sizeof(path), "./data/tst/firstimg/square_%d.bmp", i);
+    double *pixels = malloc(784 * sizeof(double));
+    get_tab(path, pixels);
+    feed_forward(n, pixels);
+    a[i] = read_output(n);
+    free(pixels);
+  }
+  for (int i = 0; i < 81; ++i) {
+    if (i % 9 == 0)
+      printf("%d\n", a[i]);
+    printf(" %d ", a[i]);
+  }
+}
+
+/*
+void load_and_train(network *n) {
+  double **inputs = malloc(NUM_IMAGES * sizeof(double *));
+  int **targets = malloc(NUM_IMAGES * sizeof(int *));
+
+  size_t num_samples = 81;
+  size_t num_epochs = 10;
+  size_t batch_size = 1;
+  for (int i = 0; i < num_samples; ++i) {
+    double *pixels = malloc(28 * 28 * sizeof(double));
+    char path[100];
+    int *label = calloc(num_samples, sizeof(int));
+
+    snprintf(path, sizeof(path), "./data/tst/firstimg/square_%d.bmp", i);
+
+    get_tab(path, pixels);
+    label[label_first[i]] = 1;
+    targets[i] = label;
+    inputs[i] = pixels;
+  }
+  train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size,
+  label_first);
+
+  for (int i = 0; i < num_samples; ++i) {
+    double *pixels = malloc(28 * 28 * sizeof(double));
+    char path[100];
+    int *label = calloc(num_samples, sizeof(int));
+
+    snprintf(path, sizeof(path), "./data/tst/secondimg/square_%d.bmp", i);
+
+    get_tab(path, pixels);
+    label[label_second[i]] = 1;
+    targets[i] = label;
+    inputs[i] = pixels;
+  }
+  train(n, LEARNING_RATE, inputs, targets, num_samples, num_epochs, batch_size,
+  label_second);
+  for (int i = 0; i < num_samples; ++i) { free(targets[i]);
+    free(inputs[i]);
+  }
+  free(inputs);
+  free(targets);
+  // Free allocated memory
+  load_mnist();
+  double **inputs2 = malloc(50000 * sizeof(double *));
+  int **targets2 = malloc(50000 * sizeof(int *));
+  for (int i = 0; i < 50000; i++) {
+    int *label = calloc(10, sizeof(int));
+    double *pixels = train_image[i];
+    for(int k = 0; k < 784; ++k)
+    {
+        if(pixels[k] >0.5)
+            pixels[k] = 1.0;
+        else
+         pixels[k] = 0.0;
+    }
+    int labelii = train_label[i];
+    label[labelii] = 1;
+    targets2[i] = label;
+    inputs2[i] = pixels;
+  }
+  train(n, LEARNING_RATE, inputs2, targets2, 50000, num_epochs, batch_size,
+train_label); for (int i = 0; i < 50000; ++i) { free(targets2[i]);
+    free(inputs2[i]);
+  }
+  free(inputs2);
+  free(targets2);
+  */
+
 int main() {
   size_t *layers = malloc(LAYER_COUNT * sizeof(size_t));
   layers[0] = 784;
@@ -171,14 +252,12 @@ int main() {
   // first: call build_images and then comment it
 
   // build_Images(NUM_IMAGES);
-  load_and_train(n);
+  //load_and_train(n);
 
+  network *n = test_from_file();
   //   export_network(n, "testnetwork");
   // test_from_load(1000);
 
-  free_network(n);
+//  free_network(n);
   return 0;
 }
-
-
-
