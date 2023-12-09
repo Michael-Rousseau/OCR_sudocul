@@ -25,7 +25,6 @@ $(OBJDIR)/%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm *.jpg
 	rm -rf $(OBJDIR)
 	rm run
 
