@@ -75,9 +75,11 @@ void draw_squares(SDL_Renderer *renderer, SDL_Texture *texture,
     for (int i = 0; i < num_lines; i++) {
         //	SDL_RenderDrawLine(renderer, 100,500, 500,500);
 
-        SDL_RenderDrawLine(renderer, squares[i].topleft.x, squares[i].topleft.y,
+        SDL_RenderDrawLine(renderer, squares[i].topleft.x,
+			squares[i].topleft.y,
                 squares[i].topleft.x + 10, squares[i].topleft.y + 10);
-        SDL_RenderDrawLine(renderer, squares[i].topright.x, squares[i].topright.y,
+        SDL_RenderDrawLine(renderer,
+			squares[i].topright.x, squares[i].topright.y,
                 squares[i].topright.x + 10, squares[i].topright.y + 10);
         SDL_RenderDrawLine(renderer, squares[i].bottomright.x,
                 squares[i].bottomright.y, squares[i].bottomright.x + 10,
@@ -149,28 +151,43 @@ void event_loop_image(SDL_Renderer *renderer, SDL_Texture *t_image) {
         }
     }
 }
-
-void event_loop_image_l(SDL_Renderer *renderer, SDL_Texture *t_image,
-        struct Line *line, int n) {
-    SDL_Event event;
-
+void event_loop_image_l(SDL_Renderer* renderer, SDL_Texture* t_image,
+        struct Line* line, int n, SDL_Surface* saveSurface)
+{
+    // Draw on the renderer
     draw(renderer, t_image);
-    while (1) {
-        SDL_WaitEvent(&event);
+    drawk(renderer, t_image, line, n);
+    SDL_RenderPresent(renderer); // Update the screen with the rendering
 
-        switch (event.type) {
-            case SDL_QUIT:
-                return;
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    update_render_scale(renderer, event.window.data1, event.window.data2);
-
-                    drawk(renderer, t_image, line, n);
-                    break;
-                }
-        }
-    }
+    // Save the rendered content to an SDL_Surface
+    SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888,
+                         saveSurface->pixels, saveSurface->pitch);
+    
+    // Save the SDL_Surface as an image file
+    IMG_SaveJPG(saveSurface, "./images/hough.jpg", 100);
 }
+
+
+void event_loop_image_l2(SDL_Renderer* renderer, SDL_Texture* t_image,
+        struct Line* line, int n, SDL_Surface* saveSurface)
+{
+    // Draw on the renderer
+    draw(renderer, t_image);
+    drawk(renderer, t_image, line, n);
+    SDL_RenderPresent(renderer); // Update the screen with the rendering
+
+    // Save the rendered content to an SDL_Surface
+    SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888,
+                         saveSurface->pixels, saveSurface->pitch);
+    
+    // Save the SDL_Surface as an image file
+    IMG_SaveJPG(saveSurface, "./images/hough_average.jpg", 100);
+}
+
+
+
+
+
 void event_loop_image_test_averagelines(SDL_Renderer *renderer,
         SDL_Texture *t_image,
         struct Line *lines, int numline) {
@@ -186,7 +203,8 @@ void event_loop_image_test_averagelines(SDL_Renderer *renderer,
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     // drawl(renderer, t_image, lines);
-                    update_render_scale(renderer, event.window.data1, event.window.data2);
+                    update_render_scale(renderer, event.window.data1,
+				    event.window.data2);
                     drawl(lines, numline, renderer, t_image);
                     break;
                 }
@@ -196,27 +214,22 @@ void event_loop_image_test_averagelines(SDL_Renderer *renderer,
 
 void event_loop_image_test_sq(SDL_Renderer *renderer, SDL_Texture *t_image,
         struct Squares *squares, int num,
-        struct Squares s) {
+        struct Squares s, SDL_Surface *saveSurface) {
     SDL_Event event;
 
     draw(renderer, t_image);
-    while (1) {
-        SDL_WaitEvent(&event);
+    draw_squares(renderer, t_image, squares, num, s);
 
-        switch (event.type) {
-            case SDL_QUIT:
-                return;
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    // drawl(renderer, t_image, lines);
-                    update_render_scale(renderer, event.window.data1, event.window.data2);
+   SDL_RenderPresent(renderer); // Update the screen with the rendering
 
-                    draw_squares(renderer, t_image, squares, num, s);
-
-                    break;
-                }
-        }
-        SDL_Delay(11);
-        break;
-    }
+    // Save the rendered content to an SDL_Surface
+    SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888,
+                         saveSurface->pixels, saveSurface->pitch);
+    
+    // Save the SDL_Surface as an image file
+    IMG_SaveJPG(saveSurface, "./images/drawsquares.jpg", 100);
 }
+
+
+
+

@@ -278,7 +278,8 @@ float** generate_Kernel(int ksize, float sigma)
 
 
 
-void applyblur (SDL_Surface * image, float** kernel, int kernelsize, SDL_Surface* filteredimage)
+void applyblur (SDL_Surface * image, float** kernel, int kernelsize,
+		SDL_Surface* filteredimage)
 {
     int imageWidth = image->w;
     int imageHeight = image->h;

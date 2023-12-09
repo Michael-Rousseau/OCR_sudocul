@@ -636,11 +636,10 @@ struct Squares *drawsquares(struct Line *lines, int len, struct Line *horizon,
   sort_horizontal_lines(horizon, len / 2);
 
   sort_vertical_lines(vertical, len / 2);
-  printf("sort\n");
+  //printf("sort\n");
 
   int num_squares = (len / 2 - 1) * (len / 2 - 1);
 
-  //	struct Squares* sq = calloc(num_squares, sizeof(struct Squares));
 
   struct Squares *sq = calloc(num_squares, sizeof(struct Squares));
   // printf("sq callo\n");
@@ -648,15 +647,11 @@ struct Squares *drawsquares(struct Line *lines, int len, struct Line *horizon,
   /*	if (!squares) {
                   fprintf(stderr, "Memory allocation failed.\n");*/
   fillsquares(vertical, horizon, sq, len / 2);
-  // printf("sq fill\n");
 
   sort_squares_horizontal(sq, num_squares);
-  //	printf("horizon");
 
   return sq;
-  /*	free(horizon);
-          free(vertical);
-          free(squares);*/
+
 }
 
 // Function to extract and save squares as images

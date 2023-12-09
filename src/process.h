@@ -106,24 +106,57 @@ void process_all(SDL_Renderer *renderer, SDL_Surface *surface){
 }
 
 
-void process_autorot(SDL_Renderer *renderer, SDL_Surface *surface) {
-    struct DetectedLines detected = auto_performHoughTransform(surface);
+void process_autorot(char *path) {
 
-    double angle = calculate_angle(detected);
+	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-    SDL_Surface *im = RotateImage(surface, angle);
-    IMG_SaveJPG(im, "./images/autorot.jpg", 100);
+	SDL_Window *window =
+		SDL_CreateWindow("Dynamic Fractal Canopy", 0, 0, 400, 400,
+				SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+	if (window == NULL)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-    SDL_Texture *im_txt = SDL_CreateTextureFromSurface(renderer, im);
-    if (im_txt == NULL) {
-      errx(EXIT_FAILURE, "%s", SDL_GetError());
-    }
+	SDL_Renderer *renderer =
+		SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+	if (renderer == NULL)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-    SDL_FreeSurface(surface);
-    SDL_FreeSurface(im);
+	SDL_Surface *surface = load_image(path);
+	if (surface == NULL)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-    SDL_DestroyTexture(im_txt);
-    free(detected.lines);
+	int w = surface->w;
+	int h = surface->h;
+	SDL_SetWindowSize(window, w, h);
+
+	process_all(renderer, surface);
+	/*SDL_Surface *ex = IMG_Load("./images/canny.jpg");
+
+	if (!ex) {
+		errx(EXIT_FAILURE, "Unable to load image: %s", IMG_GetError());
+	}*/
+
+	struct DetectedLines detected = auto_performHoughTransform(surface);
+
+	double angle = calculate_angle(detected);
+
+	SDL_Surface *im = RotateImage(surface, angle);
+	IMG_SaveJPG(im, "./images/autorot.jpg", 100);
+	//SDL_FreeSurface(ex); 
+
+	SDL_FreeSurface(surface); // Now freeing the surface after extraction
+	SDL_FreeSurface(im);
+
+	free(detected.lines);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+
+
+
+	SDL_Quit();
+
 }
 
 void process_image(char *path) {
@@ -164,9 +197,37 @@ void process_image(char *path) {
   struct Line *lin = detected.lines;
   int num = detected.count;
 
+
+
+  SDL_Texture *grayscale_texture =
+	  SDL_CreateTextureFromSurface(renderer, surface);
+  if (grayscale_texture == NULL)
+	  errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+  SDL_Surface *saveSurface = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);
+  if (saveSurface == NULL)
+	  errx(EXIT_FAILURE, "Failed to create surface for saving: %s",
+			  SDL_GetError());
+
+
+  event_loop_image_l(renderer, grayscale_texture, lin, num, saveSurface);
+  SDL_FreeSurface(saveSurface); // Free the saveSurface
+
+
   struct DetectedLines d2 = averagearray(lin, num);
   struct Line *lines = d2.lines;
   int num_lines = d2.count;
+
+  SDL_Surface *saveSurface2 = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);
+  if (saveSurface2 == NULL)
+	  errx(EXIT_FAILURE, "Failed to create surface for saving: %s", 
+			  SDL_GetError());
+
+
+  event_loop_image_l2(renderer, grayscale_texture, lines, num_lines, 
+		  saveSurface2);
+  SDL_FreeSurface(saveSurface2); // Free the saveSurface
+
 
   struct Line *horizon = calloc(num_lines / 2, sizeof(struct Line));
   struct Line *vertical = calloc(num_lines / 2, sizeof(struct Line));
@@ -181,15 +242,18 @@ void process_image(char *path) {
   struct Squares s =
       findbestsquare(surface, vertical, horizon, num_lines / 2);
 
-  SDL_Texture *grayscale_texture =
-      SDL_CreateTextureFromSurface(renderer, surface);
-  if (grayscale_texture == NULL)
-      errx(EXIT_FAILURE, "%s", SDL_GetError());
+ SDL_Surface *saveSurface3 = SDL_CreateRGBSurface(0, w, h, 32, 0, 0, 0, 0);
+  if (saveSurface3 == NULL)
+	  errx(EXIT_FAILURE, "Failed to create surface for saving: %s",
+			  SDL_GetError());
 
-  // Moved SDL_FreeSurface(surface); to after the squares are extracted
+
 
   event_loop_image_test_sq(renderer, grayscale_texture, sq,
-          (num_lines / 2 - 1) * (num_lines / 2 - 1), s);
+          (num_lines / 2 - 1) * (num_lines / 2 - 1), s, saveSurface3);
+  SDL_FreeSurface(saveSurface3); // Free the saveSurface
+
+
   extract_and_save_squares(extraction_surface, sq,
           (num_lines / 2 - 1) * (num_lines / 2 - 1), s);
 

@@ -17,10 +17,14 @@ void draw_h_v(SDL_Renderer *renderer, SDL_Texture *texture,
               struct Line *horizon, int num_lines, struct Line *vertical);
 void event_loop_image(SDL_Renderer *renderer, SDL_Texture *t_image);
 void event_loop_image_l(SDL_Renderer *renderer, SDL_Texture *t_image,
-                        struct Line *line, int n);
+                        struct Line *line, int n, SDL_Surface* save);
 void event_loop_image_test_averagelines(SDL_Renderer *renderer,
                                         SDL_Texture *t_image,
                                         struct Line *lines, int numline);
 void event_loop_image_test_sq(SDL_Renderer *renderer, SDL_Texture *t_image,
                               struct Squares *squares, int num,
-                              struct Squares s);
+                              struct Squares s,SDL_Surface* save);
+
+void event_loop_image_l2(SDL_Renderer *renderer, SDL_Texture *t_image,
+                        struct Line *line, int n, SDL_Surface* save);
+
