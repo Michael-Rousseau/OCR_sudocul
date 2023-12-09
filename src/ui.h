@@ -1,11 +1,13 @@
-#include <complex.h>
-#include <stdlib.h>
+#pragma once
 #include <gtk/gtk.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <cairo.h>
 #include <unistd.h>
+#include "process.h"
+
 #define _GNU_SOURCE
 
 GtkWidget *grayscale_button;
@@ -36,6 +38,8 @@ int in_steps_window = 0;
 static void get_the_grid(GtkWidget *widget);
 static void solve_image(GtkWidget *widget);
 
+const char *image_paths[9];
+/*
 const char *image_paths[] = {
     "./data/preprocessing/grayscale.png",
     "./data/preprocessing/contrast.png",
@@ -49,7 +53,7 @@ const char *image_paths[] = {
     "./data/processing/drawsquares.png",
     "./data/processing/extracted.png"
 };
-
+*/
 
 static gboolean display_next_image(gpointer user_data) {
     static int current_image = 0;
@@ -81,7 +85,6 @@ static gboolean display_next_image(gpointer user_data) {
     return current_image <= solve_stage;
 }
 
-
 static void on_epic_button_clicked(GtkWidget *widget) {
     if (!is_loaded){
         g_print("Image has not been loaded\n");
@@ -95,9 +98,6 @@ int start_matrix[9][9];
 
 
 int end_matrix[9][9];
-
-
-
 
 void initialize_start_matrix() {
     // Initialize start_matrix with your desired values
@@ -116,7 +116,6 @@ void initialize_end_matrix() {
         }
     }
 }
-
 
 
 static void on_steps_button_clicked(GtkButton *button, gpointer steps_window) {
@@ -160,7 +159,6 @@ static void on_solve_back_button_clicked(GtkButton *button, gpointer menu_window
 }
 
 
-
 void update_matrices_from_grid(const char *grid_string, int var) {
     int row = 0, col = 0;
     while (*grid_string) {
@@ -193,10 +191,7 @@ void update_matrices_from_grid(const char *grid_string, int var) {
 }
 
 
-
-
 static void get_the_grid(GtkWidget *widget) {
-
     GtkWidget *img;
     if(in_solve_window){
         img = sol_image;
@@ -267,8 +262,6 @@ static void get_the_grid(GtkWidget *widget) {
 }
 
 static void solve_image(GtkWidget *widget) {
-
-
     FILE *file = fopen("./data/grids/grid_end", "r");
     if (file == NULL) {
         g_print("Failed to open grid file\n");
@@ -325,6 +318,8 @@ static void on_file_chosen(GtkFileChooserButton *button, gpointer user_data) {
     if (uri) {
         char *file_path = g_filename_from_uri(uri, NULL, NULL);
         g_free(uri);
+
+        process_image(file_path);
 
         //    char* binaryPath = "../exec name";
         //  execlp(binaryPath, binaryPath, file_path, (char *) NULL);
@@ -406,13 +401,7 @@ static void on_filter_button_clicked(GtkWidget *widget, gpointer data) {
     update_button_style(hough_average_button, widget == hough_average_button);
     update_button_style(drawsquare_button, widget == drawsquare_button);
     update_button_style(extracted_button, widget == extracted_button);
-
-
-
 }
-
-
-
 
 cairo_surface_t* create_sudoku_surface() {
     const int cell_size = 50; // Size of each cell in the grid
@@ -459,7 +448,7 @@ cairo_surface_t* create_sudoku_surface() {
             if (num != 0) {
                 char num_text[2];
                 snprintf(num_text, sizeof(num_text), "%d", num);
-                
+
                 // Calculate text position to center in the cell
                 cairo_text_extents_t extents;
                 cairo_text_extents(cr, num_text, &extents);
@@ -494,10 +483,8 @@ static void save_sudoku_as_png(GtkWidget *widget, gpointer user_data) {
 
 
 static void save_sudoku_as_jpeg(GtkWidget *widget, gpointer user_data) {
-
     const char* filename = g_object_get_data(G_OBJECT(widget), "filename");
     if (filename) {
-        
         cairo_surface_t* surface = create_sudoku_surface();
 
         // Convert the Cairo surface to a GdkPixbuf
@@ -510,12 +497,9 @@ static void save_sudoku_as_jpeg(GtkWidget *widget, gpointer user_data) {
 
         // Clean up
         g_object_unref(pixbuf);
-        cairo_surface_destroy(surface); 
-
+        cairo_surface_destroy(surface);
     }
 }
-
-
 
 
 void activate(GtkApplication* app, gpointer user_data) {
@@ -524,28 +508,25 @@ void activate(GtkApplication* app, gpointer user_data) {
     GtkWidget *steps_button, *back_preprocess_button;
     GtkWidget *s_button, *back_s_button;
 
-
     GtkCssProvider *css_provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(css_provider, "style.css", NULL);
+    gtk_css_provider_load_from_path(css_provider, "./ui/style.css", NULL);
     gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
             GTK_STYLE_PROVIDER(css_provider),
             GTK_STYLE_PROVIDER_PRIORITY_USER);
 
 
     // Load the first Glade file
-    builder1 = gtk_builder_new_from_file("gladetest.glade");
+    builder1 = gtk_builder_new_from_file("./ui/gladetest.glade");
     window1 = GTK_WIDGET(gtk_builder_get_object(builder1, "windowtest"));
     if (window1 != NULL && GTK_IS_WINDOW(window1)) {
         gtk_application_add_window(app, GTK_WINDOW(window1));
     }
 
-    builder2 = gtk_builder_new_from_file("secondtest.glade");
+    builder2 = gtk_builder_new_from_file("./ui/secondtest.glade");
     window2 = GTK_WIDGET(gtk_builder_get_object(builder2, "window_preprocess"));
 
-    solve_builder = gtk_builder_new_from_file("solve.glade");
+    solve_builder = gtk_builder_new_from_file("./ui/solve.glade");
     solve_window = GTK_WIDGET(gtk_builder_get_object(solve_builder, "window_solve"));
-
-
 
     steps_button = GTK_WIDGET(gtk_builder_get_object(builder1, "steps_button"));
 
@@ -574,38 +555,30 @@ void activate(GtkApplication* app, gpointer user_data) {
 
     image = GTK_WIDGET(gtk_builder_get_object(builder2, "sudoku_image"));
 
-
-
-    // CALL 
+    // CALL
     GtkWidget *file_chooser_button = GTK_WIDGET(gtk_builder_get_object(builder2, "file_chooser_button"));
     g_signal_connect(file_chooser_button, "file-set", G_CALLBACK(on_file_chosen), image);
-
 
     sol_image = GTK_WIDGET(gtk_builder_get_object(solve_builder, "sudoku_image"));
 
     GtkWidget *solve_file_chooser_button = GTK_WIDGET(gtk_builder_get_object(solve_builder, "file_chooser_button"));
     g_signal_connect(solve_file_chooser_button, "file-set", G_CALLBACK(on_file_chosen), sol_image);
 
-
     GtkWidget *epic_button = GTK_WIDGET(gtk_builder_get_object(solve_builder, "solve_button"));
     g_signal_connect(epic_button, "clicked", G_CALLBACK(on_epic_button_clicked), NULL);
 
-
     // PRE PROCESSING
-
     grayscale_button = GTK_WIDGET(gtk_builder_get_object(builder2, "gs_button"));
     g_signal_connect(grayscale_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/grayscale.png");
 
     contrast_button = GTK_WIDGET(gtk_builder_get_object(builder2, "co_button"));
     g_signal_connect(contrast_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/contrast.png");
 
-
     reducenoise_button = GTK_WIDGET(gtk_builder_get_object(builder2, "re_button"));
     g_signal_connect(reducenoise_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/reducenoise.png");
 
     threshold_button = GTK_WIDGET(gtk_builder_get_object(builder2, "th_button"));
     g_signal_connect(threshold_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/inverse.png");
-
 
     erosion_button = GTK_WIDGET(gtk_builder_get_object(builder2, "er_button"));
     g_signal_connect(erosion_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/erosion.png");
@@ -668,9 +641,7 @@ void activate(GtkApplication* app, gpointer user_data) {
     g_signal_connect(jpg_button, "clicked", G_CALLBACK(save_sudoku_as_jpeg), NULL);
 
 
-
-
-    // SOLVE 
+    // SOLVE
     get_grid_button = GTK_WIDGET(gtk_builder_get_object(builder2, "get_grid_button"));
     if (get_grid_button != NULL && GTK_IS_BUTTON(get_grid_button)) {
         g_signal_connect(get_grid_button, "clicked", G_CALLBACK(get_the_grid),NULL);
@@ -684,17 +655,3 @@ void activate(GtkApplication* app, gpointer user_data) {
 
     gtk_widget_show_all(window1);
 }
-
-int main(int argc, char *argv[]) {
-    GtkApplication *app;
-    int status;
-
-    app = gtk_application_new("org.sudocul.MyApp", G_APPLICATION_FLAGS_NONE);
-    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
-    status = g_application_run(G_APPLICATION(app), argc, argv);
-    g_object_unref(app);
-
-    return status;
-}
-
-
