@@ -443,85 +443,83 @@ static gboolean display_next_image(gpointer user_data) {
 		}
 		current_image++;
 	}
-	else if( current_image == grid_display_stage){
-		image_solve();
-		FILE *file1 = fopen("./../build/grids/grid_01", "r");
-		if (file1 == NULL) {
-			g_print("Failed to open grid file\n");
-			return;
-		}
+	/*else if( current_image == grid_display_stage){
+	  image_solve();
+	  FILE *file1 = fopen("./../build/grids/grid_01", "r");
+	  if (file1 == NULL) {
+	  g_print("Failed to open grid file\n");
+	  return;
+	  }
 
-		char grid_string1[82]; // 81 characters for the grid + 1 for null terminator
-		char line1[20];        // Temporary buffer for each line
-		int index1 = 0;
+	  char grid_string1[82]; // 81 characters for the grid + 1 for null terminator
+	  char line1[20];        // Temporary buffer for each line
+	  int index1 = 0;
 
-		// Read the file line by line
-		while (fgets(line1, sizeof(line1), file1)) {
-			for (int i = 0; line1[i] != '\0' && index1 < 81; i++) {
-				if ((line1[i] >= '0' && line1[i] <= '9') || line1[i] == '.') {
-					grid_string1[index1++] = line1[i];
-				}
-			}
-		}
-		grid_string1[index1] = '\0'; // Null-terminate the string
-		fclose(file1);
+	// Read the file line by line
+	while (fgets(line1, sizeof(line1), file1)) {
+	for (int i = 0; line1[i] != '\0' && index1 < 81; i++) {
+	if ((line1[i] >= '0' && line1[i] <= '9') || line1[i] == '.') {
+	grid_string1[index1++] = line1[i];
+	}
+	}
+	}
+	grid_string1[index1] = '\0'; // Null-terminate the string
+	fclose(file1);
 
-		// Update start_matrix from grid_string
-		update_matrices_from_grid(grid_string1, 0);
+	// Update start_matrix from grid_string
+	update_matrices_from_grid(grid_string1, 0);
 
-		FILE *file2 = fopen("./../build/grids/grid_01", "r");
-		if (file2 == NULL) {
-			g_print("Failed to open grid file\n");
-			return;
-		}
+	FILE *file2 = fopen("./../build/grids/grid_01", "r");
+	if (file2 == NULL) {
+	g_print("Failed to open grid file\n");
+	return;
+	}
 
-		char grid_string2[82]; // 81 characters for the grid + 1 for null terminator
-		char line2[20];        // Temporary buffer for each line
-		int index2 = 0;
+	char grid_string2[82]; // 81 characters for the grid + 1 for null terminator
+	char line2[20];        // Temporary buffer for each line
+	int index2 = 0;
 
-		// Read the file line by line
-		while (fgets(line2, sizeof(line2), file2)) {
-			for (int i = 0; line2[i] != '\0' && index2 < 81; i++) {
-				if ((line2[i] >= '0' && line2[i] <= '9') || line2[i] == '.') {
-					grid_string2[index2++] = line2[i];
-				}
-			}
-		}
-		grid_string2[index2] = '\0'; // Null-terminate the string
-		fclose(file2);
+	// Read the file line by line
+	while (fgets(line2, sizeof(line2), file2)) {
+	for (int i = 0; line2[i] != '\0' && index2 < 81; i++) {
+	if ((line2[i] >= '0' && line2[i] <= '9') || line2[i] == '.') {
+	grid_string2[index2++] = line2[i];
+	}
+	}
+	}
+	grid_string2[index2] = '\0'; // Null-terminate the string
+	fclose(file2);
 
-		// Update start_matrix from grid_string
-		update_matrices_from_grid(grid_string2, 1);
-		const char* filename = "imagepng.png";
-		if (filename) {
-			cairo_surface_t* surface = create_sudoku_surface();
-			cairo_surface_write_to_png(surface, filename);
-			cairo_surface_destroy(surface);
-		}
-		GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale("./build/imagepng.png", 600, 600, TRUE, NULL);
-		if (pixbuf) {
-			gtk_image_set_from_pixbuf(GTK_IMAGE(sol_image), pixbuf);
-			g_object_unref(pixbuf);
-		}
-		current_image++;
+	// Update start_matrix from grid_string
+	update_matrices_from_grid(grid_string2, 1);
+	const char* filename = "imagepng.png";
+	if (filename) {
+	cairo_surface_t* surface = create_sudoku_surface();
+	cairo_surface_write_to_png(surface, filename);
+	cairo_surface_destroy(surface);
+	}
+	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale("./build/imagepng.png", 600, 600, TRUE, NULL);
+	if (pixbuf) {
+	gtk_image_set_from_pixbuf(GTK_IMAGE(sol_image), pixbuf);
+	g_object_unref(pixbuf);
+	}
+	current_image++;
 
-	/*
-	} else if (current_image == grid_display_stage) {
+*/ else if (current_image == grid_display_stage) {
 	// Display the grid
 	gtk_widget_hide(sol_image); // Hide or remove the image widget
 	image_solve(); // Get the grid from the 81 images
 	get_the_grid(NULL);
 	current_image++;
-	} else if (current_image == solve_stage) {
+} else if (current_image == solve_stage) {
 	// Solve the grid
 	solve_image(NULL);
 	current_image++;
 	return FALSE; // Return FALSE to stop the timeout
-	}
-	*/
-	}
+}
+
 // Continue the timeout as long as we haven't reached the final stage
-return current_image <= grid_display_stage;
+return current_image <= solve_image;
 }
 
 static void on_epic_button_clicked(GtkWidget *widget) {
