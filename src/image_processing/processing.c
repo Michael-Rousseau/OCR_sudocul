@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "image.h"
+#include "processing.h"
 #include "rotation.h"
 
 void draw(SDL_Renderer* renderer, SDL_Texture* texture)
@@ -51,7 +52,7 @@ void print_accumulator(int** accumulator, int accumulator_height,
     }
 }
 
-
+/*
 int main(int argc, char** argv)
 {
     if (argc < 3)
@@ -232,4 +233,4 @@ int main(int argc, char** argv)
        SDL_Quit();
        return EXIT_SUCCESS;
 }
-
+*/
