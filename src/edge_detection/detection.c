@@ -1,13 +1,29 @@
-
 #include <err.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-#include "image.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "hough.h"
 
 
 int original_image_width = 0;
 int original_image_height = 0;
+
+SDL_Surface* load_image(const char* path)
+{
+    SDL_Surface* is = IMG_Load(path);
+    if (is == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    SDL_Surface* fs = SDL_ConvertSurfaceFormat(is, SDL_PIXELFORMAT_RGB888, 0);
+    if (fs == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    SDL_FreeSurface(is);
+    return fs;
+}
+
 
 void update_render_scale(SDL_Renderer* renderer, int new_width, int new_height)
 {
@@ -395,7 +411,7 @@ int main(int argc, char **argv){
 		free(vertical);
 		}
 		struct Squares* sq = drawsquares( lines, num_lines,horizon, vertical);
-				struct Squares s =  findbestsquare( surface, vertical, horizon,  sq, num_lines/2 );
+				struct Squares s =  findbestsquare( surface, vertical, horizon, num_lines/2 );
 
 
 		SDL_Texture* grayscale_texture =
@@ -441,7 +457,7 @@ int main(int argc, char **argv){
 		}
 
 		struct Squares* sq = drawsquares(lines, num_lines, horizon, vertical);
-		struct Squares s =  findbestsquare( surface, vertical, horizon,  sq, num_lines/2 );
+		struct Squares s =  findbestsquare( surface, vertical, horizon, num_lines/2 );
 
 
 		SDL_Texture* grayscale_texture = SDL_CreateTextureFromSurface(renderer, surface);

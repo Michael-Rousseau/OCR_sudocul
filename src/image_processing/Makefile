@@ -8,14 +8,14 @@ LDLIBS = `pkg-config --libs sdl2 SDL2_image` -lm
 
 all: processing
 
-SRC = processing.c image.c rotation.c detection.c square_detection.c
+SRC = processing.c image.c rotation.c 
 DEPS = ${SRC:.c=.d}
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=}
 
 .PHONY: clean
 
-processing: image.o processing.o rotation.o detection.o square_detection.o
+processing: image.o processing.o rotation.o 
 
 clean:
 	${RM} ${DEPS}
