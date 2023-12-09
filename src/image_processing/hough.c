@@ -173,6 +173,7 @@ struct DetectedLines performHoughTransform(SDL_Surface *surface) {
       (struct Line *)realloc(lines, lineindex * sizeof(struct Line));
   if (temp == NULL) {
     // Handle memory allocation failure
+      free(lines);
   }
   lines = temp;
 
@@ -870,6 +871,7 @@ struct DetectedLines auto_performHoughTransform(SDL_Surface *surface) {
       (struct Line *)realloc(lines, lineindex * sizeof(struct Line));
   if (temp == NULL) {
     // Handle memory allocation failure
+    free(lines);
   }
   lines = temp;
 
@@ -912,6 +914,7 @@ double calculate_angle(struct DetectedLines result) {
 // rotate the image with corrersponding angle
 SDL_Surface *RotateImage(SDL_Surface *image, double angledegree) {
   // angledegree = fmod(angledegree, 360.0);
+    SDL_LockSurface(image);
 
   int w1 = image->w;
   int h1 = image->h;
@@ -928,9 +931,8 @@ SDL_Surface *RotateImage(SDL_Surface *image, double angledegree) {
   int h2 = fabs(sisi * w1) + fabs(coco * h1);
 
   SDL_Surface *rot = SDL_CreateRGBSurface(0, w2, h2, 32, 0, 0, 0, 0);
+    SDL_LockSurface(rot);
 
-  SDL_UnlockSurface(image);
-  SDL_UnlockSurface(rot);
 
   for (int y = 0; y < h2; y++) {
     for (int x = 0; x < w2; x++) {
