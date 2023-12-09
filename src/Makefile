@@ -1,8 +1,8 @@
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -fsanitize=address -lm -g `pkg-config --cflags sdl2 SDL2_image`
+CFLAGS = -Wall -Wextra -fsanitize=address -lm -g `pkg-config --cflags sdl2 SDL2_image gtk+-3.0`
 LDFLAGS = -fsanitize=address -lm
-LDLIBS =`pkg-config --libs sdl2 SDL2_image`
+LDLIBS = `pkg-config --libs sdl2 SDL2_image gtk+-3.0`
 
 OBJDIR = obj
 BINDIR = bin
@@ -20,7 +20,7 @@ all: $(BINDIR)/run
 
 $(BINDIR)/run: $(OBJECTS)
 	@mkdir -p $(@D)
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) $(LDLIBS) -o $@ $^
 
 $(OBJDIR)/%.o: %.c
 	@mkdir -p $(@D)
@@ -30,3 +30,4 @@ clean:
 	rm -rf $(OBJDIR) $(BINDIR)
 
 .PHONY: all clean
+
