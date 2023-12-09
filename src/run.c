@@ -32,6 +32,8 @@
 // detection
 
 //So here is an example of how to call functions on the main.
+//with all + ./data/image_x, it creates a file in data which is the result of the grid
+//the autorot has to be used separatly
 int main(int argc, char **argv) {
   // processing
   if (argc < 3)
@@ -153,8 +155,9 @@ int main(int argc, char **argv) {
       free(pixels);
     }
     //    char* finalString = malloc(100);
-    // snprintf(finalString, 100,"./data/grid_0%d\n", 1);//TODO add the name
+    // snprintf(finalString, 100,"./data/grid_0%d\n", 1);
     FILE *f = fopen("./data/grid_01", "w");
+    //Just keep grid_01 is possible, but better if you chenge the name
     for (size_t index_dim = 0; index_dim < 9; index_dim++) {
       if (index_dim % 3 == 0 && index_dim != 0)
         fprintf(f, "\n");
@@ -201,6 +204,9 @@ int main(int argc, char **argv) {
     //  free(res);
     // So here, all the code will split the grid, load the OCR on it and then
     // write it in a file
+    //
+
+    //This is the autorot, which loads it in the file autorot.png
   } else if (strcmp(argv[1], "autorot") == 0) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
       errx(EXIT_FAILURE, "%s", SDL_GetError());
