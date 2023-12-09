@@ -92,8 +92,8 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="rot_button">
-                <property name="label" translatable="yes">ROTATION</property>
+              <object class="GtkButton" id="er_button1">
+                <property name="label" translatable="yes">DUNNO</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
