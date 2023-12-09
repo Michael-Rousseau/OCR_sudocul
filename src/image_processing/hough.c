@@ -727,7 +727,7 @@ void extract_and_save_squares(SDL_Surface *original_image,
 
       // Save each square as an image
       char filename[64];
-      sprintf(filename, "square_%d.bmp", counter);
+      sprintf(filename, "./images/square_%d.bmp", counter);
 
       if (SDL_SaveBMP(resized_surface, filename) != 0) {
         fprintf(stderr, "SDL_SaveBMP failed: %s\n", SDL_GetError());

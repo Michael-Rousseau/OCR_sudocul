@@ -22,7 +22,7 @@ GtkWidget *hough_average_button;
 GtkWidget *drawsquare_button;
 GtkWidget *extracted_button;
 GtkWidget *get_grid_button;
-GtkWidget *solve_grid_button; 
+GtkWidget *solve_grid_button;
 GtkWidget *sudokuGrid;
 GtkWidget *rotate_button;
 
@@ -125,7 +125,6 @@ static void on_steps_button_clicked(GtkButton *button, gpointer steps_window) {
     in_main_window = 0;
     initialize_start_matrix();
     initialize_end_matrix();
-
 }
 
 
@@ -321,8 +320,6 @@ static void on_file_chosen(GtkFileChooserButton *button, gpointer user_data) {
 
         process_image(file_path);
 
-        //    char* binaryPath = "../exec name";
-        //  execlp(binaryPath, binaryPath, file_path, (char *) NULL);
 
         GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(file_path, 600, 600, TRUE, NULL);
         if (pixbuf) {
@@ -509,23 +506,23 @@ void activate(GtkApplication* app, gpointer user_data) {
     GtkWidget *s_button, *back_s_button;
 
     GtkCssProvider *css_provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_path(css_provider, "./ui/style.css", NULL);
+    gtk_css_provider_load_from_path(css_provider, "style.css", NULL);
     gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
             GTK_STYLE_PROVIDER(css_provider),
             GTK_STYLE_PROVIDER_PRIORITY_USER);
 
 
     // Load the first Glade file
-    builder1 = gtk_builder_new_from_file("./ui/gladetest.glade");
+    builder1 = gtk_builder_new_from_file("gladetest.glade");
     window1 = GTK_WIDGET(gtk_builder_get_object(builder1, "windowtest"));
     if (window1 != NULL && GTK_IS_WINDOW(window1)) {
         gtk_application_add_window(app, GTK_WINDOW(window1));
     }
 
-    builder2 = gtk_builder_new_from_file("./ui/secondtest.glade");
+    builder2 = gtk_builder_new_from_file("secondtest.glade");
     window2 = GTK_WIDGET(gtk_builder_get_object(builder2, "window_preprocess"));
 
-    solve_builder = gtk_builder_new_from_file("./ui/solve.glade");
+    solve_builder = gtk_builder_new_from_file("solve.glade");
     solve_window = GTK_WIDGET(gtk_builder_get_object(solve_builder, "window_solve"));
 
     steps_button = GTK_WIDGET(gtk_builder_get_object(builder1, "steps_button"));

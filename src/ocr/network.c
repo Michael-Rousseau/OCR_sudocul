@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <err.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -104,6 +105,9 @@ network *rand_init_network(size_t *layers, size_t len, double wmin, double wmax,
 network *import_network(char *path) {
   FILE *in;
   in = fopen(path, "rb");
+
+  if (NULL == in)
+      errx(errno, "%s", "Couldn't open file.");
 
   network *n = malloc(sizeof(network));
 
