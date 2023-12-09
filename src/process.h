@@ -205,6 +205,4 @@ void process_image(char *path) {
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
-
-  image_solve();
 }

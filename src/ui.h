@@ -90,7 +90,7 @@ static void on_epic_button_clicked(GtkWidget *widget) {
         g_print("Image has not been loaded\n");
         return;
     }
-    g_timeout_add_seconds(1, display_next_image, NULL);
+    image_solve();
 }
 
 
