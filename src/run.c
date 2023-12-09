@@ -12,7 +12,6 @@
 #include "./ocr/network.h"
 #include "./ocr/readSDL.h"
 #include "./ocr/thread_pool.h"
-#include "./ocr/training.h"
 // training
 
 #include "./backtracking/allocator.h"
@@ -27,7 +26,6 @@
 // square_detection
 
 #include "./edge_detection/hough.h"
-#include "./edge_detection/detection.h"
 // detection
 
 int main(int argc, char **argv) {

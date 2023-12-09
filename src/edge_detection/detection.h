@@ -1,10 +1,9 @@
-
+#pragma once
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <err.h>
 
 #include "hough.h"
-#include "image.h"
 int original_image_width = 0;
 int original_image_height = 0;
 

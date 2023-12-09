@@ -1,10 +1,9 @@
-
+#pragma once
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <err.h>
 
 #include "rotation.h"
-#include "square_detection.h"
 #include "image.h"
 void draw(SDL_Renderer *renderer, SDL_Texture *texture) {
   int render = SDL_RenderCopy(renderer, texture, NULL, NULL);
