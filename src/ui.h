@@ -38,60 +38,7 @@ int in_steps_window = 0;
 static void get_the_grid(GtkWidget *widget);
 static void solve_image(GtkWidget *widget);
 
-const char *image_paths[9];
-/*
-const char *image_paths[] = {
-    "./data/preprocessing/grayscale.png",
-    "./data/preprocessing/contrast.png",
-    "./data/preprocessing/reducenoise.png",
-    "./data/preprocessing/inverse.png",
-    "./data/preprocessing/erosion.png",
-    "./data/preprocessing/dilation.png",
-    "./data/preprocessing/canny.png",
-    "./data/processing/hough.png",
-    "./data/processing/hough_average.png",
-    "./data/processing/drawsquares.png",
-    "./data/processing/extracted.png"
-};
-*/
 
-static gboolean display_next_image(gpointer user_data) {
-    static int current_image = 0;
-    const int total_images = sizeof(image_paths) / sizeof(image_paths[0]);
-    const int grid_display_stage = total_images; // Stage to display the grid
-    const int solve_stage = total_images + 1; // Stage to solve the grid
-
-    if (current_image < total_images) {
-        // Display each image
-        GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(image_paths[current_image], 600, 600, TRUE, NULL);
-        if (pixbuf) {
-            gtk_image_set_from_pixbuf(GTK_IMAGE(sol_image), pixbuf);
-            g_object_unref(pixbuf);
-        }
-        current_image++;
-    } else if (current_image == grid_display_stage) {
-        // Display the grid
-        gtk_widget_hide(sol_image); // Hide or remove the image widget
-        get_the_grid(NULL);
-        current_image++;
-    } else if (current_image == solve_stage) {
-        // Solve the grid
-        solve_image(NULL);
-        current_image++;
-        return FALSE; // Return FALSE to stop the timeout
-    }
-
-    // Continue the timeout as long as we haven't reached the final stage
-    return current_image <= solve_stage;
-}
-
-static void on_epic_button_clicked(GtkWidget *widget) {
-    if (!is_loaded){
-        g_print("Image has not been loaded\n");
-        return;
-    }
-    image_solve();
-}
 
 
 int start_matrix[9][9];
@@ -205,7 +152,7 @@ static void get_the_grid(GtkWidget *widget) {
     }
 
     // Open the file containing the grid
-    FILE *file = fopen("./data/grids/grid_start", "r");
+    FILE *file = fopen("./../build/grids/grid_01", "r");
     if (file == NULL) {
         g_print("Failed to open grid file\n");
         return;
@@ -261,7 +208,7 @@ static void get_the_grid(GtkWidget *widget) {
 }
 
 static void solve_image(GtkWidget *widget) {
-    FILE *file = fopen("./data/grids/grid_end", "r");
+    FILE *file = fopen("./../build/grids/grid_01.result", "r");
     if (file == NULL) {
         g_print("Failed to open grid file\n");
         return;
@@ -314,6 +261,7 @@ static void solve_image(GtkWidget *widget) {
 static void on_file_chosen(GtkFileChooserButton *button, gpointer user_data) {
     gchar *uri = gtk_file_chooser_get_uri(GTK_FILE_CHOOSER(button));
 
+//    image_solve();
     if (uri) {
         char *file_path = g_filename_from_uri(uri, NULL, NULL);
         g_free(uri);
@@ -400,67 +348,193 @@ static void on_filter_button_clicked(GtkWidget *widget, gpointer data) {
     update_button_style(extracted_button, widget == extracted_button);
 }
 
+
+
+
 cairo_surface_t* create_sudoku_surface() {
-    const int cell_size = 50; // Size of each cell in the grid
-    const int grid_size = 9 * cell_size;
-    const int thick_line_width = 4; // Line width for the thicker lines
-    const int thin_line_width = 1;  // Line width for the thinner lines
+	const int cell_size = 50; // Size of each cell in the grid
+	const int grid_size = 9 * cell_size;
+	const int thick_line_width = 4; // Line width for the thicker lines
+	const int thin_line_width = 1;  // Line width for the thinner lines
 
-    // Create a Cairo surface to draw on
-    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, grid_size + thick_line_width, grid_size + thick_line_width);
-    cairo_t *cr = cairo_create(surface);
+	// Create a Cairo surface to draw on
+	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, grid_size + thick_line_width, grid_size + thick_line_width);
+	cairo_t *cr = cairo_create(surface);
 
-    // Set the background to white
-    cairo_set_source_rgb(cr, 1, 1, 1); // White
-    cairo_paint(cr);
+	// Set the background to white
+	cairo_set_source_rgb(cr, 1, 1, 1); // White
+	cairo_paint(cr);
 
-    // Set the source color to black for the grid
-    cairo_set_source_rgb(cr, 0, 0, 0); // Black
+	// Set the source color to black for the grid
+	cairo_set_source_rgb(cr, 0, 0, 0); // Black
 
-    // Draw the grid lines
-    for (int i = 0; i <= 9; ++i) {
-        // Set line width
-        cairo_set_line_width(cr, (i % 3 == 0) ? thick_line_width : thin_line_width);
+	// Draw the grid lines
+	for (int i = 0; i <= 9; ++i) {
+		// Set line width
+		cairo_set_line_width(cr, (i % 3 == 0) ? thick_line_width : thin_line_width);
 
-        // Horizontal lines
-        int y = i * cell_size + (i >= 3) + (i >= 6);
-        cairo_move_to(cr, 0, y);
-        cairo_line_to(cr, grid_size, y);
+		// Horizontal lines
+		int y = i * cell_size + (i >= 3) + (i >= 6);
+		cairo_move_to(cr, 0, y);
+		cairo_line_to(cr, grid_size, y);
 
-        // Vertical lines
-        int x = i * cell_size + (i >= 3) + (i >= 6);
-        cairo_move_to(cr, x, 0);
-        cairo_line_to(cr, x, grid_size);
+		// Vertical lines
+		int x = i * cell_size + (i >= 3) + (i >= 6);
+		cairo_move_to(cr, x, 0);
+		cairo_line_to(cr, x, grid_size);
 
-        cairo_stroke(cr);
-    }
+		cairo_stroke(cr);
+	}
 
-    // Draw the numbers
-    cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, 20);
+	// Draw the numbers
+	cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+	cairo_set_font_size(cr, 20);
 
-    for (int row = 0; row < 9; ++row) {
-        for (int col = 0; col < 9; ++col) {
-            int num = end_matrix[row][col];
-            if (num != 0) {
-                char num_text[2];
-                snprintf(num_text, sizeof(num_text), "%d", num);
+	for (int row = 0; row < 9; ++row) {
+		for (int col = 0; col < 9; ++col) {
+			int num = end_matrix[row][col];
+			if (num != 0) {
+				char num_text[2];
+				snprintf(num_text, sizeof(num_text), "%d", num);
 
-                // Calculate text position to center in the cell
-                cairo_text_extents_t extents;
-                cairo_text_extents(cr, num_text, &extents);
-                double text_x = col * cell_size + (cell_size - extents.width) / 2 - extents.x_bearing;
-                double text_y = row * cell_size + (cell_size - extents.height) / 2 - extents.y_bearing;
+				// Calculate text position to center in the cell
+				cairo_text_extents_t extents;
+				cairo_text_extents(cr, num_text, &extents);
+				double text_x = col * cell_size + (cell_size - extents.width) / 2 - extents.x_bearing;
+				double text_y = row * cell_size + (cell_size - extents.height) / 2 - extents.y_bearing;
 
-                cairo_move_to(cr, text_x, text_y);
-                cairo_show_text(cr, num_text);
-            }
-        }
-    }
+				cairo_move_to(cr, text_x, text_y);
+				cairo_show_text(cr, num_text);
+			}
+		}
+	}
 
-    cairo_destroy(cr);
-    return surface;
+	cairo_destroy(cr);
+	return surface;
 }
+
+
+
+static gboolean display_next_image(gpointer user_data) {
+	static int current_image = 0;
+	const char *image_paths[] = {
+		"./../build/images/grayscale.jpg",
+		"./../build/images/contrast.jpg",
+		"./../build/images/reducenoise.jpg",
+		"./../build/images/inverse.jpg",
+		"./../build/images/erosion.jpg",
+		"./../build/images/dilation.jpg",
+		"./../build/images/canny.jpg",
+		"./../build/images/hough.jpg",
+		"./../build/images/hough_average.jpg",
+		"./../build/images/drawsquares.jpg",
+		"./../build/images/extracted.jpg"
+	};
+	const int total_images = sizeof(image_paths) / sizeof(image_paths[0]);
+	const int grid_display_stage = total_images; // Stage to display the grid
+	const int solve_stage = total_images + 1; // Stage to solve the grid
+
+	if (current_image < total_images) {
+		// Display each image
+		GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(image_paths[current_image], 600, 600, TRUE, NULL);
+		if (pixbuf) {
+			gtk_image_set_from_pixbuf(GTK_IMAGE(sol_image), pixbuf);
+			g_object_unref(pixbuf);
+		}
+		current_image++;
+	}
+	else if( current_image == grid_display_stage){
+		image_solve();
+		FILE *file1 = fopen("./../build/grids/grid_01", "r");
+		if (file1 == NULL) {
+			g_print("Failed to open grid file\n");
+			return;
+		}
+
+		char grid_string1[82]; // 81 characters for the grid + 1 for null terminator
+		char line1[20];        // Temporary buffer for each line
+		int index1 = 0;
+
+		// Read the file line by line
+		while (fgets(line1, sizeof(line1), file1)) {
+			for (int i = 0; line1[i] != '\0' && index1 < 81; i++) {
+				if ((line1[i] >= '0' && line1[i] <= '9') || line1[i] == '.') {
+					grid_string1[index1++] = line1[i];
+				}
+			}
+		}
+		grid_string1[index1] = '\0'; // Null-terminate the string
+		fclose(file1);
+
+		// Update start_matrix from grid_string
+		update_matrices_from_grid(grid_string1, 0);
+
+		FILE *file2 = fopen("./../build/grids/grid_01", "r");
+		if (file2 == NULL) {
+			g_print("Failed to open grid file\n");
+			return;
+		}
+
+		char grid_string2[82]; // 81 characters for the grid + 1 for null terminator
+		char line2[20];        // Temporary buffer for each line
+		int index2 = 0;
+
+		// Read the file line by line
+		while (fgets(line2, sizeof(line2), file2)) {
+			for (int i = 0; line2[i] != '\0' && index2 < 81; i++) {
+				if ((line2[i] >= '0' && line2[i] <= '9') || line2[i] == '.') {
+					grid_string2[index2++] = line2[i];
+				}
+			}
+		}
+		grid_string2[index2] = '\0'; // Null-terminate the string
+		fclose(file2);
+
+		// Update start_matrix from grid_string
+		update_matrices_from_grid(grid_string2, 1);
+		const char* filename = "imagepng.png";
+		if (filename) {
+			cairo_surface_t* surface = create_sudoku_surface();
+			cairo_surface_write_to_png(surface, filename);
+			cairo_surface_destroy(surface);
+		}
+		GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale("./build/imagepng.png", 600, 600, TRUE, NULL);
+		if (pixbuf) {
+			gtk_image_set_from_pixbuf(GTK_IMAGE(sol_image), pixbuf);
+			g_object_unref(pixbuf);
+		}
+		current_image++;
+
+	/*
+	} else if (current_image == grid_display_stage) {
+	// Display the grid
+	gtk_widget_hide(sol_image); // Hide or remove the image widget
+	image_solve(); // Get the grid from the 81 images
+	get_the_grid(NULL);
+	current_image++;
+	} else if (current_image == solve_stage) {
+	// Solve the grid
+	solve_image(NULL);
+	current_image++;
+	return FALSE; // Return FALSE to stop the timeout
+	}
+	*/
+	}
+// Continue the timeout as long as we haven't reached the final stage
+return current_image <= grid_display_stage;
+}
+
+static void on_epic_button_clicked(GtkWidget *widget) {
+    if (!is_loaded){
+        g_print("Image has not been loaded\n");
+        return;
+    }
+
+    g_timeout_add_seconds(0.5, display_next_image, NULL);
+    //image_solve();
+}
+
+
 
 
 static void save_sudoku_as_png(GtkWidget *widget, gpointer user_data) {
@@ -561,51 +635,52 @@ void activate(GtkApplication* app, gpointer user_data) {
     GtkWidget *solve_file_chooser_button = GTK_WIDGET(gtk_builder_get_object(solve_builder, "file_chooser_button"));
     g_signal_connect(solve_file_chooser_button, "file-set", G_CALLBACK(on_file_chosen), sol_image);
 
+    // EPIC BUTTON
     GtkWidget *epic_button = GTK_WIDGET(gtk_builder_get_object(solve_builder, "solve_button"));
     g_signal_connect(epic_button, "clicked", G_CALLBACK(on_epic_button_clicked), NULL);
 
     // PRE PROCESSING
     grayscale_button = GTK_WIDGET(gtk_builder_get_object(builder2, "gs_button"));
-    g_signal_connect(grayscale_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/grayscale.png");
+    g_signal_connect(grayscale_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/grayscale.jpg");
 
     contrast_button = GTK_WIDGET(gtk_builder_get_object(builder2, "co_button"));
-    g_signal_connect(contrast_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/contrast.png");
+    g_signal_connect(contrast_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/contrast.jpg");
 
     reducenoise_button = GTK_WIDGET(gtk_builder_get_object(builder2, "re_button"));
-    g_signal_connect(reducenoise_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/reducenoise.png");
+    g_signal_connect(reducenoise_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/reducenoise.jpg");
 
     threshold_button = GTK_WIDGET(gtk_builder_get_object(builder2, "th_button"));
-    g_signal_connect(threshold_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/inverse.png");
+    g_signal_connect(threshold_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/inverse.jpg");
 
     erosion_button = GTK_WIDGET(gtk_builder_get_object(builder2, "er_button"));
-    g_signal_connect(erosion_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/erosion.png");
+    g_signal_connect(erosion_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/erosion.jpg");
 
     dialation_button = GTK_WIDGET(gtk_builder_get_object(builder2, "di_button"));
-    g_signal_connect(dialation_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/dilation.png");
+    g_signal_connect(dialation_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/dilation.jpg");
 
 
     canny_button = GTK_WIDGET(gtk_builder_get_object(builder2, "ca_button"));
-    g_signal_connect(canny_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/preprocessing/canny.png");
+    g_signal_connect(canny_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/canny.jpg");
 
 
 
     // PROCESSING
     hough_button = GTK_WIDGET(gtk_builder_get_object(builder2, "ho_button"));
-    g_signal_connect(hough_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/processing/hough.png");
+    g_signal_connect(hough_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/hough.jpg");
 
 
     hough_average_button = GTK_WIDGET(gtk_builder_get_object(builder2, "av_button"));
-    g_signal_connect(hough_average_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/processing/hough_average.png");
+    g_signal_connect(hough_average_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/hough_average.jpg");
 
     drawsquare_button = GTK_WIDGET(gtk_builder_get_object(builder2, "dr_button"));
-    g_signal_connect(drawsquare_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/processing/drawsquares.png");
+    g_signal_connect(drawsquare_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/drawsquares.jpg");
 
     extracted_button = GTK_WIDGET(gtk_builder_get_object(builder2, "ss_button"));
-    g_signal_connect(extracted_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/processing/extracted.png");
+    g_signal_connect(extracted_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/extracted.jpg");
 
 
     rotate_button = GTK_WIDGET(gtk_builder_get_object(builder2, "rot_button"));
-    g_signal_connect(rotate_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/processing/autorot.jpg");
+    g_signal_connect(rotate_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./../build/images/autorot.jpg");
 
 
     GtkWidget *save_png_button = GTK_WIDGET(gtk_builder_get_object(solve_builder, "png_button"));
@@ -646,7 +721,7 @@ void activate(GtkApplication* app, gpointer user_data) {
 
     solve_grid_button = GTK_WIDGET(gtk_builder_get_object(builder2, "solve_grid_button"));
     if (solve_grid_button != NULL && GTK_IS_BUTTON(solve_grid_button)) {
-        g_signal_connect(solve_grid_button, "clicked", G_CALLBACK(solve_image), sudokuGrid); // assuming sudokuGrid is your grid widget
+        g_signal_connect(solve_grid_button, "clicked", G_CALLBACK(solve_image), sudokuGrid);
     }
 
 
