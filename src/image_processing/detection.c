@@ -7,9 +7,6 @@
 #include "hough.h"
 #include "detection.h"
 
-int original_image_width = 0;
-int original_image_height = 0;
-
 SDL_Surface *load_image(const char *path) {
   SDL_Surface *is = IMG_Load(path);
   if (is == NULL)
@@ -25,6 +22,9 @@ SDL_Surface *load_image(const char *path) {
 
 void update_render_scale(SDL_Renderer *renderer, int new_width,
                          int new_height) {
+int original_image_width = 0;
+int original_image_height = 0;
+
   float scale_x = (float)new_width / original_image_width;
   float scale_y = (float)new_height / original_image_height;
   SDL_RenderSetScale(renderer, scale_x, scale_y);

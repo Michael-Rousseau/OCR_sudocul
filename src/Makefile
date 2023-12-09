@@ -1,18 +1,16 @@
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -fsanitize=address -lm -g `pkg-config --cflags sdl2 SDL2_image gtk+-3.0`
+CFLAGS = -Wall -Wextra -fsanitize=address -lm -g `pkg-config --cflags sdl2 SDL2_image`
 LDFLAGS = -fsanitize=address -lm
-LDLIBS = `pkg-config --libs sdl2 SDL2_image gtk+-3.0`
+LDLIBS = `pkg-config --libs sdl2 SDL2_image`
 
 OBJDIR = obj
 BINDIR = bin
 
 SOURCES = $(wildcard *.c) \
           $(wildcard backtracking/*.c) \
-          $(wildcard edge_detection/*.c) \
           $(wildcard image_processing/*.c) \
-          $(wildcard ocr/*.c) \
-          $(wildcard ui/*.c)
+          $(wildcard ocr/*.c)
 
 OBJECTS = $(patsubst %.c, $(OBJDIR)/%.o, $(SOURCES))
 

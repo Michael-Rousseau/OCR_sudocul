@@ -26,8 +26,8 @@
 #include "./image_processing/rotation.h"
 // square_detection
 
-#include "./edge_detection/hough.h"
-#include "./edge_detection/detection.h"
+#include "./image_processing/hough.h"
+#include "./image_processing/detection.h"
 // detection
 
 int original_image_width = 0;

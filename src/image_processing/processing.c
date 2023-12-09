@@ -4,42 +4,6 @@
 #include <SDL2/SDL_image.h>
 #include "image.h"
 #include "processing.h"
-#include "rotation.h"
-
-void draw(SDL_Renderer* renderer, SDL_Texture* texture)
-{
-    int render = SDL_RenderCopy(renderer, texture, NULL, NULL);
-    if (render != 0)
-        errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-
-
-
-    SDL_RenderPresent(renderer);
-}
-
-void event_loop_image(SDL_Renderer* renderer, SDL_Texture* t_image)
-{
-    SDL_Event event;
-
-    draw(renderer, t_image);
-    while (1)
-    {
-        SDL_WaitEvent(&event);
-
-        switch (event.type)
-        {
-            case SDL_QUIT:
-                return;
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED)
-                {
-                    draw(renderer, t_image);
-                    break;
-                }
-        }
-    }
-}
 
 
 void print_accumulator(int** accumulator, int accumulator_height,
