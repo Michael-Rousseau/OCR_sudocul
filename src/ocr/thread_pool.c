@@ -7,7 +7,7 @@
 #include "thread_pool.h"
 #include "bits/pthreadtypes.h"
 #include "ocr.h"
-#include <network.h>
+#include "network.h"
 
 
 ThreadPool* create_thread_pool(size_t num_threads)

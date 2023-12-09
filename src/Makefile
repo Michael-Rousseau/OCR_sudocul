@@ -1,35 +1,32 @@
-.PHONY: all clean backtracking ocr
+CC = gcc
+CPPFLAGS = -MMD
+CFLAGS = -Wall -Wextra -fsanitize=address -lm -g `pkg-config --cflags sdl2 SDL2_image`
+LDFLAGS = -fsanitize=address -lm
+LDLIBS =`pkg-config --libs sdl2 SDL2_image`
 
-all: backtracking ocr detection processing
+OBJDIR = obj
+BINDIR = bin
 
-ocr:
-	$(MAKE) -C ocr
-	mv ocr/xor .
-	mkdir -p data
-	cp -r ocr/data/* data/
+SOURCES = $(wildcard *.c) \
+          $(wildcard backtracking/*.c) \
+          $(wildcard edge_detection/*.c) \
+          $(wildcard image_processing/*.c) \
+          $(wildcard ocr/*.c) \
+          $(wildcard ui/*.c)
 
-backtracking:
-	$(MAKE) -C backtracking
-	mv backtracking/solver .
-	mkdir -p data
-	cp -r backtracking/data/* data
+OBJECTS = $(patsubst %.c, $(OBJDIR)/%.o, $(SOURCES))
 
-detection:
-	$(MAKE) -C edge_detection
-	mv edge_detection/detection .
-	mkdir -p data
-	cp -r edge_detection/data/* data
+all: $(BINDIR)/run
 
-processing:
-	$(MAKE) -C image_processing
-	mv image_processing/processing .
-	mkdir -p data
-	cp -r image_processing/data/* data
+$(BINDIR)/run: $(OBJECTS)
+	@mkdir -p $(@D)
+	$(CC) $(LDFLAGS) -o $@ $^
+
+$(OBJDIR)/%.o: %.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	$(MAKE) -C ocr clean
-	$(MAKE) -C backtracking clean
-	$(MAKE) -C image_processing clean
-	$(MAKE) -C edge_detection clean
-	$(RM) solver xor detection processing
-	rm -rf data
+	rm -rf $(OBJDIR) $(BINDIR)
+
+.PHONY: all clean
