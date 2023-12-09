@@ -105,35 +105,37 @@ static void on_solve_back_button_clicked(GtkButton *button, gpointer menu_window
 }
 
 
-void update_matrices_from_grid(const char *grid_string, int var) {
-    int row = 0, col = 0;
-    while (*grid_string) {
-        if (*grid_string >= '1' && *grid_string <= '9') {
-            if (var == 0){
-                start_matrix[row][col] = *grid_string - '0';
-            }
-            else {
-                end_matrix[row][col] = *grid_string - '0';
-            }
-        } else if (*grid_string == '.') {
-            start_matrix[row][col] = 0;
-        }
+void update_matrices_from_grid(const char * grid_string, int var) {
 
-        // Move to next cell
-        col++;
-        if (col == 9) {
-            col = 0;
-            row++;
-        }
 
-        // Skip to next character
-        grid_string++;
+	int row = 0, col = 0;
+	while (*grid_string) {
+		if (*grid_string >= '1' && *grid_string <= '9') {
+			if (var == 0){
+				start_matrix[row][col] = *grid_string - '0';
+			}
+			else {
+				end_matrix[row][col] = *grid_string - '0';
+			}
+		} else if (*grid_string == '.') {
+			start_matrix[row][col] = 0;
+		}
 
-        // Stop if we reach the end of the grid
-        if (row == 9) {
-            break;
-        }
-    }
+		// Move to next cell
+		col++;
+		if (col == 9) {
+			col = 0;
+			row++;
+		}
+
+		// Skip to next character
+		grid_string++;
+
+		// Stop if we reach the end of the grid
+		if (row == 9) {
+			break;
+		}
+	}
 }
 
 
@@ -158,23 +160,27 @@ static void get_the_grid(GtkWidget *widget) {
         return;
     }
 
-    char grid_string[82]; // 81 characters for the grid + 1 for null terminator
-    char line[20];        // Temporary buffer for each line
-    int index = 0;
 
-    // Read the file line by line
-    while (fgets(line, sizeof(line), file)) {
-        for (int i = 0; line[i] != '\0' && index < 81; i++) {
-            if ((line[i] >= '0' && line[i] <= '9') || line[i] == '.') {
-                grid_string[index++] = line[i];
-            }
-        }
-    }
-    grid_string[index] = '\0'; // Null-terminate the string
-    fclose(file);
+	char grid_string[82]; // 81 characters for the grid + 1 for null terminator
+	char line[20];        // Temporary buffer for each line
+	int index = 0;
 
-    // Update start_matrix from grid_string
-    update_matrices_from_grid(grid_string, 0);
+	// Read the file line by line
+	while (fgets(line, sizeof(line), file)) {
+		for (int i = 0; line[i] != '\0' && index < 81; i++) {
+			if ((line[i] >= '0' && line[i] <= '9') || line[i] == '.') {
+				grid_string[index++] = line[i];
+			}
+		}
+	}
+	grid_string[index] = '\0'; // Null-terminate the string
+	fclose(file);
+
+
+
+
+   // Update start_matrix from grid_string
+    update_matrices_from_grid( grid_string, 0);
 
     // Create a new grid for the Sudoku puzzle
     sudokuGrid = gtk_grid_new();
@@ -213,22 +219,26 @@ static void solve_image(GtkWidget *widget) {
         g_print("Failed to open grid file\n");
         return;
     }
+    
 
-    char grid_string[82]; // 81 characters for the grid + 1 for null terminator
-    char line[20];        // Temporary buffer for each line
-    int index = 0;
+    	char grid_string[82]; // 81 characters for the grid + 1 for null terminator
+	char line[20];        // Temporary buffer for each line
+	int index = 0;
 
-    // Read the file line by line
-    while (fgets(line, sizeof(line), file)) {
-        // Process each character in the line
-        for (int i = 0; line[i] != '\0' && index < 81; i++) {
-            if ((line[i] >= '0' && line[i] <= '9') || line[i] == '.') {
-                grid_string[index++] = line[i];
-            }
-        }
-    }
-    grid_string[index] = '\0'; // Null-terminate the string
-    fclose(file);
+	// Read the file line by line
+	while (fgets(line, sizeof(line), file)) {
+		for (int i = 0; line[i] != '\0' && index < 81; i++) {
+			if ((line[i] >= '0' && line[i] <= '9') || line[i] == '.') {
+				grid_string[index++] = line[i];
+			}
+		}
+	}
+	grid_string[index] = '\0'; // Null-terminate the string
+	fclose(file);
+
+
+
+
 
     // Call update_matrices_from_grid function
     update_matrices_from_grid(grid_string, 1);
@@ -528,7 +538,7 @@ static void on_epic_button_clicked(GtkWidget *widget) {
         return;
     }
 
-    g_timeout_add_seconds(0.5, display_next_image, NULL);
+    g_timeout_add_seconds(1, display_next_image, NULL);
     //image_solve();
 }
 
