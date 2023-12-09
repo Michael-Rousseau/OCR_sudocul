@@ -22,6 +22,7 @@ GtkWidget *extracted_button;
 GtkWidget *get_grid_button;
 GtkWidget *solve_grid_button; 
 GtkWidget *sudokuGrid;
+GtkWidget *rotate_button;
 
 static GtkWidget *image;
 int is_loaded = 0;
@@ -413,75 +414,6 @@ static void on_filter_button_clicked(GtkWidget *widget, gpointer data) {
 
 
 
-/*
-static void save_sudoku_as_png() {
-    const int cell_size = 50; // Size of each cell in the grid
-    const int grid_size = 9 * cell_size;
-    const int thick_line_width = 4; // Line width for the thicker lines
-    const int thin_line_width = 1;  // Line width for the thinner lines
-
-    // Create a Cairo surface to draw on
-    cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, grid_size + thick_line_width, grid_size + thick_line_width);
-    cairo_t *cr = cairo_create(surface);
-
-    // Set the background to white
-    cairo_set_source_rgb(cr, 1, 1, 1); // White
-    cairo_paint(cr);
-
-    // Set the source color to black for the grid
-    cairo_set_source_rgb(cr, 0, 0, 0); // Black
-
-    // Draw the grid lines
-    for (int i = 0; i <= 9; ++i) {
-        // Set line width
-        cairo_set_line_width(cr, (i % 3 == 0) ? thick_line_width : thin_line_width);
-
-        // Horizontal lines
-        int y = i * cell_size + (i >= 3) + (i >= 6);
-        cairo_move_to(cr, 0, y);
-        cairo_line_to(cr, grid_size, y);
-
-        // Vertical lines
-        int x = i * cell_size + (i >= 3) + (i >= 6);
-        cairo_move_to(cr, x, 0);
-        cairo_line_to(cr, x, grid_size);
-
-        cairo_stroke(cr);
-    }
-
-    // Draw the numbers
-    cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size(cr, 20);
-
-    for (int row = 0; row < 9; ++row) {
-        for (int col = 0; col < 9; ++col) {
-            int num = end_matrix[row][col];
-            if (num != 0) {
-                char num_text[2];
-                snprintf(num_text, sizeof(num_text), "%d", num);
-                
-                // Calculate text position to center in the cell
-                cairo_text_extents_t extents;
-                cairo_text_extents(cr, num_text, &extents);
-                double text_x = col * cell_size + (cell_size - extents.width) / 2 - extents.x_bearing;
-                double text_y = row * cell_size + (cell_size - extents.height) / 2 - extents.y_bearing;
-
-                cairo_move_to(cr, text_x, text_y);
-                cairo_show_text(cr, num_text);
-            }
-        }
-    }
-
-    // Save the surface to a PNG file
-    cairo_surface_write_to_png(surface, "sudoku_grid.png");
-
-    // Clean up
-    cairo_destroy(cr);
-    cairo_surface_destroy(surface);
-}*/
-
-
-
 cairo_surface_t* create_sudoku_surface() {
     const int cell_size = 50; // Size of each cell in the grid
     const int grid_size = 9 * cell_size;
@@ -702,6 +634,8 @@ void activate(GtkApplication* app, gpointer user_data) {
     g_signal_connect(extracted_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/processing/extracted.png");
 
 
+    rotate_button = GTK_WIDGET(gtk_builder_get_object(builder2, "rot_button"));
+    g_signal_connect(rotate_button, "clicked", G_CALLBACK(on_filter_button_clicked), "./data/processing/autorot.jpg");
 
 
     GtkWidget *save_png_button = GTK_WIDGET(gtk_builder_get_object(solve_builder, "png_button"));
@@ -732,8 +666,6 @@ void activate(GtkApplication* app, gpointer user_data) {
     g_signal_connect(png_button, "clicked", G_CALLBACK(save_sudoku_as_png), NULL);
     g_signal_connect(jpeg_button, "clicked", G_CALLBACK(save_sudoku_as_jpeg), NULL);
     g_signal_connect(jpg_button, "clicked", G_CALLBACK(save_sudoku_as_jpeg), NULL);
-
-
 
 
 
