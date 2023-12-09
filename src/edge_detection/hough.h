@@ -39,10 +39,9 @@ struct Squares {
 
 void printvalues(struct Line* lines, int len,SDL_Surface* original_image);
 
-struct Squares findbestsquare(SDL_Surface* original_image, struct Line* vertical, struct Line* horizon, struct Squares *squares, int len);
+struct Squares findbestsquare(SDL_Surface* original_image, struct Line* vertical, struct Line* horizon, int len);
 
 
-//struct Squares* drawsquares(struct Line* lines, int len);
 struct Squares* drawsquares(struct Line* lines, int len,struct Line* horizon, struct Line* vertical );
 
 void get_sudoku_lines(struct Line *lines, int lineCount, struct Line *topLines, int topCount) ;
@@ -51,11 +50,9 @@ struct DetectedLines averagearray(struct Line* Line, int len);
 void drawl(struct Line* line, int len,SDL_Renderer* renderer,
         SDL_Texture* texture);
 
-//void print_h_v(struct Line* lines, int len, struct Line* horizon, struct Line* vertical,
-//struct Line* topLinesh,struct Line* topLinesv);
 
 struct DetectedLines performHoughTransform(SDL_Surface *surface);
-//void extract_and_save_squares(SDL_Surface* original_image, struct Squares* squares, int num_squares);
+
 void extract_and_save_squares(SDL_Surface* original_image, struct Squares* squares, int num_squares,struct Squares s);
 //rot
 struct DetectedLines auto_performHoughTransform(SDL_Surface *surface);

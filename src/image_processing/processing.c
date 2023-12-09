@@ -4,8 +4,6 @@
 #include <SDL2/SDL_image.h>
 #include "image.h"
 #include "rotation.h"
-#include "detection.h"
-#include "square_detection.h"
 
 void draw(SDL_Renderer* renderer, SDL_Texture* texture)
 {
@@ -18,56 +16,6 @@ void draw(SDL_Renderer* renderer, SDL_Texture* texture)
 
     SDL_RenderPresent(renderer);
 }
-
-
-void draw_test_averagelines(SDL_Renderer* renderer, SDL_Texture* texture,
-        struct Line* lines)
-{
-	int render = SDL_RenderCopy(renderer, texture, NULL, NULL);
-	if (render != 0)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-
-	drawl(lines, 26, renderer);
-
-
-/*	   for (int i = 0; i <26;i++)
-	   {
-
-	   SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-
-	// Draw a line
-	SDL_RenderDrawLine(renderer, lines[i].start.x ,lines[i].start.y,
-        lines[i].end.x, lines[i].end.y);
-	}
-
-	*/
-
-	SDL_RenderPresent(renderer);
-}
-
-
-void event_loop_image_test_averagelines(SDL_Renderer* renderer,
-        SDL_Texture* t_image, struct Line* lines) {
-    SDL_Event event;
-
-    draw(renderer, t_image);
-    while (1) {
-        SDL_WaitEvent(&event);
-
-        switch (event.type) {
-            case SDL_QUIT:
-                return;
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    draw_test_averagelines(renderer, t_image, lines);
-                    //drawl(lines, 6, renderer);
-                    break;
-                }
-        }
-    }
-}
-
 
 void event_loop_image(SDL_Renderer* renderer, SDL_Texture* t_image)
 {
@@ -240,8 +188,6 @@ int main(int argc, char** argv)
 	Canny_edge_result (surface);
 	IMG_SaveJPG(surface,"canny.jpg",100);
 
-//	hough_transform(surface, 10,renderer);
-//	IMG_SaveJPG(surface,"hough.jpg",100);
 
 
         SDL_Texture* process_texture = SDL_CreateTextureFromSurface(renderer,
@@ -277,100 +223,6 @@ int main(int argc, char** argv)
 		    SDL_DestroyTexture(im_txt);
 	    }
     }   
-
-
-
-    else if (strcmp(argv[1], "detection") == 0) {
-	   /* struct Line* lines = (struct Line*)calloc(6, sizeof(struct Line));
-	    if (!lines) {
-		    fprintf(stderr, "Memory allocation failed.\n");
-		    exit(EXIT_FAILURE);
-	    }
-	    lines[0] = (struct Line){10, 0.0, {10, 0}, {500, 0}};
-	    lines[1] = (struct Line){20, 0.0, {20, 0}, {500, 0}};
-	    lines[2] = (struct Line){30, 0.0, {30, 0}, {500, 0}};
-	    lines[3] = (struct Line){0, 1.5708, {0, 10}, {0, 700}};
-	    lines[4] = (struct Line){0, 1.5708, {0, 20}, {0, 700}};
-	    lines[5] = (struct Line){0, 1.5708, {0, 30}, {0, 700}};*/
-
-
-	    struct Line lines[26];  // There are 8 horizontal
-                                    // and 8 vertical lines
-	    int L = 500;
-	    // Vertical lines
-	    lines[0] = (struct Line){L/9, 0.0, {L/9, 0}, {L/9, L}};
-	    lines[1] = (struct Line){2*L/9, 0.0, {2*L/9, 0}, {2*L/9, L}};
-	    lines[2] = (struct Line){3*L/9, 0.0, {3*L/9, 0}, {3*L/9, L}};
-	    lines[3] = (struct Line){4*L/9, 0.0, {4*L/9, 0}, {4*L/9, L}};
-	    lines[4] = (struct Line){5*L/9, 0.0, {5*L/9, 0}, {5*L/9, L}};
-	    lines[5] = (struct Line){6*L/9, 0.0, {6*L/9, 0}, {6*L/9, L}};
-	    lines[6] = (struct Line){7*L/9, 0.0, {7*L/9, 0}, {7*L/9, L}};
-	    lines[7] = (struct Line){8*L/9, 0.0, {8*L/9, 0}, {8*L/9, L}};
-
-	    // Horizontal lines
-	    lines[8] = (struct Line){0.0, 5, {0, L/9}, {L, L/9}};
-	    lines[9] = (struct Line){0.0, 15, {0, 2*L/9}, {L, 2*L/9}};
-	    lines[10] = (struct Line){0.0, 25, {0, 3*L/9}, {L, 3*L/9}};
-	    lines[11] = (struct Line){0.0,35, {0, 4*L/9}, {L, 4*L/9}};
-	    lines[12] = (struct Line){0.0, 45, {0, 5*L/9}, {L, 5*L/9}};
-	    lines[13] = (struct Line){0.0, 55, {0, 6*L/9}, {L, 6*L/9}};
-	    lines[14] = (struct Line){0.0, 65, {0, 7*L/9}, {L, 7*L/9}};
-	    lines[15] = (struct Line){0.0, 75, {0, 8*L/9}, {L, 8*L/9}};
-
-	    // Assume the dimension of the Sudoku grid is L x L
-	    // Also assume a small deviation factor, say 5 pixels
-	    const int deviation = 5;
-
-	    // Noisy lines around the first vertical line
-	    lines[16] = (struct Line){L/9 - deviation, 0.0,
-                {L/9 - deviation, 0}, {L/9 - deviation, L}};
-	    lines[17] = (struct Line){L/9, 0.0, {L/9, 0}, {L/9, L}};
-	    lines[18] = (struct Line){L/9 + deviation, 0.0,
-                {L/9 + deviation, 0}, {L/9 + deviation, L}};
-	    lines[19] = (struct Line){L/9 - 2*deviation, 0.0,
-                {L/9 - 2*deviation, 0}, {L/9 - 2*deviation, L}};
-	    lines[20] = (struct Line){L/9 + 2*deviation, 0.0,
-                {L/9 + 2*deviation, 0}, {L/9 + 2*deviation, L}};
-
-	    // Noisy lines around the first horizontal line
-	    lines[21] = (struct Line){0.0, 1.5708, {0, L/9 - deviation},
-                {L, L/9 - deviation}};
-	    lines[22] = (struct Line){0.0, 1.5708, {0, L/9}, {L, L/9}};
-	    lines[23] = (struct Line){0.0, 1.5708, {0, L/9 + deviation},
-                {L, L/9 + deviation}};
-	    lines[23] = (struct Line){0.0, 1.5708, {0, L/9 - 2*deviation},
-                {L, L/9 - 2*deviation}};
-	    lines[25] = (struct Line){0.0, 1.5708, {0, L/9 + 2*deviation},
-                {L, L/9 + 2*deviation}};
-
-
-
-	    SDL_Texture* grayscale_texture =
-                SDL_CreateTextureFromSurface(renderer, surface);
-	    if (grayscale_texture == NULL)
-		    errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-	    SDL_FreeSurface(surface);
-	    event_loop_image_test_averagelines(renderer, grayscale_texture,
-                    lines);
-	    SDL_DestroyTexture(grayscale_texture);
-    }
-
-    /* PLEASE LEAVE THE EXAMPLE !
-	       if (strcmp(argv[1], "FILTER NAME") == 0){
-	       surface_to_"FILTER NAME"(surface);
-	       SDL_Texture* "FILTER NAME"_texture =
-               SDL_CreateTextureFromSurface(renderer, surface);
-	       if ("FILTER NAME"_texture == NULL)
-	       errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-	       SDL_FreeSurface(surface);
-	       event_loop_image(renderer, "FILTER NAME"_texture);
-	       SDL_DestroyTexture("FILTER NAME"_texture);
-
-	       }
-	       */
-
        else {
            errx(EXIT_FAILURE, "Unsupported filter: %s", argv[1]);
        }
@@ -380,8 +232,4 @@ int main(int argc, char** argv)
        SDL_Quit();
        return EXIT_SUCCESS;
 }
-
-
-//printf("i think Ali is the goat...")
-
 

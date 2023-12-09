@@ -8,14 +8,14 @@ LDLIBS = `pkg-config --libs sdl2 SDL2_image` -lm
 
 all: detection
 
-SRC = detection.c image.c hough.c
+SRC = detection.c hough.c
 DEPS = ${SRC:.c=.d}
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=}
 
 .PHONY: clean
 
-detection: image.o detection.o hough.o 
+detection: detection.o hough.o 
 
 clean:
 	${RM} ${DEPS}
