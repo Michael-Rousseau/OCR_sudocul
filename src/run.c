@@ -10,6 +10,7 @@
 // include all main here
 #include "./ocr/helper.h"
 #include "./ocr/network.h"
+#include "./ocr/ocr.h"
 #include "./ocr/readSDL.h"
 #include "./ocr/thread_pool.h"
 // training
