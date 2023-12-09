@@ -1,5 +1,7 @@
+#define _GNU_SOURCE
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <math.h>
 #include <emmintrin.h>
 #include <err.h>
 #include <pthread.h>
@@ -23,7 +25,6 @@
 
 #include "./image_processing/image.h"
 #include "./image_processing/processing.h"
-#include "./image_processing/rotation.h"
 // square_detection
 
 #include "./image_processing/hough.h"
@@ -33,9 +34,8 @@
 int original_image_width = 0;
 int original_image_height = 0;
 int main(int argc, char **argv) {
-
+/*
   // processing
-
   if (argc < 3)
     errx(EXIT_FAILURE, "Usage: image-file");
 
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     errx(EXIT_FAILURE, "%s", SDL_GetError());
 
   SDL_Renderer *renderer =
-      SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+      SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
   if (renderer == NULL)
     errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -85,17 +85,17 @@ int main(int argc, char **argv) {
 
     Canny_edge_result(surface);
     IMG_SaveJPG(surface, "canny.jpg", 100);
-
     SDL_Surface *extraction_surface = IMG_Load("erosion.jpg");
+
     if (!extraction_surface) {
       errx(EXIT_FAILURE, "Unable to load image: %s", IMG_GetError());
     }
 
-    SDL_Surface *canny = IMG_Load("canny.jpg");
-    if (!extraction_surface) {
-      errx(EXIT_FAILURE, "Unable to load image: %s", IMG_GetError());
-    }
-    struct DetectedLines detected = performHoughTransform(canny);
+    //    SDL_Surface *canny = IMG_Load("canny.jpg");
+    //   if (!extraction_surface) {
+    //   errx(EXIT_FAILURE, "Unable to load image: %s", IMG_GetError());
+    //}
+    struct DetectedLines detected = performHoughTransform(surface);
     struct Line *lin = detected.lines;
     int num = detected.count;
 
@@ -114,10 +114,10 @@ int main(int argc, char **argv) {
 
     struct Squares *sq = drawsquares(lines, num_lines, horizon, vertical);
     struct Squares s =
-        findbestsquare(canny, vertical, horizon, num_lines / 2);
+        findbestsquare(surface, vertical, horizon, num_lines / 2);
 
     SDL_Texture *grayscale_texture =
-        SDL_CreateTextureFromSurface(renderer, canny);
+        SDL_CreateTextureFromSurface(renderer, surface);
     if (grayscale_texture == NULL)
       errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -125,25 +125,27 @@ int main(int argc, char **argv) {
 
     event_loop_image_test_sq(renderer, grayscale_texture, sq,
                              (num_lines / 2 - 1) * (num_lines / 2 - 1), s);
-    SDL_DestroyTexture(grayscale_texture);
-
     extract_and_save_squares(extraction_surface, sq,
                              (num_lines / 2 - 1) * (num_lines / 2 - 1), s);
 
-    SDL_FreeSurface(canny); // Now freeing the surface after extraction
 
     free(lines);
     free(horizon);
     free(vertical);
     free(sq);
+    SDL_DestroyTexture(grayscale_texture);
     SDL_FreeSurface(extraction_surface);
+    SDL_FreeSurface(surface); // Now freeing the surface after extraction
+
+
+
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  SDL_Quit();
+
   } else if (strcmp(argv[1], "autorot") == 0) {
     struct DetectedLines detected = auto_performHoughTransform(surface);
 
-    /*struct Line* lin = detectedd.lines;
-      int num = detectedd.count;
-
-      struct DetectedLines detected = averagearray(lin, num);*/
 
     double angle = calculate_angle(detected);
 
@@ -164,68 +166,73 @@ int main(int argc, char **argv) {
   } else {
     errx(EXIT_FAILURE, "Unsupported filter: %s", argv[1]);
   }
-
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
-
-  network *n = import_network("NetworkFinal.save");
+  */
+  network *n = import_network("Final.nw");
 
   unsigned int a[81];
 
   for (int i = 0; i < 81; ++i) {
     char path[100];
-    snprintf(path, sizeof(path), "./data/tst/secondimg/square_%d.bmp", i);
+    snprintf(path, sizeof(path), "square_%d.bmp", i);
     double *pixels = malloc(784 * sizeof(double));
     get_tab(path, pixels);
     feed_forward(n, pixels);
     a[i] = read_output(n);
     free(pixels);
   }
-  for (int i = 0; i < 81; ++i) {
-    if (i % 9 == 0 && i != 0)
-      printf("\n");
-    printf(" %d ", a[i]);
-  }
-  printf("\n--------------------------\n");
-  for (int i = 0; i < 81; ++i) {
-    char path[100];
-    snprintf(path, sizeof(path), "./data/tst/firstimg/square_%d.bmp", i);
-    double *pixels = malloc(784 * sizeof(double));
-    get_tab(path, pixels);
-    feed_forward(n, pixels);
-    a[i] = read_output(n);
-    free(pixels);
-  }
-  for (int i = 0; i < 81; ++i) {
-    if (i % 9 == 0 && i != 0)
-      printf("\n");
-    printf(" %d ", a[i]);
+    char* finalString = malloc(100);
+  snprintf(finalString, 100,"./data/grid_0%d", 1);//TODO add the name
+  FILE *f = fopen(finalString, "w");
+  for (size_t index_dim = 0; index_dim < 9; index_dim++) {
+    if (index_dim % 3 == 0 && index_dim != 0)
+      fprintf(f, "\n");
+    for (size_t j = 0; j < 9; ++j) {
+      int c = a[index_dim * 9 + j];
+      if (j % 3 == 0 && j != 0) {
+        if (c <= 9 && c > 0)
+          fprintf(f, " %d", a[index_dim * 9 + j]);
+        else
+          fprintf(f, " %c", '.');
+      } else if (j % 8 == 0 && j != 0) {
+        if (c <= 9 && c > 0)
+          fprintf(f, "%d\n", a[index_dim * 9 + j]);
+        else
+          fprintf(f, "%c\n", '.');
+      } else {
+
+        if (c <= 9 && c > 0)
+          fprintf(f, "%d", a[index_dim * 9 + j]);
+        else
+          fprintf(f, "%c", '.');
+      }
+    }
   }
   free_network(n);
 
   // SOLVER
 
-  if (argc != 3) {
-    usage();
-  }
-  size_t dim;
-  if (strcmp(argv[2], "16") == 0)
-    dim = 16;
-  else
-    dim = 9;
+  size_t dim = 9;
   unsigned int **FinalGrid = allocGrid(dim);
-  //    char grid[100];
-  //  snprintf(grid, sizeof(grid), "./data/%s", argv[1]);
-
-  // gridReader(dim, FinalGrid, grid);
-  gridReader(dim, FinalGrid, argv[1]);
+  gridReader(dim, FinalGrid, finalString);
   solve(FinalGrid, 0, 0, dim);
-  char *name = argv[1];
-  strcat(name, ".result");
-  gridWriter(dim, FinalGrid, name);
+  for(int i = 0; i< 9; ++i)
+      for(int j = 0; j < 9; ++j)
+      {
+          printf("%8d", FinalGrid[i][j]);
+          if(j %8== 0  && j !=0)
+              printf("\n");
+      }
+  char *res;
+  asprintf(&res, "%s%s", finalString, ".result");
+
+  free(finalString);
+
+  gridWriter(dim, FinalGrid, res);
   freeGrid(FinalGrid, dim);
-  printf("generated file: %s\n", name);
+  printf("generated file: %s\n", res);
+  free(res);
+  // So here, all the code will split the grid, load the OCR on it and then
+  // write it in a file
 
   return 0;
 }
