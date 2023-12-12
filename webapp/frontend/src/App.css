@@ -15,15 +15,87 @@
   --grey: #99b7cf;
 
   width: 100vw;
+  height: 200vh;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+
+  color: var(--purple);
+}
+
+.main-container {
+  background: linear-gradient(black, var(--dark-blue));
   height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-us {
+  background: linear-gradient(var(--purple), var(--grey));
+
+  width: 100vw;
+  height: 100vh;
+
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-us > h1 {
+  position: absolute;
+  left: 50px;
+  top: 103vh;
+}
+
+.members {
+  height: 100vh;
+  width: 100vw;
 
   display: flex;
   justify-content: center;
   align-items: center;
+}
 
-  background: linear-gradient(var(--dark-blue), black);
+.person {
+  border-radius: 20px;
+  overflow: hidden;
 
-  color: var(--purple);
+  margin: 30px;
+  height: 70vh;
+  width: 280px;
+
+  background-color: var(--dark-blue);
+  color: white;
+}
+
+.name {
+  padding-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.name > h1 {
+  margin: 0;
+  padding: 0;
+}
+
+.description {
+  padding: 20px;
+}
+
+.photo {
+  height: 230px;
+  width: 280px;
+  overflow: hidden;
+
+  background-color: red;
 }
 
 .main {
